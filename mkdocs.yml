@@ -1,0 +1,50 @@
+site_name: Zitnik Lab Template
+repo_url: https://github.com/mims-harvard/template
+site_url: https://zitniklab.hms.harvard.edu/template
+site_description: A modern, production-ready template for Python-based research projects in the Zitnik Lab.
+site_author: Zitnik Lab
+edit_uri: edit/main/docs/
+repo_name: mims-harvard/template
+copyright: Maintained by <a href="https://zitniklab.hms.harvard.edu">Zitnik Lab</a>.
+
+nav:
+  - Home: index.md
+  - Reference: reference/index.md
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: ["src"]
+theme:
+  name: material
+  feature:
+    tabs: true
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: slate
+      primary: white
+      accent: deep orange
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: default
+      primary: black
+      accent: deep orange
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  icon:
+    repo: fontawesome/brands/github
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/mims-harvard/template
+
+markdown_extensions:
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex:
+      generic: true
