@@ -1,13 +1,14 @@
 [project]
-name = "template"
-version = "0.0.1"
-description = "A modern, production-ready template for Python-based research projects in the Zitnik Lab."
+name = "stratcp"
+version = "0.1.0"
+description = "Stratified Conformal Prediction: A Python package for post-selection conformal inference with FDR-controlled stratification"
 authors = [{ name = "Zitnik Lab", email = "marinka@hms.harvard.edu" }]
 readme = "README.md"
-keywords = ['python']
+keywords = ['conformal-prediction', 'uncertainty-quantification', 'fdr-control', 'post-selection-inference', 'machine-learning']
 requires-python = ">=3.9,<4.0"
 classifiers = [
     "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",
@@ -15,20 +16,22 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [
+    "numpy>=1.24.0",
+    "pandas>=2.0.0",
+    "scipy>=1.10.0",
+    "scikit-learn>=1.3.0",
     "jupyter>=1.1.1",
-    "lab>=8.4",
-    "pydantic>=2.11.7",
-    "pydantic-settings>=2.10.1",
-    "rich>=14.1.0",
-    "typer>=0.16.1",
+    "matplotlib>=3.7.0",
+    "seaborn>=0.12.0",
 ]
 
 [project.urls]
-Repository = "https://github.com/marinkaz/template"
-Documentation = "https://marinkaz.github.io/template/"
+Repository = "https://github.com/mims-harvard/stratcp"
+Documentation = "https://zitniklab.hms.harvard.edu/stratcp/"
 
 [dependency-groups]
 dev = [
@@ -49,7 +52,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/template"]
+packages = ["src/stratcp"]
 
 [tool.ty.environment]
 python = "./.venv"
