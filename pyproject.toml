@@ -104,10 +104,16 @@ ignore = [
     "E501",
     # DoNotAssignLambda
     "E731",
+    "TRY003",  # allow message strings in raises
+    "RUF003",  # allow unicode in comments/docstrings
 ]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 12
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["S101"]
+"src/stratcp/selection/survival.py" = ["C901"]
 
 [tool.ruff.format]
 preview = true
