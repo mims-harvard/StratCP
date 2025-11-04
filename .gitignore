@@ -283,3 +283,6 @@ notebooks/**
 # Data
 !data/**/
 !data/.gitkeep
+
+# Ignore data/uni_pathology_tasks/idh_mutation_status_pred/stratcp_eval_results
+data/uni_pathology_tasks/idh_mutation_status_pred/stratcp_eval_results/**

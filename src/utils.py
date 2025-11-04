@@ -1,5 +1,7 @@
-import numpy as np
 from typing import Dict
+
+import numpy as np
+
 
 def format_rich(value: str, markup: str) -> str:
     """Format string with rich markup.
@@ -35,7 +37,7 @@ def evaluate_top1(preds: np.ndarray, labels: np.ndarray) -> Dict[str, float]:
     """
     # Marginal metrics
     mgn_cov = float(np.mean(preds == labels))  # accuracy
-    mgn_size = 1.0                             # singleton set
+    mgn_size = 1.0  # singleton set
 
     # Conditional metrics for class = 1
     mask_one = preds == 1
@@ -91,8 +93,8 @@ def evaluate_naive_cumulative(probs: np.ndarray, labels: np.ndarray, alpha: floa
     m, _ = probs.shape
 
     # Sort probs descending per-row and take cumulative sums
-    val_pi = probs.argsort(axis=1)[:, ::-1]                         # sort order (desc)
-    val_cum = np.take_along_axis(probs, val_pi, axis=1).cumsum(1)   # cumulative sums
+    val_pi = probs.argsort(axis=1)[:, ::-1]  # sort order (desc)
+    val_cum = np.take_along_axis(probs, val_pi, axis=1).cumsum(1)  # cumulative sums
 
     # Build prediction set matrix (m, n_class) as 0/1
     naive_set = np.zeros_like(probs, dtype=np.uint8)
@@ -103,7 +105,7 @@ def evaluate_naive_cumulative(probs: np.ndarray, labels: np.ndarray, alpha: floa
 
     # Per-sample coverage and size
     row_cov = naive_set[np.arange(m), labels].astype(float)  # 1 if true label in S_i
-    row_size = naive_set.sum(axis=1).astype(float)           # |S_i|
+    row_size = naive_set.sum(axis=1).astype(float)  # |S_i|
 
     # Marginal metrics
     mgn_cov = float(row_cov.mean())

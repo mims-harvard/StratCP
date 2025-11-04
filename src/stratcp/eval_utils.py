@@ -1,6 +1,8 @@
+from collections.abc import Iterable
+from typing import Any, Dict, Tuple
+
 import numpy as np
 import pandas as pd
-from typing import Dict, Tuple, Iterable, Any
 from sklearn.model_selection import train_test_split
 
 
@@ -115,9 +117,7 @@ def evaluate_naive_cumulative(
 
     # Conditional metrics restricted to singleton prediction sets.
     singleton_mask = row_size == 1
-    preds_single = (
-        np.argmax(naive_set[singleton_mask], axis=1) if np.any(singleton_mask) else np.array([])
-    )
+    preds_single = np.argmax(naive_set[singleton_mask], axis=1) if np.any(singleton_mask) else np.array([])
     labels_single = labels[singleton_mask] if np.any(singleton_mask) else np.array([])
 
     if preds_single.size > 0:
@@ -259,19 +259,14 @@ def aggregate_conformal_results(
 
         for method_name in split_to_conformal_results[template_split][group]:
             # Collect DataFrames for the requested splits.
-            dfs = [
-                _clip(split_to_conformal_results[split][group][method_name])
-                for split in splits_to_include
-            ]
+            dfs = [_clip(split_to_conformal_results[split][group][method_name]) for split in splits_to_include]
             cat = pd.concat(dfs)  # Stack rows; α remains the index.
 
             if method == "mean":
                 # Mean across splits at each α.
                 agg_df = cat.groupby(level=0).mean()
                 # SE = sample std / sqrt(n_splits) with unbiased std (ddof=1).
-                se_df = cat.groupby(level=0).apply(
-                    lambda x: x.std(ddof=1) / np.sqrt(len(dfs))
-                )
+                se_df = cat.groupby(level=0).apply(lambda x: x.std(ddof=1) / np.sqrt(len(dfs)))
                 agg_dict[group][method_name] = agg_df
                 se_dict[group][method_name] = se_df
 
@@ -476,9 +471,5 @@ def summarize_methods_at_alpha(
             if se_col in out.columns:
                 ordered.append(se_col)
         leftover = [c for c in out.columns if c not in ordered]
-        out = (
-            out[ordered + leftover]
-            .sort_values(["method", "source"])
-            .reset_index(drop=True)
-        )
+        out = out[ordered + leftover].sort_values(["method", "source"]).reset_index(drop=True)
     return out

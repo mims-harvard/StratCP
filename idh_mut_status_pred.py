@@ -1,6 +1,6 @@
 """
 This script evaluates whole-slide image (WSI) classifiers under several
-conformal prediction (CP) settings including the proposed StratCP pipeline 
+conformal prediction (CP) settings including the proposed StratCP pipeline
 and summarizes performance at a fixed alpha.
 
 The workflow is:
@@ -75,27 +75,29 @@ Notes:
 import argparse
 import os
 import pickle
-from typing import Dict, Any, Sequence, Tuple, List
+from collections.abc import Sequence
+from typing import Any, Dict, List, Tuple
 
 import numpy as np
 import pandas as pd
 import tqdm
 
-from stratcp.stratified import StratifiedCP
+from stratcp.conformal.core import conformal
+
 # Import score builders and CP from StratCP
 from stratcp.conformal.scores import (
-    compute_score_tps,
     compute_score_aps,
     compute_score_raps,
+    compute_score_tps,
 )
-from stratcp.conformal.core import conformal
 from stratcp.eval_utils import (
-    evaluate_top1, 
-    evaluate_naive_cumulative, 
-    stratified_split_return_case_ids, 
-    aggregate_conformal_results, 
-    summarize_methods_at_alpha
+    aggregate_conformal_results,
+    evaluate_naive_cumulative,
+    evaluate_top1,
+    stratified_split_return_case_ids,
+    summarize_methods_at_alpha,
 )
+from stratcp.stratified import StratifiedCP
 
 CLASS_ZERO, CLASS_ONE = 0, 1
 ALPHA_GRID = np.linspace(0.025, 0.95, 75)[:25]
@@ -110,9 +112,18 @@ GLOBAL_STRATCP_CACHE = "split_to_stratcp_results.pkl"
 def parse_args() -> argparse.Namespace:
     """Parse CLI arguments."""
     parser = argparse.ArgumentParser(description="Configurations for WSI evaluation")
-    parser.add_argument("--results_dir", default="data/uni_pathology_tasks/idh_mutation_status_pred", help="Directory for saving results")
+    parser.add_argument(
+        "--results_dir",
+        default="data/uni_pathology_tasks/idh_mutation_status_pred",
+        help="Directory for saving results",
+    )
     parser.add_argument("--seed", type=int, default=1, help="Random seed for reproducibility")
-    parser.add_argument("--exp_code", type=str, default="data/uni_pathology_tasks/idh_mutation_status_pred", help="Experiment code to locate saved outputs")
+    parser.add_argument(
+        "--exp_code",
+        type=str,
+        default="data/uni_pathology_tasks/idh_mutation_status_pred",
+        help="Experiment code to locate saved outputs",
+    )
     parser.add_argument("--random_state", type=int, default=42, help="Random state for data splits")
     parser.add_argument("--calib_prop", type=float, default=0.15, help="Calibration proportion in overall dataset")
     parser.add_argument("--test_prop", type=float, default=0.20, help="Test proportion in overall dataset")
@@ -206,10 +217,7 @@ def load_or_create_splits(
             "test_labels": test_labels,
             "calib_labels": calib_labels,
         }
-        print(
-            f"Split {split_idx + 1}/{n_splits}: "
-            f"calib={len(calib_cases)}, test={len(test_cases)}"
-        )
+        print(f"Split {split_idx + 1}/{n_splits}: calib={len(calib_cases)}, test={len(test_cases)}")
 
     # Persist to cache for later re-use.
     with open(cache_path, "wb") as f:
@@ -279,8 +287,12 @@ def extract_split_arrays(
             raise ValueError(f"Case ID {case_id} not assigned to calibration or test split.")
 
     # Convert to arrays; squeeze singleton leading dim if present (shape (n,1,C)).
-    calib_probs_arr = np.squeeze(np.array(calib_probs), axis=1) if np.array(calib_probs).ndim == 3 else np.array(calib_probs)
-    test_probs_arr = np.squeeze(np.array(test_probs), axis=1) if np.array(test_probs).ndim == 3 else np.array(test_probs)
+    calib_probs_arr = (
+        np.squeeze(np.array(calib_probs), axis=1) if np.array(calib_probs).ndim == 3 else np.array(calib_probs)
+    )
+    test_probs_arr = (
+        np.squeeze(np.array(test_probs), axis=1) if np.array(test_probs).ndim == 3 else np.array(test_probs)
+    )
 
     return (
         calib_probs_arr,
@@ -429,7 +441,7 @@ def run_vanilla_cp_for_split(
         return cached
 
     # Basic dimensions.
-    m = int(len(test_labels))
+    m = len(test_labels)
     n_classes = int(test_probs.shape[1])
 
     # Reference masks used by `conformal` (preserving original behavior).
@@ -445,13 +457,9 @@ def run_vanilla_cp_for_split(
             return compute_score_tps(calib_probs, test_probs, calib_labels)
         raise RuntimeError("Unexpected method name")  # Should be unreachable.
 
-    scores_by_method: Dict[str, Tuple[np.ndarray, np.ndarray]] = {
-        meth: _scores_for_method(meth) for meth in methods
-    }
+    scores_by_method: Dict[str, Tuple[np.ndarray, np.ndarray]] = {meth: _scores_for_method(meth) for meth in methods}
 
-    def _coverage_singleton_by_class(
-        size: np.ndarray, cov: np.ndarray, set_mat: np.ndarray, class_id: int
-    ) -> float:
+    def _coverage_singleton_by_class(size: np.ndarray, cov: np.ndarray, set_mat: np.ndarray, class_id: int) -> float:
         """Coverage among singleton sets whose predicted singleton label == class_id."""
         idx_single = np.where(size == 1)[0]
         if idx_single.size == 0:
@@ -497,22 +505,16 @@ def run_vanilla_cp_for_split(
             size = np.sum(set_mat, axis=1)
 
             # Selected = singleton sets; Unselected = non-singletons (matches original convention).
-            singleton_mask = (size == 1)
+            singleton_mask = size == 1
             unsel_idx = np.where(~singleton_mask)[0]
             sel_cover_sum = float(np.sum(cov[singleton_mask]))
 
             # Marginal coverage over all samples.
-            mgn_cov = (
-                (float(np.sum(cov[unsel_idx])) + sel_cover_sum) / float(m)
-                if m > 0 else np.nan
-            )
+            mgn_cov = (float(np.sum(cov[unsel_idx])) + sel_cover_sum) / float(m) if m > 0 else np.nan
 
             # Marginal size over all samples.
             n_selected = m - cov[unsel_idx].shape[0]
-            mgn_size = (
-                (float(np.sum(size[unsel_idx])) + float(n_selected)) / float(m)
-                if m > 0 else np.nan
-            )
+            mgn_size = (float(np.sum(size[unsel_idx])) + float(n_selected)) / float(m) if m > 0 else np.nan
 
             # Counts of singleton selections for each class (binary case).
             num_sel_cls_one = int(np.sum(singleton_mask & (set_mat[:, CLASS_ONE] == True)))
@@ -551,20 +553,18 @@ def run_vanilla_cp_for_split(
         rows, idx = [], []
         for alpha, results in alpha_to_results.items():
             mres = results["methods"][method_name]
-            rows.append(
-                {
-                    "mgn_cov": mres["mgn_cov"],
-                    "mgn_size": mres["mgn_size"],
-                    "coverage_cls_one_sel": mres["coverage_cls_one_sel"],
-                    "coverage_cls_zero_sel": mres["coverage_cls_zero_sel"],
-                    "num_sel_cls_one": mres["num_sel_cls_one"],
-                    "num_sel_cls_zero": mres["num_sel_cls_zero"],
-                    "num_total": results["num_total"],
-                    "unselected_coverage": mres["unselected_coverage"],
-                    "unselected_set_size": mres["unselected_set_size"],
-                    "num_unsel": mres["num_unsel"],
-                }
-            )
+            rows.append({
+                "mgn_cov": mres["mgn_cov"],
+                "mgn_size": mres["mgn_size"],
+                "coverage_cls_one_sel": mres["coverage_cls_one_sel"],
+                "coverage_cls_zero_sel": mres["coverage_cls_zero_sel"],
+                "num_sel_cls_one": mres["num_sel_cls_one"],
+                "num_sel_cls_zero": mres["num_sel_cls_zero"],
+                "num_total": results["num_total"],
+                "unselected_coverage": mres["unselected_coverage"],
+                "unselected_set_size": mres["unselected_set_size"],
+                "num_unsel": mres["num_unsel"],
+            })
             idx.append(alpha)
         summary[method_name] = pd.DataFrame(rows, index=idx)
 
@@ -670,21 +670,15 @@ def run_stratified_cp_for_split(
 
             # Selected (singleton) accuracy / FDR.
             selected_correct = (
-                int(np.sum(pred_labels[selected_idx] == test_labels[selected_idx]))
-                if selected_count > 0
-                else 0
+                int(np.sum(pred_labels[selected_idx] == test_labels[selected_idx])) if selected_count > 0 else 0
             )
-            selected_accuracy = (
-                float(selected_correct / selected_count) if selected_count > 0 else np.nan
-            )
+            selected_accuracy = float(selected_correct / selected_count) if selected_count > 0 else np.nan
             selected_fdr = float(1 - selected_accuracy) if selected_count > 0 else np.nan
 
             # Unselected mean coverage/size (if any unselected).
             if unselected_count > 0:
                 unsel_labels = test_labels[unselected_idx]
-                unsel_cov = pred_sets_unsel[
-                    np.arange(unselected_count), unsel_labels
-                ].astype(float)
+                unsel_cov = pred_sets_unsel[np.arange(unselected_count), unsel_labels].astype(float)
                 unsel_mean_cov = _safe_mean(unsel_cov)
                 unsel_mean_size = _safe_mean(unsel_set_sizes)
             else:
@@ -695,9 +689,9 @@ def run_stratified_cp_for_split(
             # Marginal coverage/size over all samples.
             covered_total = selected_correct + (float(np.sum(unsel_cov)) if unsel_cov.size > 0 else 0.0)
             marginal_cov = float(covered_total / total_count) if total_count > 0 else np.nan
-            marginal_size = float(
-                (selected_count + np.sum(unsel_set_sizes)) / total_count
-            ) if total_count > 0 else np.nan
+            marginal_size = (
+                float((selected_count + np.sum(unsel_set_sizes)) / total_count) if total_count > 0 else np.nan
+            )
 
             # ----- Per-class eligibility -----
             scp_per_class = StratifiedCP(
@@ -718,12 +712,8 @@ def run_stratified_cp_for_split(
             decision_fdr = {}
             for cls in range(min(2, n_classes)):
                 sel_indices = _selection_to_indices(all_selected[cls])
-                decision_sel_counts[cls] = int(len(sel_indices))
-                decision_fdr[cls] = (
-                    float(np.mean(test_labels[sel_indices] != cls))
-                    if len(sel_indices) > 0
-                    else np.nan
-                )
+                decision_sel_counts[cls] = len(sel_indices)
+                decision_fdr[cls] = float(np.mean(test_labels[sel_indices] != cls)) if len(sel_indices) > 0 else np.nan
 
             # Class-conditional coverage among unselected samples (binary only).
             unsel_true = test_labels[unselected_idx] if unselected_count > 0 else np.array([])
@@ -731,28 +721,26 @@ def run_stratified_cp_for_split(
             cls_cond_cov_cls_zero = _safe_mean(unsel_cov[unsel_true == 0]) if unselected_count > 0 else np.nan
 
             # Aggregate all fields into one record for this (alpha, method).
-            method_rows[method].append(
-                {
-                    "alpha": alpha,
-                    "selection_threshold": selection_threshold,
-                    "num_sel": selected_count,
-                    "num_unsel": unselected_count,
-                    "num_total": total_count,
-                    "sel_false_positive_rate_union": selected_fdr,
-                    "coverage_cls_zero_sel": 1 - decision_fdr.get(0, np.nan),
-                    "coverage_cls_one_sel": 1 - decision_fdr.get(1, np.nan),
-                    "num_sel_cls_zero": decision_sel_counts.get(0, 0),
-                    "num_sel_cls_one": decision_sel_counts.get(1, 0),
-                    "decision_tau_cls_zero": tau_list[0] if tau_list.size > 0 else np.nan,
-                    "decision_tau_cls_one": tau_list[1] if tau_list.size > 1 else np.nan,
-                    "mgn_cov": marginal_cov,
-                    "mgn_size": marginal_size,
-                    "unselected_coverage": unsel_mean_cov,
-                    "unselected_set_size": unsel_mean_size,
-                    "cls_cond_cov_cls_one": cls_cond_cov_cls_one,
-                    "cls_cond_cov_cls_zero": cls_cond_cov_cls_zero,
-                }
-            )
+            method_rows[method].append({
+                "alpha": alpha,
+                "selection_threshold": selection_threshold,
+                "num_sel": selected_count,
+                "num_unsel": unselected_count,
+                "num_total": total_count,
+                "sel_false_positive_rate_union": selected_fdr,
+                "coverage_cls_zero_sel": 1 - decision_fdr.get(0, np.nan),
+                "coverage_cls_one_sel": 1 - decision_fdr.get(1, np.nan),
+                "num_sel_cls_zero": decision_sel_counts.get(0, 0),
+                "num_sel_cls_one": decision_sel_counts.get(1, 0),
+                "decision_tau_cls_zero": tau_list[0] if tau_list.size > 0 else np.nan,
+                "decision_tau_cls_one": tau_list[1] if tau_list.size > 1 else np.nan,
+                "mgn_cov": marginal_cov,
+                "mgn_size": marginal_size,
+                "unselected_coverage": unsel_mean_cov,
+                "unselected_set_size": unsel_mean_size,
+                "cls_cond_cov_cls_one": cls_cond_cov_cls_one,
+                "cls_cond_cov_cls_zero": cls_cond_cov_cls_zero,
+            })
 
     # Final per-method DataFrames indexed by alpha.
     summary: Dict[str, pd.DataFrame] = {}
@@ -769,7 +757,7 @@ def run_stratified_cp_for_split(
 def main() -> None:
     """Initialize settings, load dataset, split, and run baseline/CP evaluations."""
     args = parse_args()
-    
+
     # Get CP methods from args
     methods = [m.strip().lower() for m in args.cp_methods]
     ensure_directory(args.results_dir)
@@ -783,9 +771,7 @@ def main() -> None:
     dataset_test_df = load_dataset(dataset_csv_path, list(results_dict_test.keys()))
 
     test_size = args.test_prop / (args.test_prop + args.calib_prop)
-    split_cache_path = os.path.join(
-        args.results_dir, f"calib_test_splits_n_{args.n_splits}.pkl"
-    )
+    split_cache_path = os.path.join(args.results_dir, f"calib_test_splits_n_{args.n_splits}.pkl")
     split_results = load_or_create_splits(
         dataset_test_df, test_size, args.n_splits, args.random_state, split_cache_path
     )
@@ -793,7 +779,6 @@ def main() -> None:
     split_to_baseline: Dict[int, Dict[str, pd.DataFrame]] = {}
     split_to_vanilla_cp: Dict[int, Dict[str, pd.DataFrame]] = {}
     split_to_stratcp: Dict[int, Dict[str, pd.DataFrame]] = {}
-
 
     # When n_splits set to 500; pre-load existing results if available.
 
@@ -807,15 +792,18 @@ def main() -> None:
         )
 
         baseline_cache_path = os.path.join(
-            args.results_dir, "stratcp_eval_results",
+            args.results_dir,
+            "stratcp_eval_results",
             BASELINE_CACHE_TEMPLATE.format(split_idx=split_idx, n_splits=args.n_splits),
         )
         vanilla_cache_path = os.path.join(
-            args.results_dir, "stratcp_eval_results",
+            args.results_dir,
+            "stratcp_eval_results",
             VANILLA_CP_CACHE_TEMPLATE.format(split_idx=split_idx, n_splits=args.n_splits),
         )
         stratcp_cache_path = os.path.join(
-            args.results_dir, "stratcp_eval_results",
+            args.results_dir,
+            "stratcp_eval_results",
             STRATCP_CACHE_TEMPLATE.format(split_idx=split_idx, n_splits=args.n_splits),
         )
 
@@ -837,7 +825,7 @@ def main() -> None:
             test_probs,
             test_labels,
             vanilla_cache_path,
-            methods
+            methods,
         )
 
         split_to_stratcp[split_idx] = run_stratified_cp_for_split(
@@ -849,9 +837,8 @@ def main() -> None:
             test_probs,
             test_labels,
             stratcp_cache_path,
-            methods
+            methods,
         )
-
 
     # Persist aggregated dictionaries for quick reuse.
     with open(os.path.join(args.results_dir, "stratcp_eval_results", GLOBAL_BASELINE_CACHE), "wb") as f:
@@ -868,13 +855,16 @@ def main() -> None:
     # Aggregate and display overall summaries
     alpha_range = (0.025, 0.3)
     aggr_results_baseline, se_results_baseline = aggregate_conformal_results(
-        split_to_baseline, method='mean', alpha_range=alpha_range)
+        split_to_baseline, method="mean", alpha_range=alpha_range
+    )
 
     aggr_results_vanilla_cp, se_results_vanilla_cp = aggregate_conformal_results(
-        split_to_vanilla_cp, method='mean', alpha_range=alpha_range)
+        split_to_vanilla_cp, method="mean", alpha_range=alpha_range
+    )
 
     aggr_results_strat_cp, se_results_strat_cp = aggregate_conformal_results(
-        split_to_stratcp, method='mean', alpha_range=alpha_range)
+        split_to_stratcp, method="mean", alpha_range=alpha_range
+    )
 
     summary_sources = [
         ("baseline", aggr_results_baseline, se_results_baseline),
@@ -898,15 +888,15 @@ def main() -> None:
         summary_sources=summary_sources,
         alpha=args.alpha_fixed,
         metrics=metrics,
-        include_se=True,     # set False if you don't want *_se columns
-        nearest=True,        # set False to require exact alpha match
-        atol=5e-3,           # tolerance for nearest-match (e.g., 0.005 around 0.1)
+        include_se=True,  # set False if you don't want *_se columns
+        nearest=True,  # set False to require exact alpha match
+        atol=5e-3,  # tolerance for nearest-match (e.g., 0.005 around 0.1)
     )
 
     # Print summary tables
     for idx, row in summary_df.iterrows():
         print(f"\n=== {row['source']:<12} | {row['method']} ===")
-        vals = row.drop(["source","method","alpha_requested","alpha_selected"])
+        vals = row.drop(["source", "method", "alpha_requested", "alpha_selected"])
         print(vals.to_frame(name="value"))
 
     return

@@ -6,7 +6,6 @@ labels to produce more interpretable and coherent prediction sets.
 """
 
 import numpy as np
-import pandas as pd
 
 
 def score_expand_max_sim(
@@ -272,7 +271,9 @@ def compute_score_utility(
     return cal_scores, test_scores
 
 
-def eval_similarity(pred_sets: np.ndarray, sim_mat: np.ndarray, null_lab: int | None = None, off_diag: bool = True) -> tuple[np.ndarray, float]:
+def eval_similarity(
+    pred_sets: np.ndarray, sim_mat: np.ndarray, null_lab: int | None = None, off_diag: bool = True
+) -> tuple[np.ndarray, float]:
     """
     Evaluate average pairwise similarity within prediction sets.
 
@@ -295,7 +296,7 @@ def eval_similarity(pred_sets: np.ndarray, sim_mat: np.ndarray, null_lab: int | 
     avg_sim : np.ndarray
         Average similarity for each prediction set (m,)
     overall_sim : float
-        Overall average similarity across all sets 
+        Overall average similarity across all sets
     """
     avg_sim = np.zeros(pred_sets.shape[0])
 
@@ -318,6 +319,7 @@ def eval_similarity(pred_sets: np.ndarray, sim_mat: np.ndarray, null_lab: int | 
 
     overall_sim = np.nanmean(avg_sim)
     return avg_sim, overall_sim
+
 
 # def calculate_conformal_metrics(
 #     method: str,
