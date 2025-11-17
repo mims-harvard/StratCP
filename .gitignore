@@ -286,3 +286,6 @@ notebooks/**
 
 # Ignore data/uni_pathology_tasks/idh_mutation_status_pred/stratcp_eval_results
 data/uni_pathology_tasks/idh_mutation_status_pred/stratcp_eval_results/**
+data/uni_pathology_tasks/idh_mutation_status_pred/*.pkl
+data/uni_pathology_tasks/cns_tumor_subtype/stratcp_eval_results/**
+data/uni_pathology_tasks/cns_tumor_subtype/*.pkl

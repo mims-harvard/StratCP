@@ -172,7 +172,7 @@ class StratifiedCP:
         elif self.score_fn == "utility":
             self.cal_scores_, _ = compute_score_utility(
                 cal_probs,
-                cal_probs[:1],
+                None,
                 cal_labels, 
                 self.similarity_matrix,
                 method=self.utility_method,
@@ -184,7 +184,11 @@ class StratifiedCP:
         return self
 
     def predict(
-        self, test_probs: np.ndarray, test_labels: Optional[np.ndarray] = None, test_eligs: Optional[np.ndarray] = None, eligibility: Optional[str] = None,
+        self, 
+        test_probs: np.ndarray, 
+        test_labels: Optional[np.ndarray] = None, 
+        test_eligs: Optional[np.ndarray] = None, 
+        eligibility: Optional[str] = None,
         cal_eligs: Optional[np.ndarray] = None,  # optionally update calibration eligs
         cal_conf_labels: Optional[np.ndarray] = None  # optionally update calibration confidence labels
     ) -> dict:
@@ -244,7 +248,9 @@ class StratifiedCP:
             return self._predict_per_class(test_probs, test_labels, test_eligs, cal_eligs, cal_conf_labels)
 
     def _predict_overall(
-        self, test_probs: np.ndarray, test_labels: Optional[np.ndarray] = None, test_eligs: Optional[np.ndarray] = None,
+        self, test_probs: np.ndarray, 
+        test_labels: Optional[np.ndarray] = None, 
+        test_eligs: Optional[np.ndarray] = None,
         cal_eligs: Optional[np.ndarray] = None, # optionally update cal eligibility
         cal_conf_labels: Optional[np.ndarray] = None # optionally update cal conf labels
     ) -> dict:
@@ -429,7 +435,10 @@ class StratifiedCP:
 
         # Step 4: JOMI conformal prediction for unselected samples (all_sel[K])
         # Unselected: samples not selected by any class
-        unsel_mask = all_sel[self.n_classes_]  # Index K gives unselected
+        unsel_idx = all_sel[self.n_classes_]          # indices
+        unsel_mask = np.zeros(m, dtype=bool)
+        if unsel_idx.size > 0:
+            unsel_mask[unsel_idx] = True
         ref_mats = [np.ones((m,n)) for _ in range(self.n_classes_)]
 
         if unsel_mask.sum() > 0:
@@ -443,7 +452,7 @@ class StratifiedCP:
 
                 # Compute reference sets
                 ref_mats = get_reference_sel_multiple(
-                    all_sel[self.n_classes_],
+                    unsel_idx,
                     cal_conf_labels,
                     cal_eligs,
                     self.cal_probs_,
