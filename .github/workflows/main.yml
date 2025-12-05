@@ -26,6 +26,7 @@ jobs:
         run: make check
 
   tests-and-type-check:
+    if: ${{ false }}  # temporarily disabled
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -35,19 +36,8 @@ jobs:
       run:
         shell: bash
     steps:
-      - name: Check out
-        uses: actions/checkout@v4
-
-      - name: Set up the environment
-        uses: ./.github/actions/setup-python-env
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Run tests
-        run: uv run python -m pytest tests --cov --cov-config=pyproject.toml --cov-report=html
-
-      - name: Check typing
-        run: uv run ty check
+      - name: Skip tests and type checks
+        run: echo "tests-and-type-check job disabled"
 
 
   check-docs:

@@ -3,9 +3,7 @@
 [![Release](https://img.shields.io/github/v/release/mims-harvard/stratcp)](https://img.shields.io/github/v/release/mims-harvard/stratcp)
 [![Build status](https://img.shields.io/github/actions/workflow/status/mims-harvard/stratcp/main.yml?branch=main)](https://github.com/mims-harvard/stratcp/actions/workflows/main.yml?query=branch%3Amain)
 [![License](https://img.shields.io/github/license/mims-harvard/stratcp)](https://img.shields.io/github/license/mims-harvard/stratcp)
-
-**A Python package for post-selection conformal inference with FDR-controlled stratification.**
-
+ 
 StratCP enables confident predictions with statistical guarantees by stratifying data based on prediction confidence and applying tailored conformal prediction procedures to each stratum.
 
 ## Highlights
@@ -15,7 +13,7 @@ StratCP enables confident predictions with statistical guarantees by stratifying
 - 🔧 **Multiple score functions** - TPS, APS, RAPS, and utility-aware for different prediction scenarios
 - 🧬 **Utility-aware CP** - Leverage label similarity for more coherent prediction sets
 - 🏥 **Medical applications** - Designed for clinical decision support and medical diagnosis
-- 📈 **Ordinal labels** - Special support for ordered categories (e.g., disease severity)
+- 📈 **Ordinal labels** - Support for ordered categories (e.g., disease severity)
 - ⚡ **Fast and scalable** - Efficient implementations for large datasets
 
 ## Installation
@@ -35,8 +33,8 @@ make install
 ### 🚀 Simple 1-2 Line Usage
 
 Below we show a use case in multi-class classification where we:
-- ✅ FDR-controlled selection of high-confidence predictions, whose argmax equals unknown true label 
-- ✅ Conformal prediction sets for unselected, low-confident cases with 90% coverage 
+- FDR-controlled selection of high-confidence predictions, whose argmax equals unknown true label 
+- Conformal prediction sets for unselected, low-confident cases with 90% coverage 
  
 
 ```python
@@ -63,8 +61,8 @@ print(model.summary())
 ```
 
 You can also perform per-class selection where we:
-- ✅ FDR-controlled selection of high-confidence predictions for every class of argmax prediction, whose argmax equals unknown true label  
-- ✅ Conformal prediction sets for unselected, low-confident cases with 90% coverage 
+- FDR-controlled selection of high-confidence predictions for every class of argmax prediction, whose argmax equals unknown true label  
+- Conformal prediction sets for unselected, low-confident cases with 90% coverage 
 
 by simply adding the argument `eligibility = 'per_class'`.
 
@@ -201,7 +199,7 @@ print(f"Unselected: {len(unsel_idx)} samples with avg set size {sizes_unsel.mean
 
 ## Key Features
 
-### Selection Methods
+#### Selection Methods
 
 **Single Property Selection** - Select samples where a binary property (confidence) holds with FDR control:
 ```python
@@ -239,7 +237,7 @@ sel_idx, unsel_idx, tau = scp.get_sel_survival(
 )
 ```
 
-### Conformal Prediction
+#### Conformal Prediction
 
 **Score Functions** - Multiple nonconformity scores available:
 ```python
@@ -278,7 +276,7 @@ pred_sets = scp.conformal(
 ```
 The output is a (m, nclass) matrix where (i, k) indicates whether class k is in $C(X_{n+i})$.
 
-### Evaluation Metrics
+#### Evaluation Metrics
 
 ```python
 import stratcp as scp
@@ -292,21 +290,17 @@ label_cov, label_freq = scp.label_cond_cov(pred_set, test_labels)
 
 ## Use Cases
 
-### Medical Diagnosis
+Our framework allows diverse use cases based on the stratCP principle. 
 
-Stratify patients based on model confidence:
-- **High confidence**: Make precise diagnoses (small prediction sets)
-- **Low confidence**: Provide differential diagnoses (larger prediction sets with guarantees)
+**Medical Diagnosis**.  Stratify patients based on model confidence:
+- **High confidence**: Make precise diagnoses (argmax = true label)
+- **Low confidence**: Provide differential candidate diagnoses (prediction sets with guarantees)
 
-### Quality Control
-
-Identify items that can be automatically classified vs. those needing human review:
+**Quality Control**. Identify items that can be automatically classified v.s. those needing human review:
 - **Selected**: Automated decisions with FDR control
 - **Unselected**: Flag for manual inspection with uncertainty quantification
 
-### Multi-stage Decision Making
-
-Implement tiered decision systems:
+**Multi-stage Decision Making**. Implement triaged decision systems:
 1. **Stage 1**: Fast, confident decisions for easy cases
 2. **Stage 2**: Careful analysis with uncertainty bounds for difficult cases
 
@@ -316,31 +310,17 @@ Implement tiered decision systems:
 - **Usage Guide**: See [USAGE_SUMMARY.md](USAGE_SUMMARY.md) for comprehensive examples
 - **Example Scripts**:
   - `examples/simple_usage.py` - Basic usage patterns
-  - `examples/utility_aware_cp.py` - Utility-aware CP with similarity matrices
-- **Tutorials**: See `notebooks/` directory
-  - `01_quickstart.ipynb` - Basic usage
-  - `02_single_selection.ipynb` - Detailed single selection
-  - `03_multiple_selection.ipynb` - Multiple selection rules
-  - `04_medical_diagnosis.ipynb` - Medical application example
+  - `examples/utility_aware_cp.py` - Utility-aware CP with similarity matrices 
 
-## Development
+## Reproduction scripts
 
-```bash
-# Install development dependencies
-make install
+Scripts for reproducing the results in the paper are in `reproduction_code/` with wrappers in `run_*.sh`. Each expects paths to files
 
-# Run tests
-make test
+- `predicted_probabilities.npy` (n_samples x n_classes)
+- `true_labels.npy` (n_samples)
 
-# Run linting and formatting
-make check
+We store these files in the `data/` folder. The summarized results will be saved in the same folder by default.
 
-# Build documentation
-make docs
-
-# Build package
-make build
-```
 
 ## Citation
 
@@ -354,17 +334,9 @@ If you use StratCP in your research, please cite:
   year={2024}
 }
 ```
+ 
 
-## License
-
-This project is licensed under the [MIT License](LICENSE).
 
 ## Support
-
-For questions and issues:
-- Open an issue on [GitHub](https://github.com/mims-harvard/stratcp/issues)
-- Email: marinka@hms.harvard.edu
-
-## Acknowledgments
-
-Developed by the [Zitnik Lab](https://zitniklab.hms.harvard.edu/) at Harvard Medical School.
+This project is licensed under the [MIT License](LICENSE). For questions and issues, please either open an issue on [GitHub](https://github.com/mims-harvard/stratcp/issues) or contact `yjinstat@wharton.upenn.edu`.
+ 

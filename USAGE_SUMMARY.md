@@ -350,15 +350,7 @@ for i, idx in enumerate(results['unselected_idx']):
 
 - `examples/simple_usage.py` - Basic usage examples
 - `examples/utility_aware_cp.py` - Utility-aware CP with similarity matrices
-
-## 🚀 Performance Tips
-
-1. **Use RAPS** for best set size efficiency (default)
-2. **Adjust α_sel** to control selection rate
-   - Lower α_sel → fewer selected, higher confidence
-   - Higher α_sel → more selected, lower confidence
-3. **Large calibration set** → better guarantees (aim for n ≥ 500)
-4. **Reuse fitted model** on multiple test sets for efficiency
+ 
 
 ## 📝 Citation
 

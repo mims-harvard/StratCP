@@ -796,7 +796,7 @@ def evaluate_top1(
     empty_policy: str = "nan",
     return_per_class_metrics: bool = False,
 ) -> Dict[str, Any]:
-    """Compute Top-1 multiclass metrics.
+    """Compute Top-1 multiclass mecompute_baselines_for_splittrics.
 
     This is the **multiclass** version of Top-1 evaluation and shadows the
     earlier binary-only function with the same name.
