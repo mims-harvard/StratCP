@@ -321,6 +321,47 @@ Scripts for reproducing the results in the paper are in `reproduction_code/` wit
 
 We store these files in the `data/` folder. The summarized results will be saved in the same folder by default.
 
+### Retinal disease diagnosis tasks
+
+### Neuro-oncology tasks
+
+Across all neuro-oncology tasks, we extract patch-level features from H\&E-stained whole-slide images (WSIs) using the UNI pathology foundation model together with the CLAM preprocessing pipeline for tiling and feature extraction ([CLAM GitHub](https://github.com/mahmoodlab/CLAM)). Task-specific slide-level predictors are obtained by fine-tuning these features with attention-based multiple instance learning (ABMIL; [Ilse et al., 2018](https://arxiv.org/abs/1802.04712)) on cohorts curated for each endpoint.
+
+All H\&E model checkpoints for each task are available at
+
+- `data/uni_pathology_tasks/<task_name>/model_checkpoint/`
+
+Given model predictions (per-class probabilities for classification tasks and the mean parameter for the time-to-event regression model), we then apply **StratCP** to the task-specific scores:
+
+1. **Step 1 (selection).** Select a confident subset under an expert-specified error budget using FDR control.
+2. **Step 2 (post-selection CP).** For the remaining (less confident) cases, construct conformal prediction sets with finite-sample coverage guarantees.
+
+The main entry points for reproducing neuro-oncology experiments are:
+
+- `idh_mut_status_pred.py` – IDH mutation status prediction.
+- `cns_tumor_subtype.py` – central nervous system (CNS) tumor subtype classification.
+- `he_time_to_mortaility_pred.py` – H\&E time-to-mortality prediction.
+- `he_diagnosis_in_atdg.py` – H\&E-only diagnosis in adult-type diffuse glioma (ATDG).
+
+> **TBA.** A short guide to interpreting StratCP outputs (selection rates, FDR, coverage, and prediction set sizes) will be added here.
+
+## Datasets and data access for reproduction
+
+The table below summarizes the datasets used in the paper, the corresponding tasks, and how to obtain the data required to reproduce the reported results.
+
+| Task | Dataset | Task type | Underlying FM | Fine-tuning strategy | StratCP guarantee* | Additional data approval required | Download link |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Diabetic retinopathy diagnosis | Kaggle APTOS-2019 | Classification (5 classes) | RETFound | MLP with cross-entropy loss | Multiple criteria | No | [link](https://www.kaggle.com/competitions/aptos2019-blindness-detection/data) |
+| Glaucoma diagnosis | Glaucoma Fundus dataset | Classification (3 classes) | RETFound | MLP with cross-entropy loss | Multiple criteria | No | [link](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/1YRRAC) |
+| Eye condition diagnosis | JSEIC dataset | Classification (39 classes) | RETFound | MLP with cross-entropy loss | Single criteria | No | [link](https://zenodo.org/records/3477553) |
+| IDH mutation status | TCGA–LGG & GBM; EBRAINS | Classification (2 classes) | UNI | ABMIL with cross-entropy loss | Multiple criteria | TCGA: No; EBRAINS: Yes | TCGA: [link](https://portal.gdc.cancer.gov/) <br> EBRAINS: [link](https://search.kg.ebrains.eu/instances/Dataset/8fc108ab-e2b4-406f-8999-60269dc1f994) |
+| CNS tumor subtyping | EBRAINS | Classification (30 classes) | UNI | ABMIL with cross-entropy loss | Single criteria | Yes | [link](https://search.kg.ebrains.eu/instances/Dataset/8fc108ab-e2b4-406f-8999-60269dc1f994) |
+| H\&E time-to-mortality prediction | TCGA–LGG & GBM | Time-to-event regression | UNI | ABMIL with log-normal AFT loss | Single criteria | No (H\&E WSIs are open access via GDC) | [link](https://portal.gdc.cancer.gov/) |
+
+\* “StratCP guarantee” indicates whether StratCP is applied under multiple or single selection criteria for the task.
+
+For TCGA LGG & GBM H\&E slides, no additional special approval is required beyond TCGA’s standard open-access usage terms; the diagnostic WSIs used here are open access via the GDC Data Portal. EBRAINS access is permissioned and requires a data access request.
+
 
 ## Citation
 
