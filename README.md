@@ -1,10 +1,14 @@
-# StratCP: Stratified Conformal Prediction
+# StratCP: Error controlled decisions for safe use of medical foundation models
 
 [![Release](https://img.shields.io/github/v/release/mims-harvard/stratcp)](https://img.shields.io/github/v/release/mims-harvard/stratcp)
 [![Build status](https://img.shields.io/github/actions/workflow/status/mims-harvard/stratcp/main.yml?branch=main)](https://github.com/mims-harvard/stratcp/actions/workflows/main.yml?query=branch%3Amain)
 [![License](https://img.shields.io/github/license/mims-harvard/stratcp)](https://img.shields.io/github/license/mims-harvard/stratcp)
  
-StratCP enables confident predictions with statistical guarantees by stratifying data based on prediction confidence and applying tailored conformal prediction procedures to each stratum.
+Foundation models show promise in medicine, but clinical use requires outputs that clinicians can act on under pre-specified error budgets, such as a cap on false-positive clinical calls. Without error control, strong average accuracy can still lead to harmful errors among the very cases labeled confident and to inefficient use of follow-up testing.
+
+Here we introduce StratCP, a stratified conformal framework that turns foundation-model predictions into decision-ready outputs by combining selective action with calibrated deferral. StratCP first selects a subset of patients for immediate clinical calls while controlling the false discovery rate among those calls at a user-chosen level. It then returns calibrated prediction sets for deferred patients that meet the target error rate and guide confirmatory evaluation. The procedure is model agnostic and can be applied to pretrained foundation models without retraining.
+
+We validate StratCP in ophthalmology and neuro-oncology across diagnostic classification and time-to-event prognosis. Across tasks, StratCP maintains false discovery rate control on selected patients and produces coherent prediction sets for deferred patients. In neuro-oncology, it supports diagnosis from H&E whole-slide images under a fixed error budget, reducing the need for reflex molecular assays and lowering laboratory cost and turnaround time. StratCP lays the groundwork for safe use of medical foundation models by converting predictions into error-controlled actions when evidence is strong and calibrated uncertainty otherwise.
 
 ## Highlights
 
@@ -306,7 +310,7 @@ Our framework allows diverse use cases based on the stratCP principle.
 
 ## Documentation
 
-- **API Reference**: [https://zitniklab.hms.harvard.edu/stratcp/](https://zitniklab.hms.harvard.edu/stratcp/)
+- **API Reference**: [https://zitniklab.hms.harvard.edu/projects/StratCP](https://zitniklab.hms.harvard.edu/projects/StratCP)
 - **Usage Guide**: See [USAGE_SUMMARY.md](USAGE_SUMMARY.md) for comprehensive examples
 - **Example Scripts**:
   - `examples/simple_usage.py` - Basic usage patterns
