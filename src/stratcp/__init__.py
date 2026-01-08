@@ -52,9 +52,6 @@ __email__ = "marinka@hms.harvard.edu"
 # Import main modules for convenient access
 from stratcp import conformal, metrics, selection, utils
 
-# Import high-level API
-from stratcp.stratified import StratifiedCP
-
 # Import key functions for direct access
 from stratcp.conformal import (
     compute_score_aps,
@@ -73,6 +70,9 @@ from stratcp.selection import (
     get_sel_single,
     get_sel_survival,
 )
+
+# Import high-level API
+from stratcp.stratified import StratifiedCP
 from stratcp.utils import combine_data
 
 __all__ = [

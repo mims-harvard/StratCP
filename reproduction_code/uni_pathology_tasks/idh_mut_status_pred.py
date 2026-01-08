@@ -114,14 +114,13 @@ import pandas as pd
 
 from stratcp.eval_utils import (
     aggregate_conformal_results,
-    load_or_create_splits,
-    summarize_methods_at_alpha,
-    extract_split_arrays,
     compute_baselines_for_split,
-    run_vanilla_cp_for_split,
+    extract_split_arrays,
+    load_or_create_splits,
     run_stratified_cp_for_split,
+    run_vanilla_cp_for_split,
+    summarize_methods_at_alpha,
 )
-from stratcp.stratified import StratifiedCP  # imported for completeness / external use
 
 # Convenience constants for binary-label use cases; not strictly required by
 # this script, but kept for clarity and downstream compatibility.
@@ -144,9 +143,7 @@ def parse_args() -> argparse.Namespace:
     Returns:
         argparse.Namespace: Parsed CLI arguments.
     """
-    parser = argparse.ArgumentParser(
-        description="Configurations for WSI conformal prediction evaluation."
-    )
+    parser = argparse.ArgumentParser(description="Configurations for WSI conformal prediction evaluation.")
 
     # Core configuration for I/O and experiment splits
     parser.add_argument(
@@ -312,22 +309,16 @@ def main() -> None:
     ensure_directory(args.results_dir)
 
     # Step 1: Load per-slide predictions and dataset metadata
-    results_dict_test_path = os.path.join(
-        args.results_dir, "uni_eval_results", "uni_results_dict.pkl"
-    )
+    results_dict_test_path = os.path.join(args.results_dir, "uni_eval_results", "uni_results_dict.pkl")
     results_dict_test = load_results_dict(results_dict_test_path)
 
-    dataset_csv_path = os.path.join(
-        args.results_dir, "tumor_idh_mutation_status.csv"
-    )
+    dataset_csv_path = os.path.join(args.results_dir, "tumor_idh_mutation_status.csv")
     dataset_test_df = load_dataset(dataset_csv_path, list(results_dict_test.keys()))
 
     # Step 2: Build (or load) stratified calibration/test splits at case level
     # test_size is the fraction of cases reserved for test among calib+test
     test_size = args.test_prop / (args.test_prop + args.calib_prop)
-    split_cache_path = os.path.join(
-        args.results_dir, f"calib_test_splits_n_{args.n_splits}.pkl"
-    )
+    split_cache_path = os.path.join(args.results_dir, f"calib_test_splits_n_{args.n_splits}.pkl")
     split_results = load_or_create_splits(
         dataset_test_df,
         test_size,
@@ -503,17 +494,15 @@ def main() -> None:
         summary_sources=summary_sources,
         alpha=args.alpha_fixed,
         metrics=metrics,
-        include_se=True,   # set False if you do not want *_se columns
-        nearest=True,      # set False to require an exact alpha match
-        atol=5e-3,         # tolerance for nearest-match lookup
+        include_se=True,  # set False if you do not want *_se columns
+        nearest=True,  # set False to require an exact alpha match
+        atol=5e-3,  # tolerance for nearest-match lookup
     )
 
     # Step 6: Print final summary tables for each (source, method)
     for _, row in summary_df.iterrows():
         print(f"\n=== {row['source']:<12} | {row['method']} ===")
-        vals = row.drop(
-            ["source", "method", "alpha_requested", "alpha_selected"]
-        )
+        vals = row.drop(["source", "method", "alpha_requested", "alpha_selected"])
         print(vals.to_frame(name="value"))
 
     return

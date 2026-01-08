@@ -1,5 +1,5 @@
 """
-Multiple property selection with FDR control  
+Multiple property selection with FDR control
 
 This module implements selection procedures for identifying test samples across
 multiple selection rules (K rules), each controlling FDR independently.
@@ -60,16 +60,12 @@ def get_sel_multiple(
         n_e = int(np.sum(cal_eligs[:, k]))
         m_e = int(np.sum(test_eligs[:, k]))
 
-        df = pd.DataFrame(
-            {
-                "mu": np.concatenate(
-                    [cal_scores[cal_eligs[:, k] == 1, k], test_scores[test_eligs[:, k] == 1, k]]
-                ),
-                "L": np.concatenate([cal_labels[cal_eligs[:, k] == 1, k], np.zeros(m_e)]),
-                "if_test": np.concatenate([np.zeros(n_e), np.ones(m_e)]),
-                "id": range(n_e + m_e),
-            }
-        ).sort_values(by="mu", ascending=False)
+        df = pd.DataFrame({
+            "mu": np.concatenate([cal_scores[cal_eligs[:, k] == 1, k], test_scores[test_eligs[:, k] == 1, k]]),
+            "L": np.concatenate([cal_labels[cal_eligs[:, k] == 1, k], np.zeros(m_e)]),
+            "if_test": np.concatenate([np.zeros(n_e), np.ones(m_e)]),
+            "id": range(n_e + m_e),
+        }).sort_values(by="mu", ascending=False)
 
         df["RR"] = (
             (1 + np.cumsum((df["L"] == 0) * (1 - df["if_test"])))
@@ -175,16 +171,12 @@ def get_reference_sel_multiple(
 
             if test_eligs[j, k] == 1:
                 # Case: test sample j is eligible for rule k
-                df = pd.DataFrame(
-                    {
-                        "mu": np.concatenate(
-                            [cal_scores[cal_eligs[:, k] == 1, k], test_scores[test_eligs[:, k] == 1, k]]
-                        ),
-                        "L": np.concatenate([cal_labels[cal_eligs[:, k] == 1, k], np.zeros(m_e)]),
-                        "if_test": np.concatenate([np.zeros(n_e), np.ones(m_e)]),
-                        "id": range(n_e + m_e),
-                    }
-                ).sort_values(by="mu", ascending=False)
+                df = pd.DataFrame({
+                    "mu": np.concatenate([cal_scores[cal_eligs[:, k] == 1, k], test_scores[test_eligs[:, k] == 1, k]]),
+                    "L": np.concatenate([cal_labels[cal_eligs[:, k] == 1, k], np.zeros(m_e)]),
+                    "if_test": np.concatenate([np.zeros(n_e), np.ones(m_e)]),
+                    "id": range(n_e + m_e),
+                }).sort_values(by="mu", ascending=False)
 
                 df["R11"] = (
                     (1 + np.cumsum((1 - df["if_test"]) * (df["L"] == 0)) + 1 * (df["mu"] <= test_scores[j, k]))
@@ -240,16 +232,12 @@ def get_reference_sel_multiple(
 
             if test_eligs[j, k] == 0:
                 # Case: test sample j is not eligible for rule k
-                df = pd.DataFrame(
-                    {
-                        "mu": np.concatenate(
-                            [cal_scores[cal_eligs[:, k] == 1, k], test_scores[test_eligs[:, k] == 1, k]]
-                        ),
-                        "L": np.concatenate([cal_labels[cal_eligs[:, k] == 1, k], np.zeros(m_e)]),
-                        "if_test": np.concatenate([np.zeros(n_e), np.ones(m_e)]),
-                        "id": range(n_e + m_e),
-                    }
-                ).sort_values(by="mu", ascending=False)
+                df = pd.DataFrame({
+                    "mu": np.concatenate([cal_scores[cal_eligs[:, k] == 1, k], test_scores[test_eligs[:, k] == 1, k]]),
+                    "L": np.concatenate([cal_labels[cal_eligs[:, k] == 1, k], np.zeros(m_e)]),
+                    "if_test": np.concatenate([np.zeros(n_e), np.ones(m_e)]),
+                    "id": range(n_e + m_e),
+                }).sort_values(by="mu", ascending=False)
 
                 df["R1"] = (
                     (1 + np.cumsum((1 - df["if_test"]) * (df["L"] == 0)))

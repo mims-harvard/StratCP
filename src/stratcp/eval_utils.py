@@ -21,22 +21,23 @@ Note:
 
 import os
 import pickle
-from collections.abc import Iterable
 from collections import defaultdict
-from typing import Any, Dict, Tuple, Optional, List, Sequence, Mapping
+from collections.abc import Iterable, Mapping, Sequence
+from typing import Any, Dict, List, Optional, Tuple
 
-import tqdm
 import numpy as np
 import pandas as pd
+import tqdm
 from sklearn.model_selection import train_test_split
 
-from stratcp.stratified import StratifiedCP
 from stratcp.conformal.core import conformal
 from stratcp.conformal.scores import (
     compute_score_aps,
     compute_score_raps,
     compute_score_tps,
 )
+from stratcp.stratified import StratifiedCP
+
 
 def evaluate_top1(preds: np.ndarray, labels: np.ndarray) -> Dict[str, float]:
     """Compute baseline Top-1 metrics for binary classification (legacy).
@@ -181,9 +182,9 @@ def evaluate_naive_cumulative(
     thr = 1.0 - float(alpha)
 
     # Sort classes per sample and compute cumulative sums (descending prob order)
-    sorted_idx = np.argsort(probs, axis=1)[:, ::-1]             # (n, K)
+    sorted_idx = np.argsort(probs, axis=1)[:, ::-1]  # (n, K)
     sorted_probs = np.take_along_axis(probs, sorted_idx, axis=1)  # (n, K)
-    cum = np.cumsum(sorted_probs, axis=1)                       # (n, K)
+    cum = np.cumsum(sorted_probs, axis=1)  # (n, K)
 
     # Determine minimal cut position k_i such that cum[i, k_i] >= 1 - alpha
     # Use searchsorted on each row’s cumulative sums (vectorized with broadcasting)
@@ -192,13 +193,13 @@ def evaluate_naive_cumulative(
 
     # Build binary prediction-set matrix: include all sorted positions <= k_pos[i]
     # mask_sorted[i, j] = 1{ j <= k_pos[i] }
-    mask_sorted = (np.arange(K)[None, :] <= k_pos[:, None])
-    pred_set = np.zeros_like(probs, dtype=np.uint8)             # (n, K)
-    pred_set[np.arange(n)[:, None], sorted_idx] = mask_sorted   # scatter mask back to class space
+    mask_sorted = np.arange(K)[None, :] <= k_pos[:, None]
+    pred_set = np.zeros_like(probs, dtype=np.uint8)  # (n, K)
+    pred_set[np.arange(n)[:, None], sorted_idx] = mask_sorted  # scatter mask back to class space
 
     # Coverage and set sizes
-    row_cov = pred_set[np.arange(n), labels].astype(float)      # 1 if y_i in set_i
-    row_size = pred_set.sum(axis=1).astype(float)               # |set_i|
+    row_cov = pred_set[np.arange(n), labels].astype(float)  # 1 if y_i in set_i
+    row_size = pred_set.sum(axis=1).astype(float)  # |set_i|
 
     mgn_cov = float(row_cov.mean())
     mgn_size = float(row_size.mean())
@@ -206,7 +207,7 @@ def evaluate_naive_cumulative(
     # If per-class metrics requested: compute among singleton prediction sets
     if return_per_class_metrics:
         # Classes with singleton sets only
-        singleton_mask = (row_size == 1)
+        singleton_mask = row_size == 1
         if singleton_mask.any():
             preds_single = np.argmax(pred_set[singleton_mask], axis=1)  # predicted class for singleton sets
             labels_single = labels[singleton_mask]
@@ -237,7 +238,7 @@ def evaluate_naive_cumulative(
         num_sel_by_class: Dict[int, int] = {}
 
         for k in classes_arr:
-            mask_k = (preds_single == k)
+            mask_k = preds_single == k
             n_k = int(mask_k.sum())
             num_sel_by_class[int(k)] = n_k
             if n_k > 0:
@@ -253,7 +254,7 @@ def evaluate_naive_cumulative(
         )
 
     # Otherwise, return baseline-oriented “unselected” metrics (non-singletons)
-    unselected_mask = (row_size > 1)
+    unselected_mask = row_size > 1
     if unselected_mask.any():
         unselected_coverage = float(row_cov[unselected_mask].mean())
         unselected_set_size = float(row_size[unselected_mask].mean())
@@ -684,8 +685,11 @@ def load_or_create_splits(
     splits: Dict[int, Dict[str, Any]] = {}
     for split_idx in range(n_splits):
         test_cases, calib_cases, test_labels, calib_labels = stratified_split_return_case_ids(
-            dataset_df, test_size, random_state=random_state + split_idx,
-            patient_id_col=patient_id_col, label_col=label_col
+            dataset_df,
+            test_size,
+            random_state=random_state + split_idx,
+            patient_id_col=patient_id_col,
+            label_col=label_col,
         )
         splits[split_idx] = {
             "test_cases": test_cases,
@@ -892,7 +896,7 @@ def evaluate_top1(
     num_sel_by_class: Dict[int, int] = {}
 
     for k in classes_arr:
-        mask_k = (pred_idx == k)
+        mask_k = pred_idx == k
         n_k = int(mask_k.sum())
         num_sel_by_class[int(k)] = n_k
 
@@ -1007,9 +1011,9 @@ def compute_baselines_for_split(
         row: Dict[str, Any] = {
             "mgn_cov": float(top1.get("mgn_cov", np.nan)),
             "mgn_size": float(top1.get("mgn_size", np.nan)),
-            "unselected_coverage": np.nan,   # Not applicable for Top-1
-            "unselected_set_size": np.nan,   # Not applicable for Top-1
-            "num_unsel": np.nan,             # Not applicable for Top-1
+            "unselected_coverage": np.nan,  # Not applicable for Top-1
+            "unselected_set_size": np.nan,  # Not applicable for Top-1
+            "num_unsel": np.nan,  # Not applicable for Top-1
             "num_total": int(num_total),
         }
         if return_per_class_metrics:
@@ -1078,6 +1082,7 @@ def compute_baselines_for_split(
     thresh_df = pd.DataFrame(thresh_rows, index=alphas)[col_order]
 
     return {"top1": top1_df, "thresh": thresh_df}
+
 
 def run_vanilla_cp_for_split(
     alphas: np.ndarray,
@@ -1182,9 +1187,7 @@ def run_vanilla_cp_for_split(
             return compute_score_tps(calib_probs, test_probs, calib_labels)
         raise RuntimeError("Unexpected method name")
 
-    scores_by_method: Dict[str, Tuple[np.ndarray, np.ndarray]] = {
-        meth: _scores_for_method(meth) for meth in methods
-    }
+    scores_by_method: Dict[str, Tuple[np.ndarray, np.ndarray]] = {meth: _scores_for_method(meth) for meth in methods}
 
     # Helper: construct the final column order (base + per-class)
     base_cols = [
@@ -1198,8 +1201,8 @@ def run_vanilla_cp_for_split(
         "num_total",
     ]
     if return_per_class_metrics:
-        per_class_cov_cols = [f"coverage_cls_{c}_sel" for c in range(n_classes-1, -1, -1)]
-        per_class_num_cols = [f"num_sel_cls_{c}"        for c in range(n_classes-1, -1, -1)]
+        per_class_cov_cols = [f"coverage_cls_{c}_sel" for c in range(n_classes - 1, -1, -1)]
+        per_class_num_cols = [f"num_sel_cls_{c}" for c in range(n_classes - 1, -1, -1)]
         col_order = base_cols + per_class_cov_cols + per_class_num_cols
     else:
         col_order = base_cols
@@ -1232,7 +1235,7 @@ def run_vanilla_cp_for_split(
             size = np.sum(set_mat, axis=1).astype(int)
 
             # Singleton vs unselected (non-singleton)
-            singleton_mask = (size == 1)
+            singleton_mask = size == 1
             unsel_mask = ~singleton_mask
 
             # Marginal coverage over all samples
@@ -1281,7 +1284,7 @@ def run_vanilla_cp_for_split(
                     # For each class, compute coverage among singletons predicted as that class
                     for c in range(n_classes):
                         # token = _class_token(c)
-                        mask_c = (pred_single == c)
+                        mask_c = pred_single == c
                         n_c = int(np.sum(mask_c))
                         # By convention, if there are no singletons predicted as class c,
                         # set coverage to 1.0 (consistent with earlier baselines).
@@ -1303,9 +1306,10 @@ def run_vanilla_cp_for_split(
         # Ensure all expected columns exist (use NaN/0 defaults if missing)
         for col in col_order:
             if col not in df.columns:
-                df[col] = (0 if col.startswith("num_sel_cls_") else np.nan)
+                df[col] = 0 if col.startswith("num_sel_cls_") else np.nan
         summary[method_name] = df[col_order]
     return summary
+
 
 def run_stratified_cp_for_split(
     alphas: np.ndarray,
@@ -1509,7 +1513,8 @@ def run_stratified_cp_for_split(
         # Selected cohort accuracy (over the union of selected samples)
         row["selected_coverage"] = (
             _safe_mean((pred_top1[selected_mask] == test_labels[selected_mask]).astype(float))
-            if np.any(selected_mask) else np.nan
+            if np.any(selected_mask)
+            else np.nan
         )
 
         if pred_sets_unsel.shape[0] > 0:
@@ -1520,7 +1525,9 @@ def run_stratified_cp_for_split(
             row["unselected_set_size"] = _safe_mean(sizes_unsel)
 
             # Marginal coverage/size across *all* test rows
-            covered_total = float(np.sum(unsel_cov)) + float(np.sum(pred_top1[selected_mask] == test_labels[selected_mask]))
+            covered_total = float(np.sum(unsel_cov)) + float(
+                np.sum(pred_top1[selected_mask] == test_labels[selected_mask])
+            )
             row["mgn_cov"] = covered_total / float(n_test)
             row["mgn_size"] = (float(np.sum(sizes_unsel)) + float(np.sum(selected_mask))) / float(n_test)
         else:
@@ -1552,7 +1559,7 @@ def run_stratified_cp_for_split(
             sel_pred = pred_top1[selected_mask]
             sel_true = test_labels[selected_mask]
             for i in range(n_classes):
-                m_i = (sel_pred == i)
+                m_i = sel_pred == i
                 n_i = int(np.sum(m_i))
                 cov_i = float(np.mean((sel_true[m_i] == i).astype(float))) if n_i > 0 else 1.0
                 row[f"coverage_cls_{i}_sel"] = cov_i
@@ -1563,10 +1570,7 @@ def run_stratified_cp_for_split(
                 row[f"num_sel_cls_{i}"] = 0
 
     def _add_per_class_from_per_class_selection(
-        row: Dict[str, Any],
-        all_selected: List[np.ndarray],
-        tau_list: np.ndarray | None,
-        n_test: int
+        row: Dict[str, Any], all_selected: List[np.ndarray], tau_list: np.ndarray | None, n_test: int
     ) -> None:
         """
         PER_CLASS mode: use class-specific selection masks returned by StratifiedCP.
@@ -1614,9 +1618,9 @@ def run_stratified_cp_for_split(
         unsel_idx = np.where(unselected_mask)[0]
 
         gr = check_grade_consistency(
-            pred_sets_unsel,                      # CP sets for unselected
-            test_probs[unsel_idx, :],             # probs for the same unselected rows
-            grade_map,                            # grade → [class ids]
+            pred_sets_unsel,  # CP sets for unselected
+            test_probs[unsel_idx, :],  # probs for the same unselected rows
+            grade_map,  # grade → [class ids]
             size_bins=size_bins,
         )
         row["grade_range_consistency"] = gr
@@ -1705,7 +1709,7 @@ def run_stratified_cp_for_split(
             method_rows.append(row)
 
         out[method] = pd.DataFrame(method_rows).set_index("alpha")
-    
+
     return out
 
 
@@ -1788,9 +1792,7 @@ def check_grade_consistency(
     m, n_classes = prediction_sets.shape
 
     # Storage: per-bin counts for (consistent, total)
-    bin_counts: Dict[Tuple[int, int], Dict[str, int]] = defaultdict(
-        lambda: {"consistent": 0, "total": 0}
-    )
+    bin_counts: Dict[Tuple[int, int], Dict[str, int]] = defaultdict(lambda: {"consistent": 0, "total": 0})
 
     # If no bins are provided, use a single “marginal” bin covering all sizes.
     if size_bins is None:
@@ -1806,12 +1808,8 @@ def check_grade_consistency(
         set_size = int(included_labels.size)
 
         # Map included labels to grades (drop labels that have no grade)
-        included_grades = [
-            label_to_grade(lbl, grade_map) for lbl in included_labels
-        ]
-        included_grades = sorted(
-            {g for g in included_grades if g is not None}
-        )
+        included_grades = [label_to_grade(lbl, grade_map) for lbl in included_labels]
+        included_grades = sorted({g for g in included_grades if g is not None})
 
         # If no included grades, skip this sample entirely
         if not included_grades:
@@ -1860,17 +1858,14 @@ def check_grade_consistency(
 def roman_to_int(roman):
     """
     Converts a Roman numeral to an integer.
-    
+
     Args:
         roman (str): The Roman numeral to convert.
-        
+
     Returns:
         int: The integer representation of the Roman numeral.
     """
-    roman_numerals = {
-        'I': 1, 'II': 2, 'III': 3, 'IV': 4, 'V': 5,
-        'VI': 6, 'VII': 7, 'VIII': 8, 'IX': 9, 'X': 10
-    }
+    roman_numerals = {"I": 1, "II": 2, "III": 3, "IV": 4, "V": 5, "VI": 6, "VII": 7, "VIII": 8, "IX": 9, "X": 10}
     return roman_numerals.get(roman, 0)
 
 

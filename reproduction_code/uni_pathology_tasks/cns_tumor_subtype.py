@@ -94,7 +94,7 @@ from __future__ import annotations
 import argparse
 import os
 import pickle
-from typing import Any, Dict, List, Sequence, Tuple
+from typing import Any, Dict, List, Tuple
 
 # Third-party imports
 import numpy as np
@@ -103,12 +103,12 @@ import pandas as pd
 # Project imports
 from stratcp.eval_utils import (
     aggregate_conformal_results,
-    load_or_create_splits,
-    summarize_methods_at_alpha,
-    extract_split_arrays,
     compute_baselines_for_split,
-    run_vanilla_cp_for_split,
+    extract_split_arrays,
+    load_or_create_splits,
     run_stratified_cp_for_split,
+    run_vanilla_cp_for_split,
+    summarize_methods_at_alpha,
 )
 
 # Constants
@@ -128,9 +128,7 @@ DEFAULT_SIZE_BINS: List[Tuple[int, int]] = [(2, 4), (5, 7), (8, 10), (11, 50), (
 # CLI parsing
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments for WSI multiclass StratCP evaluation."""
-    parser = argparse.ArgumentParser(
-        description="WSI multiclass evaluation with StratCP (method-selective)."
-    )
+    parser = argparse.ArgumentParser(description="WSI multiclass evaluation with StratCP (method-selective).")
 
     # I/O and bookkeeping
     parser.add_argument(
@@ -314,9 +312,7 @@ def build_grade_map(
     label_to_id = {name: i for i, name in enumerate(label_names)}
 
     # Map diagnosis → grade (dropping missing grades)
-    diag_to_grade = (
-        dataset_df.set_index(diagnosis_col)[grade_col].dropna().to_dict()
-    )
+    diag_to_grade = dataset_df.set_index(diagnosis_col)[grade_col].dropna().to_dict()
 
     grade_to_ids: Dict[Any, List[int]] = {}
     for diagnosis, grade in diag_to_grade.items():
@@ -349,15 +345,14 @@ def main() -> None:
     # Set up directories
     ensure_directory(args.results_dir)
     eval_dir = os.path.join(
-        args.results_dir, f"stratcp_eval_results_grade_consist_{args.grade_consist_set}"
+        args.results_dir,
+        f"stratcp_eval_results_grade_consist_{args.grade_consist_set}",
         # e.g. data/.../stratcp_eval_results_grade_consist_True
     )
     ensure_directory(eval_dir)
 
     # Load predictions & dataset metadata
-    results_dict_path = os.path.join(
-        args.results_dir, "uni_eval_results", "uni_results_dict.pkl"
-    )
+    results_dict_path = os.path.join(args.results_dir, "uni_eval_results", "uni_results_dict.pkl")
     results_dict = load_results_dict(results_dict_path)
     test_ids = list(results_dict.keys())
 
@@ -377,9 +372,7 @@ def main() -> None:
 
     # Split creation / loading (case-level stratification by pat_id)
     test_size = args.test_prop / (args.test_prop + args.calib_prop)
-    splits_path = os.path.join(
-        args.results_dir, f"calib_test_splits_n_{args.n_splits}.pkl"
-    )
+    splits_path = os.path.join(args.results_dir, f"calib_test_splits_n_{args.n_splits}.pkl")
 
     # Optionally force re-creation of splits by deleting cached file
     if args.overwrite_split_cache and os.path.exists(splits_path):
@@ -418,21 +411,15 @@ def main() -> None:
         # Per-split cache paths
         baseline_cache_path = os.path.join(
             eval_dir,
-            BASELINE_CACHE_TEMPLATE.format(
-                split_idx=split_idx, n_splits=args.n_splits
-            ),
+            BASELINE_CACHE_TEMPLATE.format(split_idx=split_idx, n_splits=args.n_splits),
         )
         vanilla_cache_path = os.path.join(
             eval_dir,
-            VANILLA_CP_CACHE_TEMPLATE.format(
-                split_idx=split_idx, n_splits=args.n_splits
-            ),
+            VANILLA_CP_CACHE_TEMPLATE.format(split_idx=split_idx, n_splits=args.n_splits),
         )
         stratcp_cache_path = os.path.join(
             eval_dir,
-            STRATCP_CACHE_TEMPLATE.format(
-                split_idx=split_idx, n_splits=args.n_splits
-            ),
+            STRATCP_CACHE_TEMPLATE.format(split_idx=split_idx, n_splits=args.n_splits),
         )
 
         # Baselines (Top-1, Thresh)
@@ -508,15 +495,9 @@ def main() -> None:
     # Aggregate across splits and summarize at a fixed α
     alpha_range = (float(args.alpha_aggr_min), float(args.alpha_aggr_max))
 
-    aggr_baseline, se_baseline = aggregate_conformal_results(
-        split_to_baseline, method="mean", alpha_range=alpha_range
-    )
-    aggr_vanilla, se_vanilla = aggregate_conformal_results(
-        split_to_vanilla_cp, method="mean", alpha_range=alpha_range
-    )
-    aggr_stratcp, se_stratcp = aggregate_conformal_results(
-        split_to_stratcp, method="mean", alpha_range=alpha_range
-    )
+    aggr_baseline, se_baseline = aggregate_conformal_results(split_to_baseline, method="mean", alpha_range=alpha_range)
+    aggr_vanilla, se_vanilla = aggregate_conformal_results(split_to_vanilla_cp, method="mean", alpha_range=alpha_range)
+    aggr_stratcp, se_stratcp = aggregate_conformal_results(split_to_stratcp, method="mean", alpha_range=alpha_range)
 
     summary_sources = [
         ("baseline", aggr_baseline, se_baseline),
@@ -545,11 +526,7 @@ def main() -> None:
     )
 
     # Pretty-print final summary
-    print(
-        "===== Final summary at alpha={:.3f} (nearest on grid) =====".format(
-            args.alpha_fixed
-        )
-    )
+    print(f"===== Final summary at alpha={args.alpha_fixed:.3f} (nearest on grid) =====")
     for _, row in summary_df.iterrows():
         print(f"=== {row['source']:<12} | {row['method']} ===")
         vals = row.drop(

@@ -11,7 +11,7 @@ import numpy as np
 def compute_score_tps(
     cal_smx: np.ndarray,
     test_smx: np.ndarray,
-    cal_labels: np.ndarray, 
+    cal_labels: np.ndarray,
     nonempty: bool = True,
 ) -> tuple[np.ndarray, np.ndarray]:
     """
@@ -55,7 +55,7 @@ def compute_score_tps(
 def compute_score_aps(
     cal_smx: np.ndarray,
     test_smx: np.ndarray,
-    cal_labels: np.ndarray, 
+    cal_labels: np.ndarray,
     nonempty: bool = True,
 ) -> tuple[np.ndarray, np.ndarray]:
     """
@@ -103,7 +103,7 @@ def compute_score_aps(
 def compute_score_raps(
     cal_smx: np.ndarray,
     test_smx: np.ndarray,
-    cal_labels: np.ndarray, 
+    cal_labels: np.ndarray,
     lam_reg: float = 0.01,
     nonempty: bool = True,
 ) -> tuple[np.ndarray, np.ndarray]:
@@ -203,7 +203,7 @@ def get_consec_ordering(smx: np.ndarray) -> list[int]:
 def compute_score_tps_consec(
     cal_smx: np.ndarray,
     test_smx: np.ndarray,
-    cal_labels: np.ndarray, 
+    cal_labels: np.ndarray,
     nonempty: bool = True,
 ) -> tuple[np.ndarray, np.ndarray]:
     """
@@ -260,7 +260,7 @@ def compute_score_tps_consec(
 def compute_score_aps_consec(
     cal_smx: np.ndarray,
     test_smx: np.ndarray,
-    cal_labels: np.ndarray, 
+    cal_labels: np.ndarray,
     nonempty: bool = True,
 ) -> tuple[np.ndarray, np.ndarray]:
     """
@@ -318,7 +318,7 @@ def compute_score_aps_consec(
 def compute_score_raps_consec(
     cal_smx: np.ndarray,
     test_smx: np.ndarray,
-    cal_labels: np.ndarray, 
+    cal_labels: np.ndarray,
     lam_reg: float = 0.05,
     nonempty: bool = True,
 ) -> tuple[np.ndarray, np.ndarray]:

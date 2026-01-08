@@ -11,7 +11,7 @@ import numpy as np
 def conformal(
     cal_scores: np.ndarray,
     test_scores: np.ndarray,
-    cal_labels: np.ndarray, 
+    cal_labels: np.ndarray,
     alpha: float,
     nonempty: bool = True,
     test_max_id: np.ndarray | None = None,
@@ -34,7 +34,7 @@ def conformal(
     test_scores : np.ndarray
         Nonconformity scores V(X_{n+j}, y) for test data (m, nclass)
     cal_labels : np.ndarray
-        True labels Y_i for calibration data (n,) 
+        True labels Y_i for calibration data (n,)
     alpha : float
         Miscoverage level (e.g., 0.1 for 90% coverage)
     nonempty : bool, default=True
@@ -94,14 +94,10 @@ def conformal(
         for i in range(m):
             for j in range(nclass):
                 pvals[i, j] = (
-                    np.sum(
-                        cal_weights * (cal_scores < test_scores[i, j]) * if_in_ref[j][i, :] * (cal_labels == j)
-                    )
+                    np.sum(cal_weights * (cal_scores < test_scores[i, j]) * if_in_ref[j][i, :] * (cal_labels == j))
                     + Us[i]
                     * (
-                        np.sum(
-                            cal_weights * (cal_scores == test_scores[i, j]) * (cal_labels == j) * if_in_ref[j][i, :]
-                        )
+                        np.sum(cal_weights * (cal_scores == test_scores[i, j]) * (cal_labels == j) * if_in_ref[j][i, :])
                         + test_weights[i]
                     )
                 ) / (test_weights[i] + np.sum(cal_weights * (cal_labels == j) * if_in_ref[j][i, :]))
@@ -112,10 +108,7 @@ def conformal(
                 pvals[i, j] = (
                     np.sum(cal_weights * (cal_scores < test_scores[i, j]) * if_in_ref[j][i, :])
                     + Us[i]
-                    * (
-                        np.sum(cal_weights * (cal_scores == test_scores[i, j]) * if_in_ref[j][i, :])
-                        + test_weights[i]
-                    )
+                    * (np.sum(cal_weights * (cal_scores == test_scores[i, j]) * if_in_ref[j][i, :]) + test_weights[i])
                 ) / (test_weights[i] + np.sum(cal_weights * if_in_ref[j][i, :]))
 
     prediction_sets = pvals <= (1 - alpha)
@@ -125,4 +118,4 @@ def conformal(
             raise ValueError("test_max_id must be provided when nonempty=True")
         prediction_sets[np.arange(m), test_max_id] = True
 
-    return prediction_sets 
+    return prediction_sets

@@ -85,7 +85,7 @@ class RichHandler(rich.logging.RichHandler):
         format_args = record.rich_format
 
         if not isinstance(format_args, list) or not format_args:
-            raise TypeError("rich_format must be a non-empty list")  # noqa: TRY003
+            raise TypeError("rich_format must be a non-empty list")
 
         # Apply Rich color formatting to arguments
         new_args = [f"[{color}]{arg}[/{color}]" for arg, color in zip(record.args, format_args)]

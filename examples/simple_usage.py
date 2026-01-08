@@ -6,6 +6,7 @@ stratified conformal prediction.
 """
 
 import numpy as np
+
 from stratcp import StratifiedCP
 
 # Set random seed for reproducibility
@@ -52,14 +53,14 @@ print()
 
 # Prediction sets for selected samples
 if len(results["selected_idx"]) > 0:
-    print(f"First selected sample prediction set:")
+    print("First selected sample prediction set:")
     print(f"  Classes: {np.where(results['prediction_sets']['selected'][0])[0]}")
     print(f"  Set size: {results['set_sizes']['selected'][0]:.0f}")
     print()
 
 # Prediction sets for unselected samples
 if len(results["unselected_idx"]) > 0:
-    print(f"First unselected sample prediction set:")
+    print("First unselected sample prediction set:")
     print(f"  Classes: {np.where(results['prediction_sets']['unselected'][0])[0]}")
     print(f"  Set size: {results['set_sizes']['unselected'][0]:.0f}")
     print()

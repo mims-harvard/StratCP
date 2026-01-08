@@ -7,9 +7,7 @@ This module provides helper functions for data manipulation and common operation
 import numpy as np
 
 
-def combine_data(
-    sel_idx: np.ndarray, unsel_idx: np.ndarray, sel_res: np.ndarray, unsel_res: np.ndarray
-) -> np.ndarray:
+def combine_data(sel_idx: np.ndarray, unsel_idx: np.ndarray, sel_res: np.ndarray, unsel_res: np.ndarray) -> np.ndarray:
     """
     Combine results from selected and unselected samples.
 

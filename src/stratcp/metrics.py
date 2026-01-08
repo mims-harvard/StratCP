@@ -19,7 +19,7 @@ def size_cond_cov(pred_set: np.ndarray, test_labels: np.ndarray) -> tuple[pd.Ser
         Prediction set (m, nclass)
 
     y : np.ndarray
-        True labels (m,)  
+        True labels (m,)
 
     Returns
     -------
@@ -32,9 +32,7 @@ def size_cond_cov(pred_set: np.ndarray, test_labels: np.ndarray) -> tuple[pd.Ser
     cov = np.array([pred_set[i, test_labels[i]] for i in range(pred_set.shape[0])])
     size = np.sum(pred_set, axis=1)
     num_class = pred_set.shape[1]
-    cond_cov = (
-        pd.Series(cov * 1).groupby(pd.Series(size)).mean().reindex(range(0, num_class + 1), fill_value=np.nan)
-    )
+    cond_cov = pd.Series(cov * 1).groupby(pd.Series(size)).mean().reindex(range(0, num_class + 1), fill_value=np.nan)
     cond_freq = pd.Series(cov * 1).groupby(pd.Series(size)).count().reindex(range(0, num_class + 1), fill_value=0)
     return cond_cov, cond_freq
 
@@ -61,7 +59,9 @@ def label_cond_cov(pred_set: np.ndarray, test_labels: np.ndarray) -> tuple[pd.Se
     num_class = pred_set.shape[1]
 
     cond_cov = pd.Series(cov * 1).groupby(pd.Series(test_labels)).mean().reindex(range(0, num_class), fill_value=np.nan)
-    cond_freq = pd.Series(cov * 1).groupby(pd.Series(test_labels)).count().reindex(range(0, num_class), fill_value=np.nan)
+    cond_freq = (
+        pd.Series(cov * 1).groupby(pd.Series(test_labels)).count().reindex(range(0, num_class), fill_value=np.nan)
+    )
     return cond_cov, cond_freq
 
 
@@ -84,12 +84,8 @@ def eval_singleton_cover(pred_set: np.ndarray, test_labels: np.ndarray) -> tuple
         Coverage for non-singleton prediction sets
     """
     set_size = np.sum(pred_set, axis=1)
-    singleton_cover = np.mean(
-        [pred_set[i, test_labels[i]] for i in range(pred_set.shape[0]) if set_size[i] == 1]
-    )
-    non_singleton_cover = np.mean(
-        [pred_set[i, test_labels[i]] for i in range(pred_set.shape[0]) if set_size[i] != 1]
-    )
+    singleton_cover = np.mean([pred_set[i, test_labels[i]] for i in range(pred_set.shape[0]) if set_size[i] == 1])
+    non_singleton_cover = np.mean([pred_set[i, test_labels[i]] for i in range(pred_set.shape[0]) if set_size[i] != 1])
     return singleton_cover, non_singleton_cover
 
 
@@ -107,7 +103,7 @@ def eval_consec(pred_set: np.ndarray) -> np.ndarray:
     if_consec : np.ndarray
         Binary indicators for consecutiveness (m,)
     """
-    if_consec = np.zeros((pred_set.shape[0]))
+    if_consec = np.zeros(pred_set.shape[0])
     for i in range(pred_set.shape[0]):
         true_indices = np.flatnonzero(pred_set[i, :])
 

@@ -5,8 +5,9 @@ This module provides score functions that leverage similarity matrices between
 labels to produce more interpretable and coherent prediction sets.
 """
 
-import numpy as np
 from typing import Optional, Tuple
+
+import numpy as np
 
 
 def score_expand_max_sim(
@@ -251,18 +252,10 @@ def compute_score_utility(
     # Compute expansion scores
     if method == "greedy":
         cal_scores_full = score_expand_max_sim(cal_probs, sim_mat, k_max, null_lab)
-        test_scores = (
-            None
-            if test_probs is None
-            else score_expand_max_sim(test_probs, sim_mat, k_max, null_lab)
-        )
+        test_scores = None if test_probs is None else score_expand_max_sim(test_probs, sim_mat, k_max, null_lab)
     elif method == "weighted":
         cal_scores_full = score_expand_weighted_sim(cal_probs, sim_mat, None, null_lab)
-        test_scores = (
-            None
-            if test_probs is None
-            else score_expand_weighted_sim(test_probs, sim_mat, None, null_lab)
-        )
+        test_scores = None if test_probs is None else score_expand_weighted_sim(test_probs, sim_mat, None, null_lab)
     else:
         raise ValueError(f"Unknown method: {method!r}. Use 'weighted' or 'greedy'.")
 

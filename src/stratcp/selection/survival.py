@@ -9,7 +9,8 @@ test samples with survival time above threshold with FDR control.
 
 import numpy as np
 import pandas as pd
-from scipy.stats import norm 
+from scipy.stats import norm
+
 
 def get_sel_survival(
     cal_labels: np.ndarray,  # calibration survival times T_i (n,)
@@ -144,7 +145,6 @@ def get_sel_survival(
     unsel_idx = np.setdiff1d(np.arange(m, dtype=int), sel_idx)
 
     return sel_idx, unsel_idx, tau_hat
-
 
 
 def _score_from_threshold(

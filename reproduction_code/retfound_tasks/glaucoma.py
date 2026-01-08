@@ -18,7 +18,6 @@ from __future__ import annotations
 
 import argparse
 import os
-import pickle
 from typing import Dict, Tuple
 
 import numpy as np
@@ -163,7 +162,11 @@ def eval_dec_cond_glaucoma(cp_set: np.ndarray, test_labels: np.ndarray) -> Dict[
     def _safe_mean(mask: np.ndarray, cls: int | None) -> float:
         if mask.sum() == 0:
             return 1.0
-        return float(np.mean(test_labels[mask] == cls)) if cls is not None else float(np.mean(cp_set[mask, test_labels[mask]]))
+        return (
+            float(np.mean(test_labels[mask] == cls))
+            if cls is not None
+            else float(np.mean(cp_set[mask, test_labels[mask]]))
+        )
 
     return dict(
         cov_mild=_safe_mean(if_only_mild, 0),
@@ -206,7 +209,9 @@ def _make_naive_set(probs: np.ndarray, alpha: float) -> np.ndarray:
     return naive_set
 
 
-def _vanilla_scores(method: str, calib_probs: np.ndarray, test_probs: np.ndarray, calib_labels: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+def _vanilla_scores(
+    method: str, calib_probs: np.ndarray, test_probs: np.ndarray, calib_labels: np.ndarray
+) -> tuple[np.ndarray, np.ndarray]:
     if method == "aps":
         return compute_score_aps(calib_probs, test_probs, calib_labels)
     if method == "tps":
@@ -357,7 +362,9 @@ def main() -> None:
                     alpha=a,
                     nonempty=True,
                     test_max_id=np.argmax(test_probs, axis=1),
-                    if_in_ref=[np.ones((test_probs.shape[0], calib_labels.shape[0])) for _ in range(test_probs.shape[1])],
+                    if_in_ref=[
+                        np.ones((test_probs.shape[0], calib_labels.shape[0])) for _ in range(test_probs.shape[1])
+                    ],
                 )
                 vanilla_cond = eval_dec_cond_glaucoma(pred_sets, test_labels)
                 vanilla_cond.update({"method": meth, "source": "vanilla_cp", "alpha": float(a), "run": run_idx})
@@ -407,15 +414,9 @@ def main() -> None:
     print("Saved evaluated results to CSV files.")
 
     # Aggregate across runs
-    aggr_baseline, se_baseline = aggregate_conformal_results(
-        split_to_baseline, method="mean", alpha_range=alpha_range
-    )
-    aggr_vanilla, se_vanilla = aggregate_conformal_results(
-        split_to_vanilla, method="mean", alpha_range=alpha_range
-    )
-    aggr_stratcp, se_stratcp = aggregate_conformal_results(
-        split_to_stratcp, method="mean", alpha_range=alpha_range
-    )
+    aggr_baseline, se_baseline = aggregate_conformal_results(split_to_baseline, method="mean", alpha_range=alpha_range)
+    aggr_vanilla, se_vanilla = aggregate_conformal_results(split_to_vanilla, method="mean", alpha_range=alpha_range)
+    aggr_stratcp, se_stratcp = aggregate_conformal_results(split_to_stratcp, method="mean", alpha_range=alpha_range)
 
     summary_sources = [
         ("baseline", aggr_baseline, se_baseline),

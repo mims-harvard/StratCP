@@ -2,7 +2,7 @@
 
 ## 🎯 Quick Reference
 
-### Super Simple (Recommended for Most Users)
+### Simplest Usage
 
 ```python
 from stratcp import StratifiedCP
@@ -11,21 +11,43 @@ from stratcp import StratifiedCP
 scp = StratifiedCP(alpha_sel=0.1, alpha_cp=0.1)
 results = scp.fit_predict(cal_probs, cal_labels, test_probs, test_labels)
 
-# That's it! Access results:
+# Access results:
 print(f"Selected: {len(results['selected_idx'])} samples")
 print(f"Unselected: {len(results['unselected_idx'])} samples")
 print(scp.summary())
+``` 
+
+The `results` object contains:
+- `selected_idx`, indices of high-confidence samples by the FDR-controlled action arm.
+- `unselected_idx`, indices of low-confidence samples in the deferral arm.
+- `threshold`, the selection cutoff on the confidence score (max probability).
+- `prediction_sets`, boolean array of shape `(n_unselected, n_class)` for unselected samples only.
+- `set_sizes`, sizes of each prediction set in `prediction_sets`.
+
+
+
+You can also perform per-class selection where we:
+- FDR-controlled selection of high-confidence predictions for every class of argmax prediction, whose argmax equals unknown true label
+- Conformal prediction sets for unselected, low-confident cases with 90% coverage
+
+by simply adding the argument `eligibility = 'per_class'`.
+
+```python
+import stratcp as scp
+
+# One-line usage: fit and predict
+model = scp.StratifiedCP(alpha_sel=0.1, alpha_cp=0.1, eligibility='per_class')
+results = model.fit_predict(cal_probs, cal_labels, test_probs, test_labels)
+
+# Print detailed summary
+print(model.summary())
 ```
 
-### What You Get
-
-The `results` dictionary contains:
-- `selected_idx`: Indices of high-confidence predictions (FDR controlled)
-- `unselected_idx`: Indices of low-confidence predictions
-- `threshold`: Selection threshold value
-- `prediction_sets`: Dict with `'selected'` and `'unselected'` prediction sets
-- `set_sizes`: Dict with `'selected'` and `'unselected'` set sizes
-- `coverage`: Dict with `'selected'` and `'unselected'` coverage (if labels provided)
+The `results` object contains:
+- `all_selected`, a list that contains confident indices selected for each class, followed by indices unselected by any class (low-confidence).
+- `thresholds`, a list of per-class selection thresholds.
+- `prediction_sets`, boolean array of shape `(n_unselected, n_class)` for unselected samples only (those in `all_selected[K]`).
+- `set_sizes`, sizes of each prediction set in `prediction_sets`.
 
 ### Common Workflows
 
@@ -35,54 +57,40 @@ The `results` dictionary contains:
 from stratcp import StratifiedCP
 
 # Fit on calibration data
-scp = StratifiedCP(score_fn='raps', alpha_sel=0.1, alpha_cp=0.1)
+scp = StratifiedCP(score_fn='aps', alpha_sel=0.1, alpha_cp=0.1)
 scp.fit(cal_probs, cal_labels)
 
 # Predict on new test data
 results = scp.predict(test_probs, test_labels)
 
 # Get prediction sets for each sample
-for i, idx in enumerate(results['selected_idx']):
-    pred_set = results['prediction_sets']['selected'][i]
+for i, idx in enumerate(results['unselected_idx']):
+    pred_set = results['prediction_sets'][i, :]
     classes_in_set = np.where(pred_set)[0]
     print(f"Sample {idx}: Prediction set = {classes_in_set}")
-```
+``` 
 
-#### 2. Multiple Test Sets (Reuse Calibration)
-
-```python
-# Fit once
-scp = StratifiedCP()
-scp.fit(cal_probs, cal_labels)
-
-# Predict on multiple test sets
-results1 = scp.predict(test_probs1, test_labels1)
-results2 = scp.predict(test_probs2, test_labels2)
-results3 = scp.predict(test_probs3)  # Without labels
-```
-
-#### 3. Compare Different Settings
+#### 2. Multi-class Classification with Per-Class Action Arms
 
 ```python
-settings = [
-    ('TPS', 0.10, 0.10),
-    ('APS', 0.10, 0.10),
-    ('RAPS', 0.10, 0.10),
-    ('RAPS', 0.05, 0.10),  # Stricter selection
-]
+from stratcp import StratifiedCP
 
-for score_fn, alpha_sel, alpha_cp in settings:
-    scp = StratifiedCP(score_fn=score_fn.lower(),
-                       alpha_sel=alpha_sel,
-                       alpha_cp=alpha_cp)
-    results = scp.fit_predict(cal_probs, cal_labels, test_probs, test_labels)
+# Fit on calibration data
+scp = StratifiedCP(score_fn='aps', alpha_sel=0.1, alpha_cp=0.1, eligibility='per_class') 
+results = model.fit_predict(cal_probs, cal_labels, test_probs, test_labels)
 
-    print(f"\n{score_fn} (α_sel={alpha_sel}, α_cp={alpha_cp}):")
-    print(f"  Selected: {len(results['selected_idx'])}")
-    print(f"  Avg set size: {results['set_sizes']['selected'].mean():.2f}")
-```
+# Predict on new test data
+results = scp.predict(test_probs, test_labels)
 
-#### 4. Utility-Aware CP with Similarity Matrix
+# Get prediction sets for each sample
+for i, idx in enumerate(results['all_selected'][-1]):
+    pred_set = results['prediction_sets'][i,:]
+    classes_in_set = np.where(pred_set)[0]
+    print(f"Sample {idx}: Prediction set = {classes_in_set}")
+``` 
+
+
+#### 3. Utility-Aware CP with Similarity Matrix
 
 ```python
 from stratcp import StratifiedCP
@@ -301,7 +309,7 @@ pred_sets_unsel, cov_unsel, sizes_unsel = conformal(..., if_in_ref=ref_mats)
 - **Selected samples**: High-confidence predictions where FDR ≤ α_sel
   - These typically have **smaller prediction sets** (often singleton)
   - Safe for automated decision-making
-  
+
 - **Unselected samples**: Lower-confidence predictions
   - These typically have **larger prediction sets**
   - Should be flagged for human review or additional testing
@@ -350,7 +358,7 @@ for i, idx in enumerate(results['unselected_idx']):
 
 - `examples/simple_usage.py` - Basic usage examples
 - `examples/utility_aware_cp.py` - Utility-aware CP with similarity matrices
- 
+
 
 ## 📝 Citation
 

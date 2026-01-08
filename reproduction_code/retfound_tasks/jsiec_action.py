@@ -1,6 +1,6 @@
 """
 JSIEC reproduction with action-based similarity (utility-aware) and overall eligibility.
- 
+
 - Methods: TPS, APS, RAPS, expand_greedy (utility greedy), expand_weighted (utility weighted)
 - Vanilla CP and Stratified CP (overall selection on max prob)
 - Similarity metrics on prediction sets using a provided similarity matrix
@@ -22,7 +22,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 from stratcp.conformal.core import conformal
-from stratcp.conformal.scores import compute_score_aps, compute_score_raps, compute_score_tps
+from stratcp.conformal.scores import compute_score_aps
 from stratcp.conformal.utility import compute_score_utility, eval_similarity
 from stratcp.selection.single import get_reference_sel_single, get_sel_single
 
@@ -230,18 +230,16 @@ def main() -> None:
             )
         )
         all_size_sim_rows.append(
-            pd.DataFrame(
-                {
-                    "size": [1],
-                    "method": ["top1"],
-                    "average_sim": [1.0],
-                    "count": [m],
-                    "conformal": "baseline",
-                    "alpha": 1.0,
-                    "run": run_idx,
-                    "subset": "all",
-                }
-            )
+            pd.DataFrame({
+                "size": [1],
+                "method": ["top1"],
+                "average_sim": [1.0],
+                "count": [m],
+                "conformal": "baseline",
+                "alpha": 1.0,
+                "run": run_idx,
+                "subset": "all",
+            })
         )
 
         for alpha in alphas:
@@ -267,9 +265,11 @@ def main() -> None:
                 )
             )
             avg_sim_per_size = (
-                pd.DataFrame(
-                    {"size": np.sum(naive_set, axis=1), "sim": eval_similarity(naive_set, sim_mat, null_lab=None)[0], "method": "raw_cut"}
-                )
+                pd.DataFrame({
+                    "size": np.sum(naive_set, axis=1),
+                    "sim": eval_similarity(naive_set, sim_mat, null_lab=None)[0],
+                    "method": "raw_cut",
+                })
                 .groupby(["size", "method"], as_index=False)
                 .agg(average_sim=("sim", "mean"), count=("sim", "size"))
                 .assign(conformal="baseline", alpha=float(alpha), run=run_idx, subset="all")
@@ -309,7 +309,11 @@ def main() -> None:
 
                 # Size vs similarity for vanilla
                 avg_sim_per_size = (
-                    pd.DataFrame({"size": size, "sim": eval_similarity(pred_sets, sim_mat, null_lab=None)[0], "method": meth})
+                    pd.DataFrame({
+                        "size": size,
+                        "sim": eval_similarity(pred_sets, sim_mat, null_lab=None)[0],
+                        "method": meth,
+                    })
                     .groupby(["size", "method"], as_index=False)
                     .agg(average_sim=("sim", "mean"), count=("sim", "size"))
                 )
@@ -331,7 +335,9 @@ def main() -> None:
             # Selected prediction set (singleton argmax)
             scp_set = np.zeros((m, n_classes), dtype=bool)
             scp_set[np.arange(m), test_argmax] = True
-            scp_scov, _ = eval_singleton_cover(scp_set[sel_idx], test_labels[sel_idx]) if len(sel_idx) > 0 else (np.nan, np.nan)
+            scp_scov, _ = (
+                eval_singleton_cover(scp_set[sel_idx], test_labels[sel_idx]) if len(sel_idx) > 0 else (np.nan, np.nan)
+            )
 
             # Reference sets for unselected
             ref_mat_list = None
@@ -366,7 +372,11 @@ def main() -> None:
                     avg_sim_unsel_all, avg_sim_unsel = eval_similarity(pred_unsel, sim_mat, null_lab=None)
 
                     m_sel = m - len(unsel_idx)
-                    cov_combined = (scp_scov * m_sel + np.sum(cov_unsel)) / m if not np.isnan(scp_scov) else float(np.mean(cov_unsel))
+                    cov_combined = (
+                        (scp_scov * m_sel + np.sum(cov_unsel)) / m
+                        if not np.isnan(scp_scov)
+                        else float(np.mean(cov_unsel))
+                    )
                     size_combined = (m_sel + np.sum(size_unsel)) / m
                     sim_combined = (m_sel + avg_sim_unsel * len(unsel_idx)) / m
                     nscov = float(np.mean(cov_unsel))
@@ -417,7 +427,9 @@ def main() -> None:
     # Save evaluated results
     all_res_df = pd.DataFrame(all_res)
     all_size_sim_df = pd.concat(all_size_sim_rows, ignore_index=True) if all_size_sim_rows else pd.DataFrame()
-    strat_size_sim_unsel_df = pd.concat(strat_size_sim_unsel, ignore_index=True) if strat_size_sim_unsel else pd.DataFrame()
+    strat_size_sim_unsel_df = (
+        pd.concat(strat_size_sim_unsel, ignore_index=True) if strat_size_sim_unsel else pd.DataFrame()
+    )
 
     # Duplicate Top-1 baseline across all alphas for consistent summaries
     if not all_res_df.empty:

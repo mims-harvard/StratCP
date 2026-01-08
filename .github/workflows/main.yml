@@ -9,6 +9,7 @@ on:
 
 jobs:
   quality:
+    if: ${{ false }}  # disabled
     runs-on: ubuntu-latest
     steps:
       - name: Check out

@@ -1,10 +1,11 @@
 [project]
 name = "stratcp"
 version = "0.1.0"
-description = "Stratified Conformal Prediction: A Python package for post-selection conformal inference with FDR-controlled stratification"
-authors = [{ name = "Zitnik Lab", email = "marinka@hms.harvard.edu" }]
+description = "Stratified Conformal Prediction: A Python package for safe decisions with FDR-control in the action arm and coverage in the deferral arm"
+authors = [{ name = "Ying Jin", email = "yjinstat@wharton.upenn.edu" }, { name = "Intae Moon", email = "intae_moon@hms.harvard.edu"}]
 readme = "README.md"
-keywords = ['conformal-prediction', 'uncertainty-quantification', 'fdr-control', 'post-selection-inference', 'machine-learning']
+license = { file = "LICENSE" }
+keywords = ['conformal-prediction', 'uncertainty-quantification', 'selective-prediction', 'fdr-control', 'post-selection-inference', 'machine-learning']
 requires-python = ">=3.9,<4.0"
 classifiers = [
     "Intended Audience :: Developers",

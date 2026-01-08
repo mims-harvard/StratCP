@@ -5,8 +5,9 @@ This module provides a simple, end-to-end interface for stratified conformal
 prediction with FDR-controlled selection.
 """
 
-import numpy as np
 from typing import Literal, Optional
+
+import numpy as np
 
 from stratcp.conformal import (
     compute_score_aps,
@@ -16,10 +17,10 @@ from stratcp.conformal import (
     conformal,
 )
 from stratcp.selection import (
-    get_reference_sel_single,
-    get_sel_single,
     get_reference_sel_multiple,
+    get_reference_sel_single,
     get_sel_multiple,
+    get_sel_single,
 )
 
 
@@ -28,7 +29,7 @@ class StratifiedCP:
     End-to-end stratified conformal prediction for multi-class classification.
 
     This class provides a simple interface for:
-    1. FDR-controlled selection of high-confidence predictions, separate for every class or together 
+    1. FDR-controlled selection of high-confidence predictions, separate for every class or together
     2. JOMI conformal prediction with coverage for unselected samples
 
     Parameters
@@ -63,28 +64,11 @@ class StratifiedCP:
     selection_threshold_ : float
         Selection threshold on scores
     prediction_sets_ : dict
-        Dictionary with 'selected' and 'unselected' prediction sets
+        Dictionary with 'unselected' prediction sets
     coverage_ : dict
-        Dictionary with 'selected' and 'unselected' coverage indicators
+        Dictionary with 'unselected' coverage indicators
     set_sizes_ : dict
-        Dictionary with 'selected' and 'unselected' set sizes
-
-    Examples
-    --------
-    >>> from stratcp import StratifiedCP
-    >>> import numpy as np
-    >>>
-    >>> # Fit on calibration data
-    >>> scp = StratifiedCP(score_fn='raps', alpha_sel=0.1, alpha_cp=0.1)
-    >>> scp.fit(cal_probs, cal_labels)
-    >>>
-    >>> # Predict on test data
-    >>> results = scp.predict(test_probs, test_labels)
-    >>>
-    >>> # Access results
-    >>> print(f"Selected: {len(results['selected_idx'])} samples")
-    >>> print(f"Avg set size (selected): {results['set_sizes']['selected'].mean():.2f}")
-    >>> print(f"Avg set size (unselected): {results['set_sizes']['unselected'].mean():.2f}")
+        Dictionary with 'unselected' set sizes 
     """
 
     def __init__(
@@ -129,9 +113,13 @@ class StratifiedCP:
         self.coverage_ = None
         self.set_sizes_ = None
 
-    def fit(self, cal_probs: np.ndarray, cal_labels: np.ndarray,
-            cal_elig: Optional[np.ndarray] = None,
-            cal_confs: Optional[np.ndarray] = None) -> "StratifiedCP":
+    def fit(
+        self,
+        cal_probs: np.ndarray,
+        cal_labels: np.ndarray,
+        cal_elig: Optional[np.ndarray] = None,
+        cal_confs: Optional[np.ndarray] = None,
+    ) -> "StratifiedCP":
         """
         Fit the stratified CP model on calibration data.
 
@@ -162,18 +150,14 @@ class StratifiedCP:
                 cal_probs, cal_probs[:1], cal_labels, lam_reg=self.lam_reg, nonempty=self.nonempty
             )
         elif self.score_fn == "aps":
-            self.cal_scores_, _ = compute_score_aps(
-                cal_probs, cal_probs[:1], cal_labels, nonempty=self.nonempty
-            )
+            self.cal_scores_, _ = compute_score_aps(cal_probs, cal_probs[:1], cal_labels, nonempty=self.nonempty)
         elif self.score_fn == "tps":
-            self.cal_scores_, _ = compute_score_tps(
-                cal_probs, cal_probs[:1], cal_labels, nonempty=self.nonempty
-            )
+            self.cal_scores_, _ = compute_score_tps(cal_probs, cal_probs[:1], cal_labels, nonempty=self.nonempty)
         elif self.score_fn == "utility":
             self.cal_scores_, _ = compute_score_utility(
                 cal_probs,
                 None,
-                cal_labels, 
+                cal_labels,
                 self.similarity_matrix,
                 method=self.utility_method,
                 nonempty=self.nonempty,
@@ -184,13 +168,13 @@ class StratifiedCP:
         return self
 
     def predict(
-        self, 
-        test_probs: np.ndarray, 
-        test_labels: Optional[np.ndarray] = None, 
-        test_eligs: Optional[np.ndarray] = None, 
+        self,
+        test_probs: np.ndarray,
+        test_labels: Optional[np.ndarray] = None,
+        test_eligs: Optional[np.ndarray] = None,
         eligibility: Optional[str] = None,
         cal_eligs: Optional[np.ndarray] = None,  # optionally update calibration eligs
-        cal_conf_labels: Optional[np.ndarray] = None  # optionally update calibration confidence labels
+        cal_conf_labels: Optional[np.ndarray] = None,  # optionally update calibration confidence labels
     ) -> dict:
         """
         Make stratified conformal predictions on test data.
@@ -228,17 +212,11 @@ class StratifiedCP:
             - 'prediction_sets': Array of prediction sets for unselected samples
             - 'coverage': Coverage for unselected samples (if labels provided)
             - 'set_sizes': Set sizes for unselected samples
-
-        Examples
-        --------
-        >>> scp = StratifiedCP(eligibility='overall')
-        >>> scp.fit(cal_probs, cal_labels)
-        >>> results = scp.predict(test_probs, test_labels)
-        >>> print(f"Selected {len(results['selected_idx'])} high-confidence predictions")
+ 
         """
         if self.cal_probs_ is None:
             raise ValueError("Model not fitted. Call fit() before predict().")
-        
+
         if eligibility is not None:
             self.eligibility = eligibility
 
@@ -248,11 +226,12 @@ class StratifiedCP:
             return self._predict_per_class(test_probs, test_labels, test_eligs, cal_eligs, cal_conf_labels)
 
     def _predict_overall(
-        self, test_probs: np.ndarray, 
-        test_labels: Optional[np.ndarray] = None, 
+        self,
+        test_probs: np.ndarray,
+        test_labels: Optional[np.ndarray] = None,
         test_eligs: Optional[np.ndarray] = None,
-        cal_eligs: Optional[np.ndarray] = None, # optionally update cal eligibility
-        cal_conf_labels: Optional[np.ndarray] = None # optionally update cal conf labels
+        cal_eligs: Optional[np.ndarray] = None,  # optionally update cal eligibility
+        cal_conf_labels: Optional[np.ndarray] = None,  # optionally update cal conf labels
     ) -> dict:
         """Predict with overall eligibility (original behavior)."""
         m = test_probs.shape[0]
@@ -260,62 +239,61 @@ class StratifiedCP:
         # Default: all samples eligible
         if test_eligs is None:
             test_eligs = np.ones(m)
-        
+
         cal_eligs = np.ones(len(self.cal_labels_)) if cal_eligs is None else cal_eligs
 
         # Use dummy labels if not provided (for prediction only)
         if test_labels is None:
-            test_labels = np.zeros(m, dtype=int) 
+            test_labels = np.zeros(m, dtype=int)
 
         # Step 1: Compute selection scores (max probability = confidence)
         cal_sel_scores = np.max(self.cal_probs_, axis=1)
         test_sel_scores = np.max(test_probs, axis=1)
 
         # Selection labels: whether prediction is correct
-        cal_conf_labels = (self.cal_labels_ == np.argmax(self.cal_probs_, axis=1)).astype(int) if cal_conf_labels is None else cal_conf_labels
+        cal_conf_labels = (
+            (self.cal_labels_ == np.argmax(self.cal_probs_, axis=1)).astype(int)
+            if cal_conf_labels is None
+            else cal_conf_labels
+        )
 
         # Step 2: FDR-controlled selection
         sel_idx, unsel_idx, tau = get_sel_single(
-            cal_sel_scores, cal_conf_labels, test_sel_scores, self.alpha_sel, cal_eligs, test_eligs 
+            cal_sel_scores, cal_conf_labels, test_sel_scores, self.alpha_sel, cal_eligs, test_eligs
         )
 
         # Step 3: Compute nonconformity scores for test data
         if self.score_fn == "raps":
             _, test_scores = compute_score_raps(
-                self.cal_probs_, test_probs, self.cal_labels_,  lam_reg=self.lam_reg, nonempty=self.nonempty
+                self.cal_probs_, test_probs, self.cal_labels_, lam_reg=self.lam_reg, nonempty=self.nonempty
             )
         elif self.score_fn == "aps":
-            _, test_scores = compute_score_aps(
-                self.cal_probs_, test_probs, self.cal_labels_,  nonempty=self.nonempty
-            )
+            _, test_scores = compute_score_aps(self.cal_probs_, test_probs, self.cal_labels_, nonempty=self.nonempty)
         elif self.score_fn == "tps":
-            _, test_scores = compute_score_tps(
-                self.cal_probs_, test_probs, self.cal_labels_,  nonempty=self.nonempty
-            )
+            _, test_scores = compute_score_tps(self.cal_probs_, test_probs, self.cal_labels_, nonempty=self.nonempty)
         elif self.score_fn == "utility":
             _, test_scores = compute_score_utility(
                 self.cal_probs_,
                 test_probs,
-                self.cal_labels_, 
+                self.cal_labels_,
                 self.similarity_matrix,
                 method=self.utility_method,
                 nonempty=self.nonempty,
             )
 
-        # Initialize result containers 
-        pred_sets_unsel = np.zeros((0, self.n_classes_), dtype=bool)  
+        # Initialize result containers
+        pred_sets_unsel = np.zeros((0, self.n_classes_), dtype=bool)
 
         # Step 4: JOMI conformal prediction for unselected samples
         if len(unsel_idx) > 0:
             ref_mats = [np.ones((m, self.cal_probs_.shape[0])) for _ in range(self.n_classes_)]
 
-            if len(sel_idx) > 0: # unsel_idx != [m]
-    
+            if len(sel_idx) > 0:  # unsel_idx != [m]
                 # Compute reference sets
-                test_imputed_labels = np.zeros(test_probs.shape)  
+                test_imputed_labels = np.zeros(test_probs.shape)
                 # Impute test samples Conf(X, y) for every y class
                 for k in range(self.n_classes_):
-                    test_imputed_labels[:, k] = (np.argmax(test_probs, axis=1)==k).astype(int)
+                    test_imputed_labels[:, k] = (np.argmax(test_probs, axis=1) == k).astype(int)
 
                 ref_mats = get_reference_sel_single(
                     unsel_idx,
@@ -335,7 +313,7 @@ class StratifiedCP:
             pred_sets_unsel = conformal(
                 self.cal_scores_,
                 test_scores[unsel_idx],
-                self.cal_labels_, 
+                self.cal_labels_,
                 alpha=self.alpha_cp,
                 nonempty=self.nonempty,
                 if_in_ref=ref_mats,
@@ -355,9 +333,8 @@ class StratifiedCP:
             self.selected_indices_ = sel_idx
             self.unselected_indices_ = unsel_idx
             self.selection_threshold_ = tau
-            self.prediction_sets_unsel_ = np.zeros((0, self.n_classes_), dtype=bool) 
+            self.prediction_sets_unsel_ = np.zeros((0, self.n_classes_), dtype=bool)
             self.set_sizes_ = np.array([])
- 
 
         # Build results dictionary
         results = {
@@ -366,14 +343,17 @@ class StratifiedCP:
             "threshold": tau,
             "prediction_sets": self.prediction_sets_unsel_,
             "set_sizes": self.set_sizes_,
-        } 
+        }
 
         return results
 
     def _predict_per_class(
-        self, test_probs: np.ndarray, test_labels: Optional[np.ndarray] = None, test_eligs: Optional[np.ndarray] = None, # optionally specified test eligibility
-        cal_eligs: Optional[np.ndarray] = None, # optionally update cal eligibility
-        cal_conf_labels: Optional[np.ndarray] = None # optionally update cal conf labels
+        self,
+        test_probs: np.ndarray,
+        test_labels: Optional[np.ndarray] = None,
+        test_eligs: Optional[np.ndarray] = None,  # optionally specified test eligibility
+        cal_eligs: Optional[np.ndarray] = None,  # optionally update cal eligibility
+        cal_conf_labels: Optional[np.ndarray] = None,  # optionally update cal conf labels
     ) -> dict:
         """Predict with per-class eligibility."""
         m = test_probs.shape[0]
@@ -381,21 +361,21 @@ class StratifiedCP:
 
         # Use dummy labels if not provided
         if test_labels is None:
-            test_labels = np.zeros(m, dtype=int) 
+            test_labels = np.zeros(m, dtype=int)
 
         # Step 1: Setup eligibility matrices
         # Calibration eligibility: eligible if argmax == k if not provided
         cal_argmax = np.argmax(self.cal_probs_, axis=1)
-        if cal_eligs is None: 
+        if cal_eligs is None:
             cal_eligs = np.zeros((n, self.n_classes_))
             for k in range(self.n_classes_):
                 cal_eligs[:, k] = (cal_argmax == k).astype(int)
 
-        # Calibration labels: correct if true label == k == argmax 
+        # Calibration labels: correct if true label == k == argmax
         if cal_conf_labels is None:
-            cal_conf_labels = np.zeros((n, self.n_classes_)) 
+            cal_conf_labels = np.zeros((n, self.n_classes_))
             for k in range(self.n_classes_):
-                cal_conf_labels[:, k] = ( self.cal_labels_ == k ).astype(int)
+                cal_conf_labels[:, k] = (self.cal_labels_ == k).astype(int)
 
         # Test eligibility
         test_argmax = np.argmax(test_probs, axis=1)
@@ -416,18 +396,14 @@ class StratifiedCP:
                 self.cal_probs_, test_probs, self.cal_labels_, lam_reg=self.lam_reg, nonempty=self.nonempty
             )
         elif self.score_fn == "aps":
-            _, test_scores = compute_score_aps(
-                self.cal_probs_, test_probs, self.cal_labels_, nonempty=self.nonempty
-            )
+            _, test_scores = compute_score_aps(self.cal_probs_, test_probs, self.cal_labels_, nonempty=self.nonempty)
         elif self.score_fn == "tps":
-            _, test_scores = compute_score_tps(
-                self.cal_probs_, test_probs, self.cal_labels_, nonempty=self.nonempty
-            )
+            _, test_scores = compute_score_tps(self.cal_probs_, test_probs, self.cal_labels_, nonempty=self.nonempty)
         elif self.score_fn == "utility":
             _, test_scores = compute_score_utility(
                 self.cal_probs_,
                 test_probs,
-                self.cal_labels_, 
+                self.cal_labels_,
                 self.similarity_matrix,
                 method=self.utility_method,
                 nonempty=self.nonempty,
@@ -435,14 +411,14 @@ class StratifiedCP:
 
         # Step 4: JOMI conformal prediction for unselected samples (all_sel[K])
         # Unselected: samples not selected by any class
-        unsel_idx = all_sel[self.n_classes_]          # indices
+        unsel_idx = all_sel[self.n_classes_]  # indices
         unsel_mask = np.zeros(m, dtype=bool)
         if unsel_idx.size > 0:
             unsel_mask[unsel_idx] = True
-        ref_mats = [np.ones((m,n)) for _ in range(self.n_classes_)]
+        ref_mats = [np.ones((m, n)) for _ in range(self.n_classes_)]
 
         if unsel_mask.sum() > 0:
-            if unsel_mask.sum() < m: 
+            if unsel_mask.sum() < m:
                 # Prepare imputed labels for reference set computation
                 val_imputed_confs = []
                 for k in range(self.n_classes_):
@@ -461,32 +437,31 @@ class StratifiedCP:
                     val_imputed_confs,
                     self.alpha_sel,
                 )
-            
+
             for k in range(self.n_classes_):
-                ref_mats[k] = ref_mats[k][unsel_mask,:]
+                ref_mats[k] = ref_mats[k][unsel_mask, :]
 
             # JOMI conformal prediction for unselected
             pred_sets_unsel = conformal(
                 self.cal_scores_,
                 test_scores[unsel_mask],
-                self.cal_labels_, 
+                self.cal_labels_,
                 alpha=self.alpha_cp,
                 nonempty=self.nonempty,
                 if_in_ref=ref_mats,
                 test_max_id=np.argmax(test_probs[unsel_mask], axis=1),
                 rand=self.rand,
             )
-            sizes_unsel = np.sum(pred_sets_unsel, axis = 1)
+            sizes_unsel = np.sum(pred_sets_unsel, axis=1)
         else:
-            pred_sets_unsel = np.zeros((0, self.n_classes_), dtype=bool) 
+            pred_sets_unsel = np.zeros((0, self.n_classes_), dtype=bool)
             sizes_unsel = np.array([])
 
         # Store attributes
         self.all_selected_ = all_sel
         self.selection_thresholds_ = tau_list
-        self.prediction_sets_ = pred_sets_unsel 
-        self.set_sizes_ = sizes_unsel 
- 
+        self.prediction_sets_ = pred_sets_unsel
+        self.set_sizes_ = sizes_unsel
 
         # Build results dictionary
         results = {
@@ -494,16 +469,19 @@ class StratifiedCP:
             "thresholds": tau_list,
             "prediction_sets": pred_sets_unsel,
             "set_sizes": sizes_unsel,
-        } 
+        }
 
         return results
 
     def fit_predict(
-        self, cal_probs: np.ndarray, cal_labels: np.ndarray, test_probs: np.ndarray, 
+        self,
+        cal_probs: np.ndarray,
+        cal_labels: np.ndarray,
+        test_probs: np.ndarray,
         test_labels: Optional[np.ndarray] = None,
         test_eligs: Optional[np.ndarray] = None,
-        cal_eligs: Optional[np.ndarray] = None, # optionally updated calibration eligibility
-        cal_conf_labels: Optional[np.ndarray] = None #optionaly updated cal conf labels
+        cal_eligs: Optional[np.ndarray] = None,  # optionally updated calibration eligibility
+        cal_conf_labels: Optional[np.ndarray] = None,  # optionaly updated cal conf labels
     ) -> dict:
         """
         Fit and predict in one step.
@@ -523,11 +501,6 @@ class StratifiedCP:
         -------
         results : dict
             Prediction results (same as predict method)
-
-        Examples
-        --------
-        >>> scp = StratifiedCP(alpha_sel=0.1, alpha_cp=0.1)
-        >>> results = scp.fit_predict(cal_probs, cal_labels, test_probs, test_labels)
         """
         return self.fit(cal_probs, cal_labels).predict(test_probs, test_labels, test_eligs, cal_eligs, cal_conf_labels)
 
@@ -564,46 +537,41 @@ class StratifiedCP:
             "",
             "Selection Results:",
             f"  Total samples: {n_total}",
-            f"  Selected (high confidence): {n_sel} ({n_sel/n_total:.1%})",
-            f"  Unselected (low confidence): {n_unsel} ({n_unsel/n_total:.1%})",
+            f"  Selected (high confidence): {n_sel} ({n_sel / n_total:.1%})",
+            f"  Unselected (low confidence): {n_unsel} ({n_unsel / n_total:.1%})",
             f"  Selection threshold: {self.selection_threshold_:.3f}",
             "",
         ]
 
         # Prediction set sizes
-        if 'selected' in self.set_sizes_ and len(self.set_sizes_['selected']) > 0:
+        if "selected" in self.set_sizes_ and len(self.set_sizes_["selected"]) > 0:
             summary_lines.extend([
                 "Prediction Set Sizes:",
                 f"  Selected - Mean: {self.set_sizes_['selected'].mean():.2f}, "
                 f"Median: {np.median(self.set_sizes_['selected']):.0f}",
             ])
 
-        if 'unselected' in self.set_sizes_ and len(self.set_sizes_['unselected']) > 0:
+        if "unselected" in self.set_sizes_ and len(self.set_sizes_["unselected"]) > 0:
             summary_lines.append(
                 f"  Unselected - Mean: {self.set_sizes_['unselected'].mean():.2f}, "
                 f"Median: {np.median(self.set_sizes_['unselected']):.0f}"
             )
-        elif 'unselected' not in self.set_sizes_:
+        elif "unselected" not in self.set_sizes_:
             # Handle old format where set_sizes_ is just an array
             if isinstance(self.set_sizes_, np.ndarray) and len(self.set_sizes_) > 0:
                 summary_lines.extend([
                     "Prediction Set Sizes (unselected):",
-                    f"  Mean: {self.set_sizes_.mean():.2f}, "
-                    f"Median: {np.median(self.set_sizes_):.0f}"
+                    f"  Mean: {self.set_sizes_.mean():.2f}, Median: {np.median(self.set_sizes_):.0f}",
                 ])
 
         # Coverage if available
         if self.coverage_ is not None:
             summary_lines.append("")
             summary_lines.append("Coverage (empirical):")
-            if 'selected' in self.coverage_ and len(self.coverage_['selected']) > 0:
-                summary_lines.append(
-                    f"  Selected: {self.coverage_['selected'].mean():.2%}"
-                )
-            if 'unselected' in self.coverage_ and len(self.coverage_['unselected']) > 0:
-                summary_lines.append(
-                    f"  Unselected: {self.coverage_['unselected'].mean():.2%}"
-                )
+            if "selected" in self.coverage_ and len(self.coverage_["selected"]) > 0:
+                summary_lines.append(f"  Selected: {self.coverage_['selected'].mean():.2%}")
+            if "unselected" in self.coverage_ and len(self.coverage_["unselected"]) > 0:
+                summary_lines.append(f"  Unselected: {self.coverage_['unselected'].mean():.2%}")
                 summary_lines.append(
                     f"  Overall: {np.concatenate([self.coverage_['selected'], self.coverage_['unselected']]).mean():.2%}"
                 )
@@ -617,7 +585,7 @@ class StratifiedCP:
             return "Model fitted but no predictions made yet. Call predict() first."
 
         n_total = 0
-        for k in range(1+self.n_classes_):
+        for k in range(1 + self.n_classes_):
             n_total += len(self.all_selected_[k])
 
         summary_lines = [
@@ -639,9 +607,7 @@ class StratifiedCP:
             n_sel_k = len(self.all_selected_[k])
             threshold_k = self.selection_thresholds_[k] if self.selection_thresholds_ is not None else None
 
-            summary_lines.append(
-                f"  Class {k}: {n_sel_k} selected ({n_sel_k/n_total:.1%})"
-            )
+            summary_lines.append(f"  Class {k}: {n_sel_k} selected ({n_sel_k / n_total:.1%})")
             if threshold_k is not None:
                 summary_lines.append(f"    Threshold: {threshold_k:.3f}")
 
@@ -649,29 +615,27 @@ class StratifiedCP:
         n_unsel = len(self.all_selected_[self.n_classes_])
         summary_lines.extend([
             "",
-            f"  Unselected (not selected by any class): {n_unsel} ({n_unsel/n_total:.1%})",
+            f"  Unselected (not selected by any class): {n_unsel} ({n_unsel / n_total:.1%})",
             "",
         ])
 
         # Prediction set sizes for unselected
-        if 'unselected' in self.set_sizes_ and len(self.set_sizes_['unselected']) > 0:
+        if "unselected" in self.set_sizes_ and len(self.set_sizes_["unselected"]) > 0:
             summary_lines.extend([
                 "Prediction Set Sizes (unselected only):",
-                f"  Mean: {self.set_sizes_.mean():.2f}, "
-                f"Median: {np.median(self.set_sizes_):.0f}",
+                f"  Mean: {self.set_sizes_.mean():.2f}, Median: {np.median(self.set_sizes_):.0f}",
             ])
         elif isinstance(self.set_sizes_, np.ndarray) and len(self.set_sizes_) > 0:
             # Handle case where set_sizes_ is just an array
             summary_lines.extend([
                 "Prediction Set Sizes (unselected only):",
-                f"  Mean: {self.set_sizes_.mean():.2f}, "
-                f"Median: {np.median(self.set_sizes_):.0f}",
+                f"  Mean: {self.set_sizes_.mean():.2f}, Median: {np.median(self.set_sizes_):.0f}",
             ])
 
         # Coverage for unselected if available
         if self.coverage_ is not None:
             summary_lines.append("")
-            if 'unselected' in self.coverage_ and len(self.coverage_['unselected']) > 0:
+            if "unselected" in self.coverage_ and len(self.coverage_["unselected"]) > 0:
                 summary_lines.extend([
                     "Coverage (empirical, unselected only):",
                     f"  {self.coverage_['unselected'].mean():.2%}",

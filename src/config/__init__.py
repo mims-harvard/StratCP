@@ -30,7 +30,7 @@ class _YamlConfigSettingsSource(PydanticBaseSettingsSource):
 
     def _read_config_file(self, encoding: str | None) -> dict[str, Any]:
         if self._config_path is None:
-            raise ValueError("Config path not set")  # noqa: TRY003
+            raise ValueError("Config path not set")
 
         with open(self._config_path, encoding=encoding) as f:
             return yaml.safe_load(f) or {}

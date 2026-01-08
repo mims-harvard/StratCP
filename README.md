@@ -1,9 +1,8 @@
 # StratCP: Error controlled decisions for safe use of medical foundation models
 
 [![Release](https://img.shields.io/github/v/release/mims-harvard/stratcp)](https://img.shields.io/github/v/release/mims-harvard/stratcp)
-[![Build status](https://img.shields.io/github/actions/workflow/status/mims-harvard/stratcp/main.yml?branch=main)](https://github.com/mims-harvard/stratcp/actions/workflows/main.yml?query=branch%3Amain)
 [![License](https://img.shields.io/github/license/mims-harvard/stratcp)](https://img.shields.io/github/license/mims-harvard/stratcp)
- 
+
 Foundation models show promise in medicine, but clinical use requires outputs that clinicians can act on under pre-specified error budgets, such as a cap on false-positive clinical calls. Without error control, strong average accuracy can still lead to harmful errors among the very cases labeled confident and to inefficient use of follow-up testing.
 
 Here we introduce StratCP, a stratified conformal framework that turns foundation-model predictions into decision-ready outputs by combining selective action with calibrated deferral. StratCP first selects a subset of patients for immediate clinical calls while controlling the false discovery rate among those calls at a user-chosen level. It then returns calibrated prediction sets for deferred patients that meet the target error rate and guide confirmatory evaluation. The procedure is model agnostic and can be applied to pretrained foundation models without retraining.
@@ -37,9 +36,9 @@ make install
 ### 🚀 Simple 1-2 Line Usage
 
 Below we show a use case in multi-class classification where we:
-- FDR-controlled selection of high-confidence predictions, whose argmax equals unknown true label 
-- Conformal prediction sets for unselected, low-confident cases with 90% coverage 
- 
+- FDR-controlled selection of high-confidence predictions, whose argmax equals unknown true label
+- Conformal prediction sets for unselected, low-confident cases with 90% coverage
+
 
 ```python
 import numpy as np
@@ -53,6 +52,8 @@ test_probs = np.random.dirichlet(np.ones(K), size=m)
 test_labels = np.array([np.random.choice(K, p=test_probs[i]) for i in range(m)])
 
 # One-line usage: fit and predict
+# Goal: select confident predictions with FDR <= alpha_sel, 
+#       for unselected units, construct prediction sets with coverage >= 1-alpha_cp
 model = scp.StratifiedCP(alpha_sel=0.1, alpha_cp=0.1)
 results = model.fit_predict(cal_probs, cal_labels, test_probs, test_labels)
 
@@ -64,9 +65,11 @@ print(f"Avg set size (unselected): {results['set_sizes'].mean():.2f}")
 print(model.summary())
 ```
 
+
+
 You can also perform per-class selection where we:
-- FDR-controlled selection of high-confidence predictions for every class of argmax prediction, whose argmax equals unknown true label  
-- Conformal prediction sets for unselected, low-confident cases with 90% coverage 
+- FDR-controlled selection of high-confidence predictions for every class of argmax prediction, whose argmax equals unknown true label
+- Conformal prediction sets for unselected, low-confident cases with 90% coverage
 
 by simply adding the argument `eligibility = 'per_class'`.
 
@@ -80,6 +83,12 @@ results = model.fit_predict(cal_probs, cal_labels, test_probs, test_labels)
 # Print detailed summary
 print(model.summary())
 ```
+
+The `results` object contains:
+- `all_selected`, a list that contains confident indices selected for each class, followed by indices unselected by any class (low-confidence).
+- `thresholds`, a list of per-class selection thresholds.
+- `prediction_sets`, boolean array of shape `(n_unselected, n_class)` for unselected samples only (those in `all_selected[K]`).
+- `set_sizes`, sizes of each prediction set in `prediction_sets`.
 
 ### 🧬 Utility-Aware CP with Label Similarity
 
@@ -121,7 +130,7 @@ print(f"Average pairwise similarity: {overall_sim:.3f}")
 - More coherent prediction sets (similar classes grouped together)
 - Better interpretability for domain experts
 - Maintains valid coverage guarantees
-<!-- 
+<!--
 ### 📦 Import Patterns
 
 All key functions are available from the top-level `stratcp` package:
@@ -153,7 +162,7 @@ from stratcp.metrics import size_cond_cov, label_cond_cov
 
 ### 📊 Advanced Usage (Lower-Level API)
 
-You can also use lower-level functions for more bespoke use cases. Let's say you want to select confident predictions according to K criteria, where 
+You can also use lower-level functions for more bespoke use cases. Let's say you want to select confident predictions according to K criteria, where
 - $I_k(x,y)=1$ means the desired $k$-th criterion (confident prediction) is satisfied
 - $G_k(x)$ means the sample is eligble to be selected for $k$-th criterion (optional)
 - $f_k(x,y)$ is a predicted score for the $k$-th criterion
@@ -166,27 +175,27 @@ import stratcp as scp
 
 # Step 1: FDR-controlled selection
 sel_idx, unsel_idx, tau = scp.get_sel_single(
-    cal_conf_scores=cal_confidence,      # Calibration confidence scores (n,) 
-    cal_conf_labels=cal_conf_labels,     # Binary labels (n,) for correctness/confidence 
-    test_conf_scores=test_confidence,    # Test confidence scores (m,)  
+    cal_conf_scores=cal_confidence,      # Calibration confidence scores (n,)
+    cal_conf_labels=cal_conf_labels,     # Binary labels (n,) for correctness/confidence
+    test_conf_scores=test_confidence,    # Test confidence scores (m,)
     alpha=0.1                       # FDR level (10%)
 )
 
-# Step 2: Compute (your own) nonconformity scores 
+# Step 2: Compute (your own) nonconformity scores
 cal_conformal_scores, test_conformal_scores = scp.compute_score_raps(
     cal_probs, test_probs, cal_labels
-) 
+)
 
 # Step 3: JOMI conformal prediction for unselected samples
 # This reference mats can be plugged into your own score functions
 ref_mats = scp.get_reference_sel_single(
-    unsel_idx, 
+    unsel_idx,
     cal_conf_labels = cal_conf_labels, # Binary labels (n,) for correctness/confidence
     cal_conf_scores = cal_confidence,
     test_conf_scores = test_confidence,
     test_imputed_conf_labels = test_imputed_labels, # Imputed test confidence labels L(X_n+j, y) for all labels y (m, nclass)
     alpha=0.1
-) 
+)
 
 # obtain conformal prediction sets
 pred_sets_unsel = scp.conformal(
@@ -210,9 +219,9 @@ print(f"Unselected: {len(unsel_idx)} samples with avg set size {sizes_unsel.mean
 import stratcp as scp
 
 sel_idx, unsel_idx, tau = scp.get_sel_single(
-    cal_conf_scores=cal_confidence,      # Calibration confidence scores (n,) 
-    cal_conf_labels=cal_conf_labels,     # Binary labels (n,) for correctness/confidence 
-    test_conf_scores=test_confidence,    # Test confidence scores (m,)  
+    cal_conf_scores=cal_confidence,      # Calibration confidence scores (n,)
+    cal_conf_labels=cal_conf_labels,     # Binary labels (n,) for correctness/confidence
+    test_conf_scores=test_confidence,    # Test confidence scores (m,)
     alpha=0.1                            # FDR level
 )
 ```
@@ -224,10 +233,10 @@ import stratcp as scp
 all_sel, tau_list = scp.get_sel_multiple(
     cal_scores=cal_confidence,      # Calibration confidence scores (n,) for K criteria
     cal_labels=cal_conf_labels,     # Binary labels (n,K) for correctness/confidence I_k
-    test_scores=test_confidence,    # Test confidence scores (m,K) for K criteria 
+    test_scores=test_confidence,    # Test confidence scores (m,K) for K criteria
     cal_eligs=cal_eligible,         # Eligibility indicators (n,K) for K criteria
     test_eligs=test_eligible,       # Test eligibility indicators (m,K) for K criteria
-    alpha=0.1                       # FDR level (10%) 
+    alpha=0.1                       # FDR level (10%)
 )
 ```
 
@@ -248,7 +257,7 @@ sel_idx, unsel_idx, tau = scp.get_sel_survival(
 import stratcp as scp
 
 # Standard scores
-cal_scores, test_scores = scp.compute_score_aps(cal_probs, test_probs, cal_labels) 
+cal_scores, test_scores = scp.compute_score_aps(cal_probs, test_probs, cal_labels)
 ```
 
 **Utility-Aware Scores** - Leverage label similarity for coherent sets:
@@ -257,8 +266,8 @@ import stratcp as scp
 
 # Compute utility-aware scores
 cal_scores, test_scores = scp.compute_score_utility(
-    cal_probs, test_probs, cal_labels, similarity_matrix 
-) 
+    cal_probs, test_probs, cal_labels, similarity_matrix
+)
 # Evaluate prediction set coherence
 avg_sim, overall_sim = scp.eval_similarity(prediction_sets, similarity_matrix)
 ```
@@ -274,7 +283,7 @@ pred_sets = scp.conformal(
 
 # With selection (JOMI CP)
 pred_sets = scp.conformal(
-    cal_scores, test_scores, cal_labels,  
+    cal_scores, test_scores, cal_labels,
     alpha=0.1, if_in_ref=reference_sets  # Use JOMI reference sets
 )
 ```
@@ -289,12 +298,12 @@ import stratcp as scp
 cond_cov, cond_freq = scp.size_cond_cov(pred_set, test_labels)
 
 # Coverage by true label
-label_cov, label_freq = scp.label_cond_cov(pred_set, test_labels)  
+label_cov, label_freq = scp.label_cond_cov(pred_set, test_labels)
 ```
 
 ## Use Cases
 
-Our framework allows diverse use cases based on the stratCP principle. 
+Our framework allows diverse use cases based on the stratCP principle.
 
 **Medical Diagnosis**.  Stratify patients based on model confidence:
 - **High confidence**: Make precise diagnoses (argmax = true label)
@@ -314,7 +323,7 @@ Our framework allows diverse use cases based on the stratCP principle.
 - **Usage Guide**: See [USAGE_SUMMARY.md](USAGE_SUMMARY.md) for comprehensive examples
 - **Example Scripts**:
   - `examples/simple_usage.py` - Basic usage patterns
-  - `examples/utility_aware_cp.py` - Utility-aware CP with similarity matrices 
+  - `examples/utility_aware_cp.py` - Utility-aware CP with similarity matrices
 
 ## Reproduction scripts
 
@@ -326,6 +335,16 @@ Scripts for reproducing the results in the paper are in `reproduction_code/` wit
 We store these files in the `data/` folder. The summarized results will be saved in the same folder by default.
 
 ### Retinal disease diagnosis tasks
+
+Across all ophthalmology tasks, we follow the RetFound foundation model [[Zhou et al., 2023](https://www.nature.com/articles/s41586-023-06555-x)] using the provided model checkpoints and data splits available [here](https://github.com/rmaphoh/RETFound/blob/main/BENCHMARK.md). Given model predictions (per-class probabilities for classification tasks), we apply **StratCP** to the task-specific scores:
+1. **Action arm.** Select a confident subset under an expert-specified FDR budget (that is, the incorrect predictions among selected).
+2. **Deferral arm.** For the remaining (less confident) cases, construct conformal prediction sets with finite-sample coverage guarantees, adjusting for the distribution shift due to the selection in the action arm. 
+
+The experiments in the paper can be reproduced with the following scripts:
+- `reproduction_code/retfound_tasks/diabetic_retinpacy.py` for the DR diagnosis task.
+- `reproduction_code/retfound_tasks/glaucoma.py` for the Glaucoma diagnosis task.
+- `reproduction_code/retfound_tasks/jsiec_action.py` for the eye condition detection task, with utility enhancement. 
+
 
 ### Neuro-oncology tasks
 
@@ -347,7 +366,12 @@ The main entry points for reproducing neuro-oncology experiments are:
 - `he_time_to_mortaility_pred.py` – H\&E time-to-mortality prediction.
 - `he_diagnosis_in_atdg.py` – H\&E-only diagnosis in adult-type diffuse glioma (ATDG).
 
-> **TBA.** A short guide to interpreting StratCP outputs (selection rates, FDR, coverage, and prediction set sizes) will be added here.
+**Interpreting StratCP outputs (quick guide)**
+
+- **Selection rate**: fraction of test samples selected for immediate action. In `eligibility="overall"`, compute `len(results["selected_idx"]) / m`. In `eligibility="per_class"`, use the per-class counts in `results["all_selected"]` and the unselected set in `results["all_selected"][K]`.
+- **FDR (action arm)**: controlled at `alpha_sel` by construction on the selected set. Empirical FDR can be estimated if true labels are available by checking the selected predictions that are incorrect.
+- **Coverage (deferral arm)**: prediction sets for unselected samples target `1 - alpha_cp` coverage. With labels, compute the fraction of unselected samples whose true label is inside `results["prediction_sets"]`.
+- **Prediction set sizes**: `results["set_sizes"]` summarizes uncertainty for unselected samples; smaller sets indicate higher confidence.
 
 ## Datasets and data access for reproduction
 
@@ -379,9 +403,8 @@ If you use StratCP in your research, please cite:
   year={2024}
 }
 ```
- 
+
 
 
 ## Support
 This project is licensed under the [MIT License](LICENSE). For questions and issues, please either open an issue on [GitHub](https://github.com/mims-harvard/stratcp/issues) or contact `yjinstat@wharton.upenn.edu`.
- 

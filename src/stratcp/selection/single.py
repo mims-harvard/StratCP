@@ -1,11 +1,12 @@
 """
-Single property selection with FDR control 
+Single property selection with FDR control
 
 This module implements selection procedures for identifying test samples where a binary
 property L==1 can be confidently claimed, controlling the False Discovery Rate (FDR).
 """
 
 from typing import Optional
+
 import numpy as np
 import pandas as pd
 
@@ -56,14 +57,12 @@ def get_sel_single(
     m_e = int(np.sum(test_eligs))
 
     # Combine calibration and test data for ranking
-    df = pd.DataFrame(
-        {
-            "mu": np.concatenate([cal_scores[cal_eligs == 1], test_scores[test_eligs == 1]]),
-            "L": np.concatenate([cal_labels[cal_eligs == 1], np.zeros(m_e)]),
-            "if_test": np.concatenate([np.zeros(n_e), np.ones(m_e)]),
-            "id": range(n_e + m_e),
-        }
-    ).sort_values(by="mu", ascending=False)
+    df = pd.DataFrame({
+        "mu": np.concatenate([cal_scores[cal_eligs == 1], test_scores[test_eligs == 1]]),
+        "L": np.concatenate([cal_labels[cal_eligs == 1], np.zeros(m_e)]),
+        "if_test": np.concatenate([np.zeros(n_e), np.ones(m_e)]),
+        "id": range(n_e + m_e),
+    }).sort_values(by="mu", ascending=False)
 
     # Compute FDR estimate for each threshold
     df["RR"] = (
@@ -155,14 +154,12 @@ def get_reference_sel_single(
     for j in unsel_idx:
         if test_eligs[j] == 1:
             # Case: test sample j is eligible
-            df = pd.DataFrame(
-                {
-                    "mu": np.concatenate([cal_conf_scores[cal_eligs == 1], test_conf_scores[test_eligs == 1]]),
-                    "L": np.concatenate([cal_conf_labels[cal_eligs == 1], np.zeros(m_e)]),
-                    "if_test": np.concatenate([np.zeros(n_e), np.ones(m_e)]),
-                    "id": range(n_e + m_e),
-                }
-            ).sort_values(by="mu", ascending=False)
+            df = pd.DataFrame({
+                "mu": np.concatenate([cal_conf_scores[cal_eligs == 1], test_conf_scores[test_eligs == 1]]),
+                "L": np.concatenate([cal_conf_labels[cal_eligs == 1], np.zeros(m_e)]),
+                "if_test": np.concatenate([np.zeros(n_e), np.ones(m_e)]),
+                "id": range(n_e + m_e),
+            }).sort_values(by="mu", ascending=False)
 
             # Compute FDR estimates for different swap scenarios
             df["R11"] = (
@@ -213,14 +210,12 @@ def get_reference_sel_single(
 
         if test_eligs[j] == 0:
             # Case: test sample j is not eligible
-            df = pd.DataFrame(
-                {
-                    "mu": np.concatenate([cal_conf_scores[cal_eligs == 1], test_conf_scores[test_eligs == 1]]),
-                    "L": np.concatenate([cal_conf_labels[cal_eligs == 1], np.zeros(m_e)]),
-                    "if_test": np.concatenate([np.zeros(n_e), np.ones(m_e)]),
-                    "id": range(n_e + m_e),
-                }
-            ).sort_values(by="mu", ascending=False)
+            df = pd.DataFrame({
+                "mu": np.concatenate([cal_conf_scores[cal_eligs == 1], test_conf_scores[test_eligs == 1]]),
+                "L": np.concatenate([cal_conf_labels[cal_eligs == 1], np.zeros(m_e)]),
+                "if_test": np.concatenate([np.zeros(n_e), np.ones(m_e)]),
+                "id": range(n_e + m_e),
+            }).sort_values(by="mu", ascending=False)
 
             df["R1"] = (
                 (1 + np.cumsum((1 - df["if_test"]) * (df["L"] == 0)))
@@ -247,4 +242,3 @@ def get_reference_sel_single(
                 ref_mats[y][j, (cal_eligs == 1) & (cal_conf_labels == 0) & (cal_conf_scores < tau_0)] = 1
 
     return ref_mats
-
