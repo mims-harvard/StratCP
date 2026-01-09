@@ -396,11 +396,11 @@ For TCGA LGG & GBM H\&E slides, no additional special approval is required beyon
 If you use StratCP in your research, please cite:
 
 ```bibtex
-@article{stratcp2024,
-  title={Stratified Conformal Prediction for Post-Selection Inference},
-  author={Your Name and Collaborators},
-  journal={Journal Name},
-  year={2024}
+@article{stratcp2026,
+  title={TBA},
+  author={TBA},
+  journal={Journal TBA},
+  year={2026}
 }
 ```
 
