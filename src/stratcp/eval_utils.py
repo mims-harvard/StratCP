@@ -22,8 +22,7 @@ Note:
 import os
 import pickle
 from collections import defaultdict
-from collections.abc import Iterable, Mapping, Sequence
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Iterable, Mapping, Sequence
 
 import numpy as np
 import pandas as pd
@@ -39,138 +38,103 @@ from stratcp.conformal.scores import (
 from stratcp.stratified import StratifiedCP
 
 
-def evaluate_top1(preds: np.ndarray, labels: np.ndarray) -> Dict[str, float]:
-    """Compute baseline Top-1 metrics for binary classification (legacy).
-
-    This older helper assumes **binary** labels {0, 1} and computes:
-    - Overall accuracy (marginal coverage).
-    - Class-conditional coverage, conditional on predicted class being 0 or 1.
-    - Counts of predictions for each class.
-    - Dummy fields for "unselected" metrics (not applicable for Top-1).
-
-    Args:
-        preds:
-            Predicted binary labels of shape ``(n_samples,)``.
-        labels:
-            Ground-truth binary labels of shape ``(n_samples,)``.
-
-    Returns:
-        Dict[str, float]:
-            {
-                "mgn_cov": float,
-                "mgn_size": 1.0,
-                "coverage_cls_one_sel": float,
-                "coverage_cls_zero_sel": float,
-                "num_sel_cls_one": int,
-                "num_sel_cls_zero": int,
-                "unselected_coverage": np.nan,
-                "unselected_set_size": np.nan,
-                "num_unsel": np.nan,
-            }
-
-    Notes:
-        This function is superseded by the later, multiclass-aware `evaluate_top1`
-        but is retained here for backward compatibility and reference.
-    """
-    # Marginal metrics (overall accuracy and singleton set size).
-    mgn_cov = float(np.mean(preds == labels))
-    mgn_size = 1.0  # Top-1 implies singleton sets
-
-    # Conditional metrics for class 1 predictions.
-    mask_one = preds == 1
-    n_one = int(mask_one.sum())
-    cls_cond_cov_one = float(np.mean(labels[mask_one] == 1)) if n_one > 0 else 1.0
-
-    # Conditional metrics for class 0 predictions.
-    mask_zero = preds == 0
-    n_zero = int(mask_zero.sum())
-    cls_cond_cov_zero = float(np.mean(labels[mask_zero] == 0)) if n_zero > 0 else 1.0
-
-    # Aggregate results; non-applicable fields set to NaN for consistency.
-    return dict(
-        mgn_cov=mgn_cov,
-        mgn_size=mgn_size,
-        coverage_cls_one_sel=cls_cond_cov_one,
-        coverage_cls_zero_sel=cls_cond_cov_zero,
-        num_sel_cls_one=n_one,
-        num_sel_cls_zero=n_zero,
-        unselected_coverage=np.nan,
-        unselected_set_size=np.nan,
-        num_unsel=np.nan,
-    )
-
-
 def evaluate_naive_cumulative(
     probs: np.ndarray,
     labels: np.ndarray,
     alpha: float,
-    *,
     return_per_class_metrics: bool = False,
     classes: Optional[Iterable[int]] = None,
     empty_policy: str = "nan",
 ) -> Dict[str, Any]:
-    """Build naive cumulative prediction sets and compute multiclass metrics.
+    """Evaluate naive cumulative multiclass prediction sets and compute coverage/size metrics.
 
-    For each sample, classes are sorted by descending probability and included
-    in the prediction set until the cumulative probability first exceeds
-    ``1 - alpha``.
+    This baseline constructs a prediction set S_i for each sample i by sorting classes in
+    descending probability and taking the smallest prefix whose cumulative mass reaches
+    at least (1 - alpha).
+
+    Metric definitions (exact computations):
+        Let S_i ⊆ {0, ..., K-1} be the prediction set for sample i, and y_i be its label.
+
+        - row_cov[i] = 1{ y_i ∈ S_i }.
+        - row_size[i] = |S_i|.
+
+        - mgn_cov = (1/n) * Σ_i row_cov[i]
+            = empirical marginal coverage over all samples.
+
+        - mgn_size = (1/n) * Σ_i row_size[i]
+            = average prediction set size over all samples.
+
+        Selection rule (for "selected_*" metrics when return_per_class_metrics=False):
+            selected := { i : |S_i| = 1 }  (singleton prediction sets only)
+
+        - selected_coverage = mean(row_cov[i] for i with |S_i|=1)
+            = (1/|Sel|) * Σ_{i∈Sel} 1{ y_i ∈ S_i }.
+            Since |S_i|=1 for selected i, this is identical to Top-1 accuracy restricted
+            to the subset of singleton-set samples, but computed via membership.
+
+        - selected_set_size = mean(row_size[i] for i with |S_i|=1)
+            = 1.0 when at least one singleton exists; otherwise nan.
+
+        - num_sel = |Sel|
+            = number of singleton prediction sets.
+
+        Per-class singleton precision metrics (when return_per_class_metrics=True):
+            For selected samples (|S_i|=1), define p_i as the unique class in S_i.
+
+        - num_sel_by_class[k] = #{ i : |S_i|=1 and p_i = k }.
+
+        - coverage_by_pred_class[k] = P(y=k | singleton pred=k) estimated by
+              mean( 1{ y_i = k } over i with |S_i|=1 and p_i=k )
+            If num_sel_by_class[k] == 0, the value is set by empty_policy.
 
     Args:
         probs:
-            Array of shape ``(n_samples, n_classes)`` with class probabilities
-            (or logits).
+            Array of shape (n_samples, n_classes) with class probabilities (or logits).
+            This function treats the values as scores for ranking; if they are logits,
+            behavior corresponds to ranking by logit and cum-summing logits (which is
+            usually not meaningful). In practice, pass probabilities.
         labels:
-            Array of shape ``(n_samples,)`` with integer ground-truth class indices.
+            Array of shape (n_samples,) with integer ground-truth class indices.
         alpha:
-            Miscoverage level in ``[0, 1]``; target coverage is approximately
-            ``1 - alpha``.
+            Miscoverage level in [0, 1]; target coverage is approximately 1 - alpha.
         return_per_class_metrics:
-            If ``True``, return:
-                - aggregate metrics (mgn_cov, mgn_size), and
-                - per-class singleton metrics:
-                    * coverage_by_pred_class: P(y=k | singleton pred=k)
-                    * num_sel_by_class: # singleton predictions with class k.
-            If ``False`` (default), return aggregate + “unselected” metrics:
-                - unselected_coverage, unselected_set_size, num_unsel.
+            If True, return per-class singleton precision + singleton counts.
+            If False, return selected_coverage where selected := singleton prediction sets.
         classes:
-            Optional iterable of class IDs to include in per-class metrics. If
-            ``None``, the union of *singleton* predicted classes and all labels
-            is used.
+            Optional iterable of class IDs to include in per-class metrics. If None, uses
+            the union of singleton predicted classes and all labels.
         empty_policy:
-            Value for per-class coverage when no singleton predictions are made
-            for a class. One of:
-                * ``"one"``  → 1.0 (vacuous truth),
-                * ``"nan"``  → ``np.nan``,
-                * ``"zero"`` → 0.0.
+            Value for per-class coverage when no singleton predictions are made for a class:
+                - "one"  -> 1.0 (vacuous truth)
+                - "nan"  -> np.nan
+                - "zero" -> 0.0
 
     Returns:
         Dict[str, Any]:
-
-        If ``return_per_class_metrics=True``:
-            {
-                "mgn_cov": float,
-                "mgn_size": float,
-                "coverage_by_pred_class": Dict[int, float],
-                "num_sel_by_class": Dict[int, int],
-            }
-
-        Otherwise:
-            {
-                "mgn_cov": float,
-                "mgn_size": float,
-                "unselected_coverage": float | np.nan,
-                "unselected_set_size": float | np.nan,
-                "num_unsel": int,
-            }
+            If return_per_class_metrics=True:
+                {
+                    "mgn_cov": float,
+                    "mgn_size": float,
+                    "coverage_by_pred_class": Dict[int, float],
+                    "num_sel_by_class": Dict[int, int],
+                }
+            Otherwise:
+                {
+                    "mgn_cov": float,
+                    "mgn_size": float,
+                    "selected_coverage": float|np.nan,
+                    "selected_set_size": float|np.nan,
+                    "num_sel": int,
+                }
 
     Raises:
         ValueError:
-            If shapes are inconsistent, alpha is out of range, or
-            ``empty_policy`` is invalid.
+            If shapes are inconsistent, alpha is out of range, or empty_policy is invalid.
     """
     # Validate inputs
     probs = np.asarray(probs)
     labels = np.asarray(labels).reshape(-1)
+
     if probs.ndim != 2:
         raise ValueError("probs must be 2D with shape (n_samples, n_classes).")
     if labels.ndim != 1 or labels.shape[0] != probs.shape[0]:
@@ -181,36 +145,40 @@ def evaluate_naive_cumulative(
         raise ValueError("alpha must be in [0, 1].")
     thr = 1.0 - float(alpha)
 
-    # Sort classes per sample and compute cumulative sums (descending prob order)
+    # Build naive cumulative prediction sets
+    # Sort classes by descending probability per sample.
     sorted_idx = np.argsort(probs, axis=1)[:, ::-1]  # (n, K)
     sorted_probs = np.take_along_axis(probs, sorted_idx, axis=1)  # (n, K)
+
+    # Cumulative probability mass in the sorted order.
     cum = np.cumsum(sorted_probs, axis=1)  # (n, K)
 
-    # Determine minimal cut position k_i such that cum[i, k_i] >= 1 - alpha
-    # Use searchsorted on each row’s cumulative sums (vectorized with broadcasting)
-    # k_pos[i] = smallest j with cum[i, j] >= thr
+    # Minimal cut position k_i such that cum[i, k_i] >= (1 - alpha).
+    # k_pos[i] is the first index where cum >= thr.
     k_pos = np.sum(cum < thr, axis=1)  # (n,)
 
-    # Build binary prediction-set matrix: include all sorted positions <= k_pos[i]
-    # mask_sorted[i, j] = 1{ j <= k_pos[i] }
-    mask_sorted = np.arange(K)[None, :] <= k_pos[:, None]
+    # Include all positions <= k_pos[i] in the sorted order, then scatter back.
+    mask_sorted = np.arange(K)[None, :] <= k_pos[:, None]  # (n, K) boolean
     pred_set = np.zeros_like(probs, dtype=np.uint8)  # (n, K)
-    pred_set[np.arange(n)[:, None], sorted_idx] = mask_sorted  # scatter mask back to class space
+    pred_set[np.arange(n)[:, None], sorted_idx] = mask_sorted.astype(np.uint8)
 
-    # Coverage and set sizes
-    row_cov = pred_set[np.arange(n), labels].astype(float)  # 1 if y_i in set_i
-    row_size = pred_set.sum(axis=1).astype(float)  # |set_i|
+    # Compute per-sample coverage and set size
+    row_cov = pred_set[np.arange(n), labels].astype(float)  # 1{y_i in S_i}
+    row_size = pred_set.sum(axis=1).astype(float)           # |S_i|
 
+    # Marginal (across-all-samples) metrics
     mgn_cov = float(row_cov.mean())
     mgn_size = float(row_size.mean())
 
-    # If per-class metrics requested: compute among singleton prediction sets
+    # Selected := singleton prediction sets
+    singleton_mask = row_size == 1
+
+    # Per-class singleton precision metrics
     if return_per_class_metrics:
-        # Classes with singleton sets only
-        singleton_mask = row_size == 1
         if singleton_mask.any():
-            preds_single = np.argmax(pred_set[singleton_mask], axis=1)  # predicted class for singleton sets
-            labels_single = labels[singleton_mask]
+            # For singleton sets, the argmax of the binary set indicator is the unique class.
+            preds_single = np.argmax(pred_set[singleton_mask], axis=1).astype(int)  # p_i
+            labels_single = labels[singleton_mask].astype(int)                      # y_i
         else:
             preds_single = np.array([], dtype=int)
             labels_single = np.array([], dtype=int)
@@ -218,7 +186,7 @@ def evaluate_naive_cumulative(
         # Class inventory to report
         if classes is None:
             if preds_single.size > 0 or labels.size > 0:
-                classes_arr = np.unique(np.concatenate([preds_single, labels]))
+                classes_arr = np.unique(np.concatenate([preds_single, labels.astype(int)]))
             else:
                 classes_arr = np.array([], dtype=int)
         else:
@@ -238,11 +206,14 @@ def evaluate_naive_cumulative(
         num_sel_by_class: Dict[int, int] = {}
 
         for k in classes_arr:
-            mask_k = preds_single == k
+            # Selected samples whose singleton prediction is class k
+            mask_k = preds_single == int(k)
             n_k = int(mask_k.sum())
             num_sel_by_class[int(k)] = n_k
+
+            # Precision among those samples: mean(1{y_i=k})
             if n_k > 0:
-                coverage_by_pred_class[int(k)] = float(np.mean(labels_single[mask_k] == k))
+                coverage_by_pred_class[int(k)] = float(np.mean(labels_single[mask_k] == int(k)))
             else:
                 coverage_by_pred_class[int(k)] = float(empty_val) if not np.isnan(empty_val) else np.nan
 
@@ -253,23 +224,173 @@ def evaluate_naive_cumulative(
             num_sel_by_class=num_sel_by_class,
         )
 
-    # Otherwise, return baseline-oriented “unselected” metrics (non-singletons)
-    unselected_mask = row_size > 1
-    if unselected_mask.any():
-        unselected_coverage = float(row_cov[unselected_mask].mean())
-        unselected_set_size = float(row_size[unselected_mask].mean())
-        num_unsel = int(unselected_mask.sum())
+    # Selected metrics (singleton sets only)
+    if singleton_mask.any():
+        selected_coverage = float(row_cov[singleton_mask].mean())
+        selected_set_size = float(row_size[singleton_mask].mean())  # == 1.0
+        num_unsel = int((~singleton_mask).sum())
     else:
-        unselected_coverage = np.nan
-        unselected_set_size = np.nan
+        selected_coverage = np.nan
+        selected_set_size = np.nan
         num_unsel = 0
 
     return dict(
         mgn_cov=mgn_cov,
         mgn_size=mgn_size,
-        unselected_coverage=unselected_coverage,
-        unselected_set_size=unselected_set_size,
+        selected_coverage=selected_coverage,
+        selected_set_size=selected_set_size,
         num_unsel=num_unsel,
+    )
+
+
+def evaluate_top1(
+    preds: np.ndarray,
+    labels: np.ndarray,
+    classes: Optional[Iterable[int]] = None,
+    empty_policy: str = "nan",
+    return_per_class_metrics: bool = False,
+) -> Dict[str, Any]:
+    """Evaluate Top-1 multiclass predictions and compute accuracy (and optional per-class precision).
+
+    Metric definitions (exact computations):
+        Let \hat{y}_i be the Top-1 prediction (argmax over classes) and y_i the true label.
+
+        - mgn_cov = (1/n) * Σ_i 1{ \hat{y}_i = y_i }
+            = empirical Top-1 accuracy across all samples.
+
+        - mgn_size = 1.0
+            = Top-1 prediction sets are always singletons.
+
+        Selection rule (for "selected_*" metrics when return_per_class_metrics=False):
+            selected := all samples
+
+        - selected_coverage = mean( 1{ \hat{y}_i = y_i } over all samples )
+            = mgn_cov (identical by definition).
+
+        - selected_set_size = 1.0
+
+        - num_sel = n
+
+        Per-class precision metrics (when return_per_class_metrics=True):
+        For each class k:
+
+        - num_sel_by_class[k] = #{ i : \hat{y}_i = k }.
+
+        - coverage_by_pred_class[k] = P(y=k | \hat{y}=k) estimated by
+              mean( 1{ y_i = k } over i with \hat{y}_i = k )
+            If num_sel_by_class[k] == 0, the value is set by empty_policy.
+
+    Args:
+        preds:
+            Either:
+                - (n,) array of integer predicted class IDs, or
+                - (n, K) array of class probabilities/logits (argmax is used).
+        labels:
+            (n,) array of integer ground-truth labels.
+        classes:
+            Optional iterable of class IDs to report. If None, uses the union of predicted
+            and true labels.
+        empty_policy:
+            How to score per-class precision when no samples are predicted as a class:
+                - "one"  -> 1.0 (vacuous truth)
+                - "nan"  -> np.nan
+                - "zero" -> 0.0
+        return_per_class_metrics:
+            If True, include per-class precision/count dictionaries.
+            If False, also return selected_coverage (selected := all samples).
+
+    Returns:
+        Dict[str, Any]:
+            If return_per_class_metrics=True:
+                {
+                    "mgn_cov": float,                         # Top-1 accuracy
+                    "mgn_size": float,                        # 1.0
+                    "coverage_by_pred_class": Dict[int, float],  # P(y=k | pred=k)
+                    "num_sel_by_class": Dict[int, int],          # # predicted as k
+                }
+            Otherwise:
+                {
+                    "mgn_cov": float,                         # Top-1 accuracy
+                    "mgn_size": float,                        # 1.0
+                    "selected_coverage": float,               # equals mgn_cov
+                    "selected_set_size": float,               # 1.0
+                    "num_sel": int,                           # n
+                }
+
+    Raises:
+        ValueError:
+            If input shapes are inconsistent or empty_policy is invalid.
+    """
+    # Coerce inputs and validate
+    preds = np.asarray(preds)
+    labels = np.asarray(labels).reshape(-1)
+
+    # Convert (n, K) probabilities/logits -> (n,) predicted class indices
+    if preds.ndim == 2:
+        pred_idx = np.argmax(preds, axis=1).astype(int)
+    elif preds.ndim == 1:
+        pred_idx = preds.astype(int)
+    else:
+        raise ValueError("preds must be either (n,) predicted class indices or (n, K) probabilities/logits.")
+
+    if pred_idx.shape[0] != labels.shape[0]:
+        raise ValueError("preds and labels must have the same number of samples.")
+
+    n = int(labels.shape[0])
+
+    # Global Top-1 metrics
+    # mgn_cov := mean(1{pred_i == y_i})
+    mgn_cov = float(np.mean(pred_idx == labels))
+
+    # mgn_size := 1 always for Top-1
+    mgn_size = 1.0
+
+    # Selected := all instances for Top-1
+    selected_coverage = mgn_cov
+    num_sel = n
+
+    # Per-class metrics (precision by predicted class)
+    if classes is None:
+        classes_arr = np.unique(np.concatenate([pred_idx, labels.astype(int)]))
+    else:
+        classes_arr = np.array(list(classes), dtype=int)
+
+    if empty_policy == "one":
+        empty_val = 1.0
+    elif empty_policy == "nan":
+        empty_val = np.nan
+    elif empty_policy == "zero":
+        empty_val = 0.0
+    else:
+        raise ValueError("empty_policy must be one of {'one','nan','zero'}")
+
+    coverage_by_pred_class: Dict[int, float] = {}
+    num_sel_by_class: Dict[int, int] = {}
+
+    for k in classes_arr:
+        mask_k = pred_idx == int(k)
+        n_k = int(mask_k.sum())
+        num_sel_by_class[int(k)] = n_k
+
+        # precision for class k: mean(1{y_i=k} among i with pred_i=k)
+        if n_k > 0:
+            coverage_by_pred_class[int(k)] = float(np.mean(labels[mask_k] == int(k)))
+        else:
+            coverage_by_pred_class[int(k)] = float(empty_val) if not np.isnan(empty_val) else np.nan
+
+    if return_per_class_metrics:
+        return dict(
+            mgn_cov=mgn_cov,
+            mgn_size=mgn_size,
+            coverage_by_pred_class=coverage_by_pred_class,
+            num_sel_by_class=num_sel_by_class,
+        )
+
+    return dict(
+        mgn_cov=mgn_cov,
+        mgn_size=mgn_size,
+        selected_coverage=selected_coverage,
+        num_sel=num_sel,
     )
 
 
@@ -332,40 +453,48 @@ def aggregate_conformal_results(
 ) -> Tuple[dict, dict | None]:
     """Aggregate conformal-prediction results across splits.
 
-    Expects a nested mapping:
+    Supports two input nestings:
+
+    (A) One-level (common in your prints):
+        {split_id: {method_name: DataFrame}}
+
+    (B) Two-level:
         {split_id: {group: {method_name: DataFrame}}}
-    where each DataFrame is indexed by alpha (α) and contains metric columns.
+
+    Each DataFrame is indexed by alpha (α) and contains metric columns.
+    Some columns (e.g., ``grade_range_consistency``) may be dict-valued (object dtype).
+    These dict-valued columns are aggregated per α by aggregating values per dict key.
 
     Args:
         split_to_conformal_results:
-            Nested results per split in the form
-            ``{split_id: {group: {method_name: DataFrame}}}``.
+            Results per split.
         method:
-            Aggregation statistic across splits: one of ``"mean"`` or ``"median"``.
+            Aggregation statistic across splits: ``"mean"`` or ``"median"``.
         splits_to_include:
-            Optional subset of split IDs to aggregate. If ``None``, all keys of
-            ``split_to_conformal_results`` are used.
+            Optional subset of split IDs to aggregate. If ``None``, aggregate all splits.
         alpha_range:
-            Optional ``(min_alpha, max_alpha)`` to filter rows by α before
-            aggregation (inclusive on both ends).
+            Optional ``(min_alpha, max_alpha)`` to filter rows by α before aggregation
+            (inclusive on both ends).
 
     Returns:
-        Tuple[dict, dict | None]:
-            (agg_dict, se_dict), where:
+        (agg_dict, se_dict):
+            agg_dict has same nesting as input, but with one aggregated DataFrame per
+            (method_name) or (group, method_name).
 
-            * agg_dict:
-                Same nesting as input but with a single aggregated DataFrame per
-                (group, method_name).
-            * se_dict:
-                Same nesting with standard-error DataFrames when ``method="mean"``,
-                otherwise ``None``.
+            se_dict is returned only when method == "mean"; it mirrors agg_dict and
+            contains standard-error DataFrames (including dict-valued SE dicts for dict columns).
 
     Raises:
         ValueError:
             If ``method`` is not one of ``{"mean", "median"}``.
     """
+    if method not in {"mean", "median"}:
+        raise ValueError(f"Unsupported aggregation method: {method}")
+
     if splits_to_include is None:
         splits_to_include = list(split_to_conformal_results.keys())
+    if len(splits_to_include) == 0:
+        return {}, {} if method == "mean" else None
 
     # Helper to slice an α-range.
     def _clip(df: pd.DataFrame) -> pd.DataFrame:
@@ -374,34 +503,179 @@ def aggregate_conformal_results(
         lo, hi = alpha_range
         return df[(df.index >= lo) & (df.index <= hi)]
 
-    agg_dict, se_dict = {}, {} if method == "mean" else None
+    def _is_dict_col(s: pd.Series) -> bool:
+        # Look at a small sample of non-null values to detect dict payloads.
+        non_null = s.dropna()
+        if non_null.empty:
+            return False
+        sample = non_null.head(25)
+        return any(isinstance(x, dict) for x in sample)
 
-    # We assume every split has the same groups/methods structure.
-    template_split = splits_to_include[0]
-    for group in split_to_conformal_results[template_split]:
-        agg_dict[group] = {}
-        if method == "mean":
-            se_dict[group] = {}
+    def _agg_dicts(dicts: list[dict], stat: str) -> dict:
+        """Aggregate a list of dicts by key -> stat(values)."""
+        if len(dicts) == 0:
+            return {}
 
-        for method_name in split_to_conformal_results[template_split][group]:
-            # Collect DataFrames for the requested splits.
-            dfs = [_clip(split_to_conformal_results[split][group][method_name]) for split in splits_to_include]
-            cat = pd.concat(dfs)  # Stack rows; α remains the index.
+        keys = set()
+        for d in dicts:
+            keys.update(d.keys())
 
-            if method == "mean":
-                # Mean across splits at each α.
-                agg_df = cat.groupby(level=0).mean()
-                # SE = sample std / sqrt(n_splits) with unbiased std (ddof=1).
-                se_df = cat.groupby(level=0).apply(lambda x: x.std(ddof=1) / np.sqrt(len(dfs)))
-                agg_dict[group][method_name] = agg_df
-                se_dict[group][method_name] = se_df
-
-            elif method == "median":
-                agg_df = cat.groupby(level=0).median()
-                agg_dict[group][method_name] = agg_df
-
+        out: dict = {}
+        for k in keys:
+            vals = []
+            for d in dicts:
+                if k in d and d[k] is not None and not (isinstance(d[k], float) and np.isnan(d[k])):
+                    vals.append(float(d[k]))
+            if len(vals) == 0:
+                out[k] = np.nan
             else:
-                raise ValueError(f"Unsupported aggregation method: {method}")
+                out[k] = float(np.mean(vals)) if stat == "mean" else float(np.median(vals))
+        return out
+
+    def _se_dicts(dicts: list[dict]) -> dict:
+        """SE per key: std(ddof=1)/sqrt(n) across dict values."""
+        if len(dicts) == 0:
+            return {}
+
+        keys = set()
+        for d in dicts:
+            keys.update(d.keys())
+
+        out: dict = {}
+        for k in keys:
+            vals = []
+            for d in dicts:
+                if k in d and d[k] is not None and not (isinstance(d[k], float) and np.isnan(d[k])):
+                    vals.append(float(d[k]))
+            n = len(vals)
+            if n < 2:
+                out[k] = np.nan
+            else:
+                out[k] = float(np.std(vals, ddof=1) / np.sqrt(n))
+        return out
+
+    def _aggregate_df_list(dfs: list[pd.DataFrame]) -> tuple[pd.DataFrame, pd.DataFrame | None]:
+        """Aggregate a list of conformal metric DataFrames indexed by α."""
+        # Clip and outer-align columns.
+        dfs = [_clip(df.copy()) for df in dfs]
+        cat = pd.concat(dfs, axis=0, sort=True)  # stacks rows; α stays the index
+
+        # Identify dict-valued columns.
+        dict_cols = [c for c in cat.columns if _is_dict_col(cat[c])]
+
+        # Numeric columns: everything else; coerce to numeric where possible.
+        numeric_cols = [c for c in cat.columns if c not in dict_cols]
+
+        # Pre-coerce numeric part to numeric (object -> float) safely.
+        cat_num = cat[numeric_cols].apply(pd.to_numeric, errors="coerce") if numeric_cols else pd.DataFrame(index=cat.index)
+
+        # Aggregate per α.
+        alphas = sorted(cat.index.unique())
+        agg_rows: list[dict[str, Any]] = []
+        se_rows: list[dict[str, Any]] = []
+
+        for a in alphas:
+            row_num = cat_num.loc[a]
+            if isinstance(row_num, pd.Series):
+                row_num = row_num.to_frame().T  # single row
+
+            # mean/median over rows at this α (across splits)
+            if method == "mean":
+                agg_num = row_num.mean(axis=0, skipna=True)
+            else:
+                agg_num = row_num.median(axis=0, skipna=True)
+
+            out_row: dict[str, Any] = {col: agg_num.get(col, np.nan) for col in numeric_cols}
+
+            # Dict-valued aggregation
+            for col in dict_cols:
+                sub = cat.loc[a]
+                if isinstance(sub, pd.Series):
+                    # If only one row at this α, cat.loc[a] might be a Series of columns
+                    # (this happens when there's only one split). Normalize.
+                    sub = sub.to_frame().T
+
+                dict_list = [x for x in sub[col].dropna().tolist() if isinstance(x, dict)]
+                out_row[col] = _agg_dicts(dict_list, stat=method)
+
+            agg_rows.append(out_row)
+
+            # Standard errors only for mean aggregation
+            if method == "mean":
+                se_row: dict[str, Any] = {}
+                # numeric SE per column: std/sqrt(n) using available (non-nan) entries
+                for col in numeric_cols:
+                    vals = row_num[col].dropna().values
+                    n = len(vals)
+                    if n < 2:
+                        se_row[col] = np.nan
+                    else:
+                        se_row[col] = float(np.std(vals, ddof=1) / np.sqrt(n))
+
+                # dict SE per key
+                for col in dict_cols:
+                    sub = cat.loc[a]
+                    if isinstance(sub, pd.Series):
+                        sub = sub.to_frame().T
+                    dict_list = [x for x in sub[col].dropna().tolist() if isinstance(x, dict)]
+                    se_row[col] = _se_dicts(dict_list)
+
+                se_rows.append(se_row)
+
+        agg_df = pd.DataFrame(agg_rows, index=pd.Index(alphas, name=cat.index.name))
+        if method == "mean":
+            se_df = pd.DataFrame(se_rows, index=pd.Index(alphas, name=cat.index.name))
+        else:
+            se_df = None
+
+        return agg_df, se_df
+
+    # Detect whether input is one-level or two-level nesting
+    template_split = splits_to_include[0]
+    template_obj = split_to_conformal_results[template_split]
+
+    is_one_level = isinstance(template_obj, dict) and all(
+        isinstance(v, pd.DataFrame) for v in template_obj.values()
+    )
+
+    agg_dict: dict = {}
+    se_dict: dict | None = {} if method == "mean" else None
+
+    if is_one_level:
+        # {split: {method_name: DataFrame}}
+        for method_name in template_obj.keys():
+            dfs = [
+                split_to_conformal_results[split][method_name]
+                for split in splits_to_include
+                if method_name in split_to_conformal_results[split]
+            ]
+            if len(dfs) == 0:
+                continue
+            agg_df, se_df = _aggregate_df_list(dfs)
+            agg_dict[method_name] = agg_df
+            if method == "mean" and se_dict is not None:
+                se_dict[method_name] = se_df
+
+    else:
+        # {split: {group: {method_name: DataFrame}}}
+        for group in split_to_conformal_results[template_split]:
+            agg_dict[group] = {}
+            if method == "mean" and se_dict is not None:
+                se_dict[group] = {}
+
+            for method_name in split_to_conformal_results[template_split][group]:
+                dfs = [
+                    split_to_conformal_results[split][group][method_name]
+                    for split in splits_to_include
+                    if group in split_to_conformal_results[split]
+                    and method_name in split_to_conformal_results[split][group]
+                ]
+                if len(dfs) == 0:
+                    continue
+                agg_df, se_df = _aggregate_df_list(dfs)
+                agg_dict[group][method_name] = agg_df
+                if method == "mean" and se_dict is not None:
+                    se_dict[group][method_name] = se_df
 
     return agg_dict, se_dict
 
@@ -494,31 +768,36 @@ def summarize_methods_at_alpha(
 ) -> pd.DataFrame:
     """Summarize specified metrics at a fixed alpha for each (source, method).
 
-    Each source is given as:
-        (source_label, aggr_results, se_results)
+    Special handling:
+        If ``"grade_range_consistency"`` is requested in ``metrics``, this
+        function expects ``aggr_results[method]["grade_range_consistency"]`` to be a
+        dict-valued Series/DataFrame indexed by α (as produced by your updated
+        ``aggregate_conformal_results``).
 
-    where:
-        * aggr_results[method_name][metric_name] is a Series/DataFrame indexed by α
-        * se_results has the same structure, containing standard-error estimates.
+        It will expand the dict at the selected α into one column per bin:
+            ``grade_range_consistency_<lo>_<hi>``
+        e.g., ``grade_range_consistency_2_4``.
+
+        If ``include_se=True`` and SE data are available, it will also expand
+        the SE dict into:
+            ``grade_range_consistency_<lo>_<hi>_se``
+
+        IMPORTANT: This function does *not* include a scalar ``grade_range_consistency``
+        column, and it does *not* include ``grade_range_consistency_overall``.
 
     Args:
         summary_sources:
-            Iterable of ``(source_label, aggr_results, se_results)`` tuples,
-            typically for:
-                - baselines
-                - vanilla CP
-                - Stratified CP.
+            Iterable of ``(source_label, aggr_results, se_results)`` tuples.
         alpha:
             Target alpha at which to extract metrics.
         metrics:
-            Iterable of metric names to extract (e.g., ``"mgn_cov"``,
-            ``"mgn_size"``, ``"num_sel_cls_1"``, etc.).
+            Iterable of metric names to extract.
         methods:
-            Optional subset of methods to include. If ``None``, methods are
-            inferred per source from its ``aggr_results``.
+            Optional subset of methods to include. If ``None``, methods are inferred
+            per source from its ``aggr_results``.
         include_se:
             If ``True``, append columns with suffix ``"_se"`` when SE data
-            are available.
+            are available (including bin-wise SE for grade_range_consistency).
         nearest:
             If ``True``, select the nearest alpha within ``atol`` if an exact
             alpha is not present in the index.
@@ -527,15 +806,7 @@ def summarize_methods_at_alpha(
 
     Returns:
         pd.DataFrame:
-            A tidy DataFrame with one row per (source, method), containing:
-
-            - identifier columns:
-                * ``source``
-                * ``method``
-                * ``alpha_requested``
-                * ``alpha_selected``
-            - one column per requested metric (if found)
-            - optional ``<metric>_se`` columns when ``include_se`` is True.
+            One row per (source, method), with identifier columns plus metric columns.
 
     Notes:
         - Rows are included only when at least one requested metric was found
@@ -544,14 +815,30 @@ def summarize_methods_at_alpha(
           (``num_sel_cls_one``, ``num_sel_cls_zero``, ``num_unsel``) exist,
           ``num_total`` is derived as their sum.
     """
+    def _as_float_or_nan(x: Any) -> float:
+        try:
+            if x is None or (isinstance(x, float) and np.isnan(x)):
+                return np.nan
+            return float(x)
+        except Exception:
+            return np.nan
+
+    def _extract_grade_consistency_dict(row: pd.Series) -> Dict[tuple, float] | None:
+        """Given a picked alpha row (Series), extract the dict payload if present."""
+        payload = None
+        if "grade_range_consistency" in row.index:
+            payload = row["grade_range_consistency"]
+        else:
+            payload = row.iloc[0] if len(row) > 0 else None
+
+        return payload if isinstance(payload, dict) else None
+
     rows: list[Dict[str, Any]] = []
 
     for source_label, aggr_results, se_results in summary_sources:
-        # Determine which methods to use for this specific source.
         source_methods = list(methods) if methods is not None else list(aggr_results.keys())
 
         for mname in source_methods:
-            # Skip methods not present in this source.
             if mname not in aggr_results:
                 continue
 
@@ -566,34 +853,92 @@ def summarize_methods_at_alpha(
             found_any_metric = False
 
             for metric in metrics:
+                # Special case: grade_range_consistency -> expand bins only
+                if metric == "grade_range_consistency":
+                    d_main: Dict[tuple, float] | None = None
+
+                    obj = aggr_results[mname].get("grade_range_consistency", None)
+                    if obj is not None:
+                        df_main = _ensure_df(obj, default_metric="grade_range_consistency")
+                        row = _pick_alpha_row(df_main, alpha, nearest=nearest, atol=atol)
+                        if row is not None:
+                            found_any_metric = True
+                            if not alpha_selected_set:
+                                rec["alpha_selected"] = float(row.name)
+                                alpha_selected_set = True
+
+                            d_main = _extract_grade_consistency_dict(row)
+                            if d_main is not None:
+                                for k, v in d_main.items():
+                                    if isinstance(k, tuple) and len(k) == 2:
+                                        lo, hi = k
+                                        col = f"grade_range_consistency_{lo}_{hi}"
+                                        rec[col] = _as_float_or_nan(v)
+
+                    # Bin-wise SE expansion (if available)
+                    if include_se and se_results is not None and mname in se_results:
+                        obj_se = se_results[mname].get("grade_range_consistency", None)
+                        if obj_se is not None:
+                            df_se = _ensure_df(obj_se, default_metric="grade_range_consistency")
+
+                            se_row = None
+                            # Prefer exact alpha_selected if we already picked it from main.
+                            if alpha_selected_set and not pd.isna(rec["alpha_selected"]):
+                                se_row = _pick_alpha_row(
+                                    df_se, float(rec["alpha_selected"]), nearest=False, atol=0.0
+                                )
+                            if se_row is None:
+                                se_row = _pick_alpha_row(df_se, alpha, nearest=nearest, atol=atol)
+
+                            if se_row is not None:
+                                d_se = _extract_grade_consistency_dict(se_row)
+                                if d_se is not None:
+                                    for k, v in d_se.items():
+                                        if isinstance(k, tuple) and len(k) == 2:
+                                            lo, hi = k
+                                            col = f"grade_range_consistency_{lo}_{hi}"
+                                            rec[f"{col}_se"] = _as_float_or_nan(v)
+
+                    # Ensure SE columns exist (NaN) for bins present in main but missing in se.
+                    if include_se and d_main is not None:
+                        for k in d_main.keys():
+                            if isinstance(k, tuple) and len(k) == 2:
+                                lo, hi = k
+                                col = f"grade_range_consistency_{lo}_{hi}"
+                                rec.setdefault(f"{col}_se", np.nan)
+
+                    # IMPORTANT: do NOT set rec["grade_range_consistency"] or rec["grade_range_consistency_se"]
+                    continue
+
+                # Default behavior for scalar/Series/DataFrame metrics
                 val = np.nan
                 val_se = np.nan
 
-                # Main metric value at/near alpha.
                 obj = aggr_results[mname].get(metric, None)
                 if obj is not None:
                     df_main = _ensure_df(obj, default_metric=metric)
                     row = _pick_alpha_row(df_main, alpha, nearest=nearest, atol=atol)
                     if row is not None:
                         found_any_metric = True
-                        # Prefer named column if present; otherwise take first column.
                         val = row[metric] if metric in row.index else row.iloc[0]
                         if not alpha_selected_set:
                             rec["alpha_selected"] = float(row.name)
                             alpha_selected_set = True
                 rec[metric] = val
 
-                # Standard error (optional).
                 if include_se and se_results is not None and mname in se_results:
                     obj_se = se_results[mname].get(metric, None)
                     if obj_se is not None:
                         df_se = _ensure_df(obj_se, default_metric=f"{metric}_se")
-                        # Prefer exact 'alpha_selected' once it's set.
+
                         se_row = None
                         if alpha_selected_set and not pd.isna(rec["alpha_selected"]):
-                            se_row = _pick_alpha_row(df_se, float(rec["alpha_selected"]), nearest=False, atol=0.0)
+                            se_row = _pick_alpha_row(
+                                df_se, float(rec["alpha_selected"]), nearest=False, atol=0.0
+                            )
                         if se_row is None:
                             se_row = _pick_alpha_row(df_se, alpha, nearest=nearest, atol=atol)
+
                         if se_row is not None:
                             if f"{metric}_se" in se_row.index:
                                 val_se = se_row[f"{metric}_se"]
@@ -601,6 +946,7 @@ def summarize_methods_at_alpha(
                                 val_se = se_row[metric]
                             else:
                                 val_se = se_row.iloc[0]
+
                 if include_se:
                     rec[f"{metric}_se"] = val_se
 
@@ -614,22 +960,47 @@ def summarize_methods_at_alpha(
                 if not any(pd.isna(p) for p in parts):
                     rec["num_total"] = float(parts[0]) + float(parts[1]) + float(parts[2])
 
-            # Append only if at least one metric was found for this (source, method).
             if found_any_metric:
                 rows.append(rec)
 
     out = pd.DataFrame.from_records(rows)
-    if not out.empty:
-        # Order columns: identifiers, then metrics with their _se right after each.
-        ordered = ["source", "method", "alpha_requested", "alpha_selected"]
-        for metric in metrics:
-            if metric in out.columns:
-                ordered.append(metric)
-            se_col = f"{metric}_se"
-            if se_col in out.columns:
-                ordered.append(se_col)
-        leftover = [c for c in out.columns if c not in ordered]
-        out = out[ordered + leftover].sort_values(["method", "source"]).reset_index(drop=True)
+    if out.empty:
+        return out
+
+    # Column ordering
+    ordered = ["source", "method", "alpha_requested", "alpha_selected"]
+
+    def _bin_key(c: str) -> tuple[int, int]:
+        # c like "grade_range_consistency_2_4"
+        parts = c.split("_")
+        try:
+            lo = int(parts[-2])
+            hi = int(parts[-1])
+            return (lo, hi)
+        except Exception:
+            return (10**9, 10**9)
+
+    for metric in metrics:
+        if metric == "grade_range_consistency":
+            # Include bin columns and their SE columns, but not the raw metric name.
+            bin_cols = [c for c in out.columns if c.startswith("grade_range_consistency_") and not c.endswith("_se")]
+            bin_cols_sorted = sorted(bin_cols, key=_bin_key)
+            for c in bin_cols_sorted:
+                if c not in ordered:
+                    ordered.append(c)
+                se_c = f"{c}_se"
+                if include_se and se_c in out.columns and se_c not in ordered:
+                    ordered.append(se_c)
+            continue
+
+        if metric in out.columns:
+            ordered.append(metric)
+        se_col = f"{metric}_se"
+        if include_se and se_col in out.columns:
+            ordered.append(se_col)
+
+    leftover = [c for c in out.columns if c not in ordered]
+    out = out[ordered + leftover].sort_values(["method", "source"]).reset_index(drop=True)
     return out
 
 
@@ -793,134 +1164,6 @@ def extract_split_arrays(
     )
 
 
-def evaluate_top1(
-    preds: np.ndarray,
-    labels: np.ndarray,
-    classes: Optional[Iterable[int]] = None,
-    empty_policy: str = "nan",
-    return_per_class_metrics: bool = False,
-) -> Dict[str, Any]:
-    """Compute Top-1 multiclass mecompute_baselines_for_splittrics.
-
-    This is the **multiclass** version of Top-1 evaluation and shadows the
-    earlier binary-only function with the same name.
-
-    It supports two modes controlled by ``return_per_class_metrics``:
-
-    - If ``True``:
-        * overall Top-1 accuracy (mgn_cov),
-        * average set size (always 1.0),
-        * per-class Top-1 precision (coverage_by_pred_class),
-        * per-class selection counts (num_sel_by_class).
-
-    - If ``False``:
-        * only overall Top-1 metrics (mgn_cov, mgn_size).
-
-    Args:
-        preds:
-            Either:
-                * (n,) array of integer predicted class IDs, or
-                * (n, K) array of class probabilities/logits (argmax is used).
-        labels:
-            (n,) array of integer ground-truth labels.
-        classes:
-            Optional iterable of class IDs to report. If ``None``, uses the
-            union of predicted and true labels.
-        empty_policy:
-            How to score coverage when no samples are predicted as a class:
-                * ``"one"``  → 1.0 (vacuous truth),
-                * ``"nan"``  → ``np.nan``,
-                * ``"zero"`` → 0.0.
-        return_per_class_metrics:
-            If ``True``, include per-class precision/count dictionaries in the
-            returned dict; otherwise only global metrics.
-
-    Returns:
-        Dict[str, Any]:
-            If ``return_per_class_metrics=True``:
-                {
-                    "mgn_cov": float,
-                    "mgn_size": float,
-                    "coverage_by_pred_class": Dict[int, float],
-                    "num_sel_by_class": Dict[int, int],
-                }
-            else:
-                {
-                    "mgn_cov": float,
-                    "mgn_size": float,
-                }
-
-    Raises:
-        ValueError:
-            If input shapes are inconsistent or ``empty_policy`` is invalid.
-    """
-    # Coerce inputs and validate
-    preds = np.asarray(preds)
-    labels = np.asarray(labels).reshape(-1)
-
-    # Convert (n, K) probabilities/logits -> (n,) Top-1 class indices.
-    if preds.ndim == 2:
-        pred_idx = np.argmax(preds, axis=1)
-    elif preds.ndim == 1:
-        pred_idx = preds.astype(int)
-    else:
-        raise ValueError("preds must be either (n,) predicted class indices or (n, K) probabilities/logits.")
-
-    if pred_idx.shape[0] != labels.shape[0]:
-        raise ValueError("preds and labels must have the same number of samples.")
-
-    n = labels.shape[0]
-
-    # Determine class inventory to report
-    if classes is None:
-        classes_arr = np.unique(np.concatenate([pred_idx, labels]))
-    else:
-        classes_arr = np.array(list(classes), dtype=int)
-
-    # Global Top-1 metrics
-    mgn_cov = float(np.mean(pred_idx == labels))
-    mgn_size = 1.0
-
-    # Policy for classes with no predicted samples
-    if empty_policy == "one":
-        empty_val = 1.0
-    elif empty_policy == "nan":
-        empty_val = np.nan
-    elif empty_policy == "zero":
-        empty_val = 0.0
-    else:
-        raise ValueError("empty_policy must be one of {'one','nan','zero'}")
-
-    # Per-class aggregates
-    coverage_by_pred_class: Dict[int, float] = {}
-    num_sel_by_class: Dict[int, int] = {}
-
-    for k in classes_arr:
-        mask_k = pred_idx == k
-        n_k = int(mask_k.sum())
-        num_sel_by_class[int(k)] = n_k
-
-        if n_k > 0:
-            coverage_by_pred_class[int(k)] = float(np.mean(labels[mask_k] == k))
-        else:
-            coverage_by_pred_class[int(k)] = float(empty_val) if not np.isnan(empty_val) else np.nan
-
-    if return_per_class_metrics:
-        return_dict = dict(
-            mgn_cov=mgn_cov,
-            mgn_size=mgn_size,
-            coverage_by_pred_class=coverage_by_pred_class,
-            num_sel_by_class=num_sel_by_class,
-        )
-    else:
-        return_dict = dict(
-            mgn_cov=mgn_cov,
-            mgn_size=mgn_size,
-        )
-
-    return return_dict
-
-
 def compute_baselines_for_split(
     alphas: np.ndarray,
     test_probs: np.ndarray,
@@ -1011,6 +1254,8 @@ def compute_baselines_for_split(
         row: Dict[str, Any] = {
             "mgn_cov": float(top1.get("mgn_cov", np.nan)),
             "mgn_size": float(top1.get("mgn_size", np.nan)),
+            "selected_coverage": float(top1.get("selected_coverage", np.nan)),
+            "selected_set_size": float(top1.get("selected_set_size", np.nan)),
             "unselected_coverage": np.nan,  # Not applicable for Top-1
             "unselected_set_size": np.nan,  # Not applicable for Top-1
             "num_unsel": np.nan,  # Not applicable for Top-1
@@ -1035,6 +1280,8 @@ def compute_baselines_for_split(
         row: Dict[str, Any] = {
             "mgn_cov": float(agg.get("mgn_cov", np.nan)),
             "mgn_size": float(agg.get("mgn_size", np.nan)),
+            "selected_coverage": float(agg.get("selected_coverage", np.nan)),
+            "selected_set_size": float(agg.get("selected_set_size", np.nan)),
             "unselected_coverage": float(agg.get("unselected_coverage", np.nan)),
             "unselected_set_size": float(agg.get("unselected_set_size", np.nan)),
             "num_unsel": float(agg.get("num_unsel", np.nan)),
@@ -1054,6 +1301,8 @@ def compute_baselines_for_split(
     base_cols: List[str] = [
         "mgn_cov",
         "mgn_size",
+        "selected_coverage",
+        "selected_set_size",
         "unselected_coverage",
         "unselected_set_size",
         "num_unsel",
@@ -1080,7 +1329,6 @@ def compute_baselines_for_split(
     for a in tqdm.tqdm(alphas, desc=pbar_desc):
         thresh_rows.append(_row_thresh(a, n_test))
     thresh_df = pd.DataFrame(thresh_rows, index=alphas)[col_order]
-
     return {"top1": top1_df, "thresh": thresh_df}
 
 
@@ -1092,6 +1340,9 @@ def run_vanilla_cp_for_split(
     test_labels: np.ndarray,
     methods: Sequence[str],
     return_per_class_metrics: bool = False,
+    grade_consist_eval: bool = False,
+    grade_map: Dict[Any, List[int]] | None = None,
+    size_bins: List[Tuple[int, int]] | None = None,
     pbar_desc: str = "Vanilla CP",
 ) -> Dict[str, pd.DataFrame]:
     """Run vanilla conformal prediction (APS/TPS/RAPS) for one split.
@@ -1124,6 +1375,16 @@ def run_vanilla_cp_for_split(
             If ``True``, add per-class singleton coverage/count columns:
                 * coverage_cls_<k>_sel
                 * num_sel_cls_<k>.
+        grade_consist_eval:
+            If ``True``, compute grade-range consistency on the unselected
+            cohort and attach it to each row as a dict under
+            'grade_range_consistency'.
+        grade_map:
+            Mapping ``grade -> [class ids]`` used for grade-range consistency
+            evaluation. Required if ``grade_consist_eval=True``.
+        size_bins:
+            List of ``(min_size, max_size)`` tuples defining size bins for
+            grade-range consistency evaluation. If ``None``, no binning is done.
         pbar_desc:
             Description string used by tqdm for the α-loop.
 
@@ -1200,12 +1461,43 @@ def run_vanilla_cp_for_split(
         "num_unsel",
         "num_total",
     ]
+    if grade_consist_eval:
+        base_cols.append("grade_range_consistency")
+
     if return_per_class_metrics:
         per_class_cov_cols = [f"coverage_cls_{c}_sel" for c in range(n_classes - 1, -1, -1)]
         per_class_num_cols = [f"num_sel_cls_{c}" for c in range(n_classes - 1, -1, -1)]
         col_order = base_cols + per_class_cov_cols + per_class_num_cols
     else:
         col_order = base_cols
+    
+    def _attach_grade_consistency(
+        row: Dict[str, Any],
+        pred_sets_unsel: np.ndarray,
+        unselected_mask: np.ndarray,
+    ) -> None:
+        """
+        If grade-consistent analysis is enabled, compute grade-range consistency
+        on the *unselected* cohort and attach it to the row as a dict under
+        'grade_range_consistency'. Keys are size-bin tuples; values are the
+        corresponding consistency scores.
+        """
+        if not grade_consist_eval or grade_map is None:
+            return
+        if pred_sets_unsel.shape[0] == 0:
+            row["grade_range_consistency"] = {}
+            return
+
+        # Map unselected mask to row indices in test_probs
+        unsel_idx = np.where(unselected_mask)[0]
+
+        gr = check_grade_consistency(
+            pred_sets_unsel,  # CP sets for unselected
+            test_probs[unsel_idx, :],  # probs for the same unselected rows
+            grade_map,  # grade → [class ids]
+            size_bins=size_bins,
+        )
+        row["grade_range_consistency"] = gr
 
     # Storage for results per method across α
     summary: Dict[str, pd.DataFrame] = {}
@@ -1298,7 +1590,10 @@ def run_vanilla_cp_for_split(
                         row[f"coverage_cls_{c}_sel"] = 1.0
                         row[f"num_sel_cls_{c}"] = 0
 
+            
             rows.append(row)
+            pred_sets_unsel = set_mat[unsel_mask]
+            _attach_grade_consistency(row, pred_sets_unsel, unsel_mask)
             idx.append(float(alpha))
 
         # Assemble DataFrame (α-indexed) with consistent column order
@@ -1671,7 +1966,6 @@ def run_stratified_cp_for_split(
                 _add_per_class_from_selected_partition(row, selected_mask)
                 # Optional grade diagnostics (unselected only)
                 _attach_grade_consistency(row, pred_sets_unsel, unselected_mask)
-                # breakpoint()
             else:
                 # Per-class eligibility (K thresholds + residual unselected)
                 res = scp.predict(test_probs, test_labels)
@@ -1692,7 +1986,6 @@ def run_stratified_cp_for_split(
                     selected_array = all_selected[i]
                     if selected_array.size:
                         processed_mask[selected_array] = True
-                    # breakpoint()
                     selected_mask |= processed_mask
 
                 # CP outputs for unselected only

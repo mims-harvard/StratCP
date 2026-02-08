@@ -71,7 +71,7 @@ High-level workflow
 
 Example usage
 -------------
-python wsi_eval_stratcp.py \\
+python cns_tumor_subtype.py \\
     --results_dir data/uni_pathology_tasks/cns_tumor_subtype \\
     --random_state 42 \\
     --calib_prop 0.15 --test_prop 0.20 \\
@@ -133,7 +133,7 @@ def parse_args() -> argparse.Namespace:
     # I/O and bookkeeping
     parser.add_argument(
         "--results_dir",
-        default="data/uni_pathology_tasks/cns_tumor_subtype",
+        default="../../data/uni_pathology_tasks/cns_tumor_subtype",
         help="Root directory for predictions and where evaluation outputs are saved.",
     )
     parser.add_argument(
@@ -262,7 +262,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--eligibility",
         type=str,
-        default="per_class",
+        default="overall",
         help="Eligibility criterion for StratCP ('per_class' or 'overall'; default: 'per_class').",
     )
 
@@ -453,6 +453,9 @@ def main() -> None:
                 test_labels,
                 methods,
                 return_per_class_metrics=False,
+                grade_consist_eval=bool(args.grade_consist_set),
+                grade_map=grade_map,
+                size_bins=DEFAULT_SIZE_BINS,
             )
             with open(vanilla_cache_path, "wb") as f:
                 pickle.dump(vanilla_results, f)
@@ -482,6 +485,14 @@ def main() -> None:
                 pickle.dump(stratcp_results, f)
             print(f"  Saved StratCP to {stratcp_cache_path}")
         split_to_stratcp[split_idx] = stratcp_results
+
+        """
+        [TODO]
+        * Include grande-consistency results in the summary table at the end.
+        * Include grande-consistency results in Vanilla CP as well.
+        
+        """
+        # breakpoint()
 
     # Persist aggregated per-split dictionaries for reuse
     with open(os.path.join(eval_dir, GLOBAL_BASELINE_CACHE), "wb") as f:
@@ -515,6 +526,8 @@ def main() -> None:
         "num_unsel",
         "num_total",
     )
+    if args.grade_consist_set:
+        metrics += ("grade_range_consistency",)
 
     summary_df = summarize_methods_at_alpha(
         summary_sources=summary_sources,
@@ -536,6 +549,7 @@ def main() -> None:
         print(vals.to_frame(name="value"))
 
     breakpoint()
+    return
 
 
 if __name__ == "__main__":
