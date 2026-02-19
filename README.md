@@ -338,7 +338,7 @@ We store these files in the `data/` folder. The summarized results will be saved
 
 Across all ophthalmology tasks, we follow the RetFound foundation model [[Zhou et al., 2023](https://www.nature.com/articles/s41586-023-06555-x)] using the provided model checkpoints and data splits available [here](https://github.com/rmaphoh/RETFound/blob/main/BENCHMARK.md). Given model predictions (per-class probabilities for classification tasks), we apply **StratCP** to the task-specific scores:
 1. **Action arm.** Select a confident subset under an expert-specified FDR budget (that is, the incorrect predictions among selected).
-2. **Deferral arm.** For the remaining (less confident) cases, construct conformal prediction sets with finite-sample coverage guarantees, adjusting for the distribution shift due to the selection in the action arm. 
+2. **Deferral arm.** For the remaining (deferred) cases, construct conformal prediction sets with finite-sample coverage guarantees, adjusting for the distribution shift due to the selection in the action arm. 
 
 The experiments in the paper can be reproduced with the following scripts:
 - `reproduction_code/retfound_tasks/diabetic_retinpacy.py` for the DR diagnosis task.
@@ -354,10 +354,7 @@ All H\&E model checkpoints for each task are available at
 
 - `data/uni_pathology_tasks/<task_name>/model_checkpoint/`
 
-Given model predictions (per-class probabilities for classification tasks and the mean parameter for the time-to-event regression model), we then apply **StratCP** to the task-specific scores:
-
-1. **Step 1 (selection).** Select a confident subset under an expert-specified error budget using FDR control.
-2. **Step 2 (post-selection CP).** For the remaining (less confident) cases, construct conformal prediction sets with finite-sample coverage guarantees.
+Given model predictions (per-class probabilities for classification tasks and the mean parameter for the time-to-event regression model), we then apply **StratCP** to the task-specific scores, following the same procedure as in the retinal disease diagnosis tasks.
 
 The main entry points for reproducing neuro-oncology experiments are:
 
@@ -381,10 +378,10 @@ The table below summarizes the datasets used in the paper, the corresponding tas
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Diabetic retinopathy diagnosis | Kaggle APTOS-2019 | Classification (5 classes) | RETFound | MLP with cross-entropy loss | Multiple criteria | No | [link](https://www.kaggle.com/competitions/aptos2019-blindness-detection/data) |
 | Glaucoma diagnosis | Glaucoma Fundus dataset | Classification (3 classes) | RETFound | MLP with cross-entropy loss | Multiple criteria | No | [link](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/1YRRAC) |
-| Eye condition diagnosis | JSEIC dataset | Classification (39 classes) | RETFound | MLP with cross-entropy loss | Single criteria | No | [link](https://zenodo.org/records/3477553) |
+| Eye condition diagnosis | JSEIC dataset | Classification (39 classes) | RETFound | MLP with cross-entropy loss | Single criterion | No | [link](https://zenodo.org/records/3477553) |
 | IDH mutation status | TCGA–LGG & GBM; EBRAINS | Classification (2 classes) | UNI | ABMIL with cross-entropy loss | Multiple criteria | TCGA: No; EBRAINS: Yes | TCGA: [link](https://portal.gdc.cancer.gov/) <br> EBRAINS: [link](https://search.kg.ebrains.eu/instances/Dataset/8fc108ab-e2b4-406f-8999-60269dc1f994) |
-| CNS tumor subtyping | EBRAINS | Classification (30 classes) | UNI | ABMIL with cross-entropy loss | Single criteria | Yes | [link](https://search.kg.ebrains.eu/instances/Dataset/8fc108ab-e2b4-406f-8999-60269dc1f994) |
-| H\&E time-to-mortality prediction | TCGA–LGG & GBM | Time-to-event regression | UNI | ABMIL with log-normal AFT loss | Single criteria | No (H\&E WSIs are open access via GDC) | [link](https://portal.gdc.cancer.gov/) |
+| CNS tumor subtyping | EBRAINS | Classification (30 classes) | UNI | ABMIL with cross-entropy loss | Single criterion | Yes | [link](https://search.kg.ebrains.eu/instances/Dataset/8fc108ab-e2b4-406f-8999-60269dc1f994) |
+| H\&E time-to-mortality prediction | TCGA–LGG & GBM | Time-to-event regression | UNI | ABMIL with log-normal AFT loss | Single criterion | No (H\&E WSIs are open access via GDC) | [link](https://portal.gdc.cancer.gov/) |
 
 \* “StratCP guarantee” indicates whether StratCP is applied under multiple or single selection criteria for the task.
 
