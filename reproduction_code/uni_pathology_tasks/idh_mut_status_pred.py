@@ -1,107 +1,71 @@
 """
-Evaluate whole-slide image (WSI) classifiers for **IDH mutation status prediction**
-using several conformal prediction (CP) settings, including the proposed
-Stratified CP (StratCP) pipeline, and summarize performance over α-ranges
-and at a fixed α.
+idh_mut_status_pred.py
 
-Task / labels
--------------
-The target task is **IDH mutation status** (e.g., in diffuse glioma).
-Labels are assumed to be binary:
+Reproduction analysis script for StratCP on the IDH mutation status prediction task
+from whole-slide imaging (WSI) model outputs.
 
-    0 → IDH wild-type (non-carrier)
-    1 → IDH mutant (carrier)
+This module evaluates and summarizes error-controlled decision-making pipelines using
+the StratCP framework, as presented in the StratCP repository (mims-harvard/StratCP),
+for a binary neuro-oncology classification setting (IDH mutation status). Given cached
+per-slide model predictions (class probabilities and labels) and slide-level metadata,
+the script constructs or reuses stratified case-level calibration/test splits and runs
+split-wise conformal evaluation across an alpha grid.
 
-All metrics and summaries in this script are computed with respect to these
-two classes, although many of the utilities generalize to more classes.
+For each split, the script computes:
+    1) Baseline methods (e.g., top-1 / threshold-based summaries),
+    2) Vanilla conformal prediction methods (TPS / APS / RAPS), and
+    3) Stratified conformal prediction (StratCP), with configurable eligibility.
 
-Workflow
---------
-(A) Load per-slide predictions and dataset metadata.
-(B) Build (or load) N stratified splits at the *case* level into calibration
-    and test partitions.
-(C) For each split:
-      - Compute / load baseline metrics (Top-1, naive threshold).
-      - Compute / load vanilla CP metrics for requested methods (TPS / APS / RAPS).
-      - Compute / load Stratified CP metrics for requested methods.
-(D) Persist all split-level results to disk.
-(E) Aggregate the per-split results (mean and standard error) over a user-chosen
-    α-range.
-(F) Summarize metrics at a user-chosen fixed α and print tidy tables.
+StratCP eligibility modes and selected-side guarantee interpretation
+-------------------------------------------------------------------
+This script defaults to:
+    --eligibility per_class
 
-Command-line arguments (see `parse_args()` for full details)
-------------------------------------------------------------
-Key flags:
-  --results_dir   Root folder containing prediction artifacts and where outputs
-                  will be saved.
-  --seed          Random seed for experiment bookkeeping (not used in splitting).
-  --random_state  Base RNG seed for stratified splits (each split adds split_idx).
-  --calib_prop    Proportion of calibration cases among (calib + test).
-  --test_prop     Proportion of test cases among (calib + test).
-  --n_splits      Number of independent stratified case-level splits.
-  --cp_methods    Space-separated list among: tps aps raps.
-  --alpha_fixed   α at which to print the final comparison table.
-  --alpha_min/max/points  Define the α-grid for evaluation.
-  --alpha_aggr_min/max    Define the α-range used for aggregation.
-  --return_per_class_metrics  If set, include per-class metrics in outputs.
-  --eligibility   Eligibility mode for StratCP (e.g., "per_class" or "overall").
+Supported eligibility settings (passed to `run_stratified_cp_for_split`) include:
+    - "per_class":
+        Eligibility/selection is defined separately for each predicted class.
+        The selected-side error control target is applied at the class-specific
+        selected subset level (i.e., per predicted class), under the nominal
+        error budget alpha (subject to the assumptions/guarantees of StratCP).
 
-Expected inputs on disk
------------------------
-Under `--results_dir`:
-  - uni_eval_results/uni_results_dict.pkl
-      A pickled dict mapping:
-          slide_id -> {"prob": np.ndarray of shape (n_classes,),
-                        "label": int}
-  - tumor_idh_mutation_status.csv
-      CSV with at least the columns:
-          slide_id, case_id, label
+    - "overall":
+        Eligibility/selection is defined globally across all predictions.
+        The selected-side error control target is applied to the pooled selected
+        predictions as a whole, under a single pre-specified error budget alpha.
 
-Outputs on disk
----------------
-Per-split caches under {results_dir}/stratcp_eval_results/:
-  - top1_thresh_results_split_{i}_of_{N}.pkl
-  - cp_vanilla_results_split_{i}_of_{N}.pkl
-  - stratcp_results_split_{i}_of_{N}.pkl
+In both cases, unselected (deferred) samples are evaluated via conformal prediction
+sets (APS/TPS/RAPS), and the script reports selected/unselected metrics accordingly.
 
-Global (all-splits) caches under {results_dir}/stratcp_eval_results/:
-  - split_to_baseline_top_1_thresh_results.pkl
-  - split_to_cp_vanilla_results.pkl
-  - split_to_stratcp_results.pkl
+To support reproducible analysis and efficient reruns, split-level outputs are cached
+to disk and later consolidated into global result dictionaries. The script then
+aggregates metrics across splits (mean and standard error over a user-specified alpha
+range) and prints final summary tables at a target alpha, including selected/unselected
+performance and prediction-set statistics.
 
-Assumptions / requirements
---------------------------
-  - Binary labels {0, 1} with:
-        0 → IDH wild-type
-        1 → IDH mutant (carrier)
-    Constants CLASS_ZERO / CLASS_ONE are set accordingly, but the underlying
-    utilities may support more classes.
-  - The `stratcp` package is available and provides:
-      * StratifiedCP
-      * compute_score_tps / compute_score_aps / compute_score_raps
-      * conformal (core CP set constructor)
-      * helper functions imported from `stratcp.eval_utils`.
-  - The helper functions used for aggregation / summarization are imported from:
-      `stratcp.eval_utils` (see imports below).
+Typical use case:
+    - Reproduce and compare baseline, vanilla CP, and StratCP behavior on the IDH
+      mutation status WSI task using precomputed model probabilities.
+    - Inspect coverage, set size, and selection-related metrics under fixed error
+      budgets and alpha sweeps.
+    - Compare class-specific vs overall StratCP selection behavior via the
+      `--eligibility` flag.
 
-Example usage
--------------
-  python idh_mut_status_pred.py \\
-      --results_dir data/uni_pathology_tasks/idh_mutation_status_pred \\
-      --random_state 42 \\
-      --calib_prop 0.15 --test_prop 0.20 \\
-      --n_splits 10 \\
-      --cp_methods aps \\
-      --alpha_fixed 0.05
+Example executions:
+    # Default (per-class eligibility; APS; summarize at alpha=0.05)
+    python idh_mut_status_pred.py \
+        --results_dir ../../data/uni_pathology_tasks/idh_mutation_status_pred \
+        --cp_methods aps \
+        --n_splits 10 \
+        --alpha_fixed 0.05 \
+        --eligibility per_class
 
-Notes
------
-  - Caching is enabled at split-level granularity; re-runs will be fast if
-    caches already exist.
-  - Aggregation computes split-wise mean and standard error (SE) within a
-    specified α-range.
-  - The final printed summary uses `--alpha_fixed`; if the exact α is not on
-    the grid, the nearest α is used (with a configurable tolerance).
+    # Alternative: overall eligibility with APS + RAPS
+    python idh_mut_status_pred.py \
+        --results_dir ../../data/uni_pathology_tasks/idh_mutation_status_pred \
+        --cp_methods aps raps \
+        --n_splits 10 \
+        --alpha_fixed 0.05 \
+        --eligibility overall
 """
 
 import argparse
@@ -148,7 +112,7 @@ def parse_args() -> argparse.Namespace:
     # Core configuration for I/O and experiment splits
     parser.add_argument(
         "--results_dir",
-        default="data/uni_pathology_tasks/idh_mutation_status_pred",
+        default="../../data/uni_pathology_tasks/idh_mutation_status_pred",
         help="Directory containing inputs and where results will be saved.",
     )
     parser.add_argument(
@@ -309,12 +273,11 @@ def main() -> None:
     ensure_directory(args.results_dir)
 
     # Step 1: Load per-slide predictions and dataset metadata
-    results_dict_test_path = os.path.join(args.results_dir, "uni_eval_results", "uni_results_dict.pkl")
-    results_dict_test = load_results_dict(results_dict_test_path)
+    model_preds_path = os.path.join(args.results_dir, "uni_eval_results", "uni_results_dict.pkl")
+    model_preds = load_results_dict(model_preds_path)
 
     dataset_csv_path = os.path.join(args.results_dir, "tumor_idh_mutation_status.csv")
-    dataset_test_df = load_dataset(dataset_csv_path, list(results_dict_test.keys()))
-
+    dataset_test_df = load_dataset(dataset_csv_path, list(model_preds.keys()))
     # Step 2: Build (or load) stratified calibration/test splits at case level
     # test_size is the fraction of cases reserved for test among calib+test
     test_size = args.test_prop / (args.test_prop + args.calib_prop)
@@ -345,7 +308,7 @@ def main() -> None:
         calib_probs, calib_labels, test_probs, test_labels = extract_split_arrays(
             split_info,
             dataset_test_df,
-            results_dict_test,
+            model_preds,
         )
 
         # Construct per-split cache paths

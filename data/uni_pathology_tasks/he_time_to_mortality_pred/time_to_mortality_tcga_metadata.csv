@@ -1,0 +1,874 @@
+case_id,case_submitter_id,project_id,gender,age_at_index,vital_status,days_to_last_follow_up,primary_diagnosis,event,survival_time
+0078b0c4-68a9-483b-9aab-61156d263213,TCGA-14-1034,TCGA-GBM,female,60,Dead,485.0,Glioblastoma,1,485.0
+0133e584-111e-450a-b451-77a2799ef529,TCGA-06-0133,TCGA-GBM,male,64,Dead,428.0,Glioblastoma,1,435.0
+01a92062-967a-4900-8dc7-a5ecd3b3f8e2,TCGA-06-0171,TCGA-GBM,male,65,Dead,396.0,Glioblastoma,1,399.0
+025a7401-a65d-4ea0-8b4e-0ba775b0322a,TCGA-12-0819,TCGA-GBM,female,49,Dead,754.0,Glioblastoma,1,754.0
+035b09b7-add1-456d-ae80-20e8a03f6d7b,TCGA-19-2621,TCGA-GBM,male,83,Dead,33.0,Glioblastoma,1,33.0
+0389b35b-651b-4776-b12a-d315a100f47c,TCGA-12-0619,TCGA-GBM,male,60,Dead,316.0,Glioblastoma,1,1062.0
+03e9a354-7c95-4484-9ead-ed04acce7cb6,TCGA-15-1447,TCGA-GBM,female,36,Alive,1618.0,Glioblastoma,0,1618.0
+0456a66b-c9b3-4eb1-9872-424a7ea712a2,TCGA-06-0750,TCGA-GBM,male,43,Dead,28.0,Glioblastoma,1,28.0
+04b4ebb4-6780-42d8-a980-711cd10cfe14,TCGA-14-1455,TCGA-GBM,male,61,Dead,28.0,Glioblastoma,1,28.0
+054f472f-98cb-4559-b2e2-b5f800fc8eef,TCGA-06-0221,TCGA-GBM,male,31,Dead,548.0,Glioblastoma,1,603.0
+0553e60e-3510-417d-af8a-75947ebe8ab6,TCGA-02-0024,TCGA-GBM,male,35,Dead,1615.0,Glioblastoma,1,1615.0
+05875fe7-ad0e-45e1-a880-9aece4fea3b9,TCGA-02-0321,TCGA-GBM,male,74,Dead,301.0,Glioblastoma,1,301.0
+05944575-8473-4ed0-9de8-8091018001c2,TCGA-81-5911,TCGA-GBM,male,33,Alive,539.0,Glioblastoma,0,539.0
+05d5da50-52fe-4342-9c15-9ee4c1d6662e,TCGA-15-1446,TCGA-GBM,male,55,Alive,581.0,Glioblastoma,0,581.0
+0645038d-8abe-4a79-8695-bf8824d33f67,TCGA-08-0349,TCGA-GBM,male,46,Dead,231.0,Glioblastoma,1,298.0
+06c427a1-8c2d-4003-b744-139114a04440,TCGA-14-1451,TCGA-GBM,male,39,Dead,703.0,Glioblastoma,1,703.0
+06e32525-6043-45a1-9fef-fa24ab219a1f,TCGA-08-0510,TCGA-GBM,male,75,Dead,107.0,Glioblastoma,1,130.0
+074fa012-a61e-4646-bb3c-34d16782a2ea,TCGA-08-0352,TCGA-GBM,male,79,Dead,39.0,Glioblastoma,1,39.0
+0798dbe2-1914-427c-a2fe-2a865d0d6eda,TCGA-14-1459,TCGA-GBM,female,63,Dead,378.0,Glioblastoma,1,378.0
+07a2c1da-040e-44ea-9a56-751a06761894,TCGA-06-0148,TCGA-GBM,male,76,Dead,298.0,Glioblastoma,1,307.0
+08505b91-58b8-4121-a8ea-b9832331c24a,TCGA-02-0071,TCGA-GBM,male,53,Dead,167.0,Glioblastoma,1,167.0
+0a85c7b4-f07d-4727-b9d2-7b14c52edabb,TCGA-12-0703,TCGA-GBM,male,46,Dead,551.0,Glioblastoma,1,620.0
+0aa5b68f-2b99-44d2-b17f-f4eb17fe891e,TCGA-08-0359,TCGA-GBM,female,59,Dead,29.0,Glioblastoma,1,103.0
+0ce23e2c-8e64-4391-8148-de823bce0d5f,TCGA-08-0375,TCGA-GBM,female,51,Dead,279.0,Glioblastoma,1,372.0
+0cf6c734-74c3-4fb5-ac4b-72967edd6ee7,TCGA-08-0373,TCGA-GBM,male,69,Dead,134.0,Glioblastoma,1,134.0
+0d04d215-b709-40dd-9d18-d470cfb5bafd,TCGA-12-1099,TCGA-GBM,female,68,Dead,104.0,Glioblastoma,1,126.0
+0fc32169-8eb9-405f-becc-ed38d7064a58,TCGA-OX-A56R,TCGA-GBM,male,68,Dead,,Glioblastoma,1,180.0
+107335ed-03d3-47ab-b70d-df40e66102ac,TCGA-02-0333,TCGA-GBM,female,77,Dead,133.0,Glioblastoma,1,133.0
+108a8d8e-1ddb-4c0d-a05b-71573b33b9aa,TCGA-08-0390,TCGA-GBM,male,69,Dead,322.0,Glioblastoma,1,425.0
+12084e89-dbc2-43b3-a6d0-0e71e53d0eac,TCGA-41-2573,TCGA-GBM,male,59,Alive,272.0,Glioblastoma,0,272.0
+120e257d-1cf1-421f-9a6b-6a5681eaea2e,TCGA-12-0780,TCGA-GBM,female,51,Dead,434.0,Glioblastoma,1,452.0
+12824b2b-9c0a-4dcf-8941-34593a4e93da,TCGA-14-0786,TCGA-GBM,female,50,Dead,701.0,Glioblastoma,1,701.0
+12b67dc2-5e4c-48eb-92ba-8d91d2eadfe2,TCGA-12-1600,TCGA-GBM,male,86,Dead,414.0,Glioblastoma,1,448.0
+13480f06-32ee-48b5-a729-a963a7979b90,TCGA-08-0511,TCGA-GBM,male,69,Dead,235.0,Glioblastoma,1,235.0
+13b4d676-ee9b-499b-94bb-2365830fb37e,TCGA-19-5947,TCGA-GBM,female,47,Dead,202.0,Glioblastoma,1,202.0
+13d12179-3182-4f41-85a2-90fd50e51480,TCGA-06-1802,TCGA-GBM,male,61,Dead,240.0,Glioblastoma,1,466.0
+141a1ef1-9be6-46d1-b445-305b222727d2,TCGA-12-0615,TCGA-GBM,female,78,Dead,426.0,Glioblastoma,1,467.0
+149be735-d5db-43b6-80b7-d40e3a84500b,TCGA-06-0187,TCGA-GBM,male,69,Dead,801.0,Glioblastoma,1,828.0
+151ca826-a4d7-42eb-8684-f9fe7b93543f,TCGA-12-0822,TCGA-GBM,male,46,Dead,715.0,Glioblastoma,1,715.0
+159e0318-6173-440f-be07-8d956086e99d,TCGA-12-3652,TCGA-GBM,male,60,Dead,1050.0,Glioblastoma,1,1062.0
+15e058e8-2f33-4fb4-92af-3d9dea1fa906,TCGA-06-0156,TCGA-GBM,male,57,Dead,164.0,Glioblastoma,1,178.0
+163e93a7-4d8d-4f28-a9f6-4d0ed16630cd,TCGA-19-0963,TCGA-GBM,male,61,Dead,434.0,Glioblastoma,1,434.0
+165b8f99-f7ba-4553-96ed-235e3f77e19c,TCGA-12-1599,TCGA-GBM,female,47,Dead,769.0,Glioblastoma,1,781.0
+17dffffc-65d6-4209-9075-18a441001f0f,TCGA-26-1438,TCGA-GBM,male,36,Alive,305.0,Glioblastoma,0,305.0
+18e04edc-04a3-4d1c-b536-3797e1924f48,TCGA-19-5954,TCGA-GBM,female,72,Dead,242.0,Glioblastoma,1,368.0
+19146c75-8f41-44f3-8423-7db4d0d0efe1,TCGA-02-0337,TCGA-GBM,male,48,Dead,764.0,Glioblastoma,1,764.0
+196ce35a-2d36-479e-aab9-91d2082d7e7c,TCGA-06-0213,TCGA-GBM,female,55,Dead,6.0,Glioblastoma,1,16.0
+1af5c959-0f36-4a14-8383-ebc0543db3bb,TCGA-08-0244,TCGA-GBM,male,62,Dead,690.0,Glioblastoma,1,690.0
+1b042663-dcb1-4fc9-b813-7b90cc2eb392,TCGA-08-0525,TCGA-GBM,male,52,Dead,486.0,Glioblastoma,1,486.0
+1b415f4a-b103-450d-8917-e682cdf34149,TCGA-02-0439,TCGA-GBM,female,70,Dead,20.0,Glioblastoma,1,20.0
+1b6c184a-5868-4a51-8a82-aa16a7e65126,TCGA-06-0881,TCGA-GBM,male,50,Dead,178.0,Glioblastoma,1,504.0
+1dbfbff7-d048-4770-ae02-e6a287256210,TCGA-12-0620,TCGA-GBM,male,57,Dead,181.0,Glioblastoma,1,318.0
+1e2108e8-b620-4865-a8d8-77f9a0fe28a2,TCGA-28-1745,TCGA-GBM,male,76,Alive,345.0,Glioblastoma,0,345.0
+1e63e985-fbb7-4e43-93a5-e718d0b4ad09,TCGA-02-0432,TCGA-GBM,male,36,Dead,1433.0,Glioblastoma,1,1433.0
+1e80ccf6-ef81-4662-bf5e-392f092c1e67,TCGA-41-2572,TCGA-GBM,male,67,Dead,406.0,Glioblastoma,1,406.0
+1edfe67c-1142-4498-927c-9b7b426af7a3,TCGA-02-0339,TCGA-GBM,male,67,Dead,377.0,Glioblastoma,1,377.0
+1f48f010-98fe-4b5a-b96a-14fb25eff23f,TCGA-06-0184,TCGA-GBM,male,63,Dead,1228.0,Glioblastoma,1,2126.0
+20a83eb1-466d-4f85-921a-cb8beea8eabe,TCGA-19-0962,TCGA-GBM,female,77,Dead,13.0,Glioblastoma,1,20.0
+20bad0d5-3135-49a4-a119-fa7a1e56fd1b,TCGA-26-5134,TCGA-GBM,male,74,Alive,167.0,Glioblastoma,0,167.0
+2188c194-dfe4-4471-9b8b-050db1a1062c,TCGA-06-0882,TCGA-GBM,male,30,Dead,165.0,Glioblastoma,1,632.0
+224235c1-5b6e-48d5-a5d1-777dfede0f1e,TCGA-06-0168,TCGA-GBM,female,59,Dead,579.0,Glioblastoma,1,598.0
+225f3689-221d-4296-8472-d8c21eedaf8d,TCGA-RR-A6KA,TCGA-GBM,female,72,Dead,,Glioblastoma,1,191.0
+24164e89-16ae-48c1-a464-9be94141deef,TCGA-12-0692,TCGA-GBM,female,75,Dead,80.0,Glioblastoma,1,111.0
+24ae6f30-eec8-49a7-abde-246b3873679e,TCGA-06-0154,TCGA-GBM,male,54,Dead,389.0,Glioblastoma,1,424.0
+24eaab84-5d9c-4c12-af8b-32f4c6d8f81e,TCGA-02-0048,TCGA-GBM,male,80,Dead,98.0,Glioblastoma,1,98.0
+25f41de3-9d70-45df-913f-4fb3e5f0f7d6,TCGA-06-0219,TCGA-GBM,male,67,Dead,11.0,Glioblastoma,1,22.0
+2749c671-dee1-4d91-b3fa-4b50accf7a11,TCGA-15-1449,TCGA-GBM,male,65,Dead,,Glioblastoma,1,404.0
+27c8c458-eb2f-43e4-a06b-6cd61a9a3a28,TCGA-14-0783,TCGA-GBM,female,36,Dead,189.0,Glioblastoma,1,189.0
+281e1a57-9a8c-4fa0-ac5e-e5e1df7ef8e2,TCGA-02-0074,TCGA-GBM,female,68,Dead,310.0,Glioblastoma,1,310.0
+28df4629-204f-4352-a19f-303a2e067633,TCGA-28-1751,TCGA-GBM,female,61,Alive,232.0,Glioblastoma,0,232.0
+29b34909-9cdc-4a52-b0ab-fa99f3ab17bb,TCGA-12-0769,TCGA-GBM,male,52,Dead,378.0,Glioblastoma,1,458.0
+2b2002aa-8ac9-404b-ad08-b6c60658e976,TCGA-08-0385,TCGA-GBM,male,71,Dead,31.0,Glioblastoma,1,82.0
+2b90648c-c99e-4d4d-8d9b-67ff2c4e6115,TCGA-12-1598,TCGA-GBM,female,75,Dead,287.0,Glioblastoma,1,476.0
+2c5fa2d4-8e35-42e4-8bca-9fb3371a19c8,TCGA-26-5132,TCGA-GBM,male,74,Alive,286.0,Glioblastoma,0,286.0
+2c922593-d94d-4e8f-b68b-b4b8cfcbf3e4,TCGA-41-2575,TCGA-GBM,male,75,Dead,290.0,Glioblastoma,1,290.0
+2deec528-4550-47b2-9a0d-cac7eeb24f3e,TCGA-02-0085,TCGA-GBM,female,63,Dead,1561.0,Glioblastoma,1,1561.0
+2f4a127f-101a-4192-b3e8-f9be2c8648bc,TCGA-19-2624,TCGA-GBM,male,51,Dead,5.0,Glioblastoma,1,5.0
+2f61ea6b-a3f2-477f-ab98-47ed07b3b2cd,TCGA-12-3653,TCGA-GBM,female,34,Dead,357.0,Glioblastoma,1,442.0
+2f8b698a-cbd0-4cab-a814-dc683e0e9305,TCGA-19-1387,TCGA-GBM,male,81,Alive,181.0,Glioblastoma,0,181.0
+30a1fe5e-5b12-472c-aa86-c2db8167ab23,TCGA-02-0001,TCGA-GBM,female,44,Dead,279.0,Glioblastoma,1,358.0
+314d9188-c8fd-43fc-905d-b6889de542c8,TCGA-08-0386,TCGA-GBM,male,74,Dead,478.0,Glioblastoma,1,548.0
+31e6e6c8-9197-4927-bfe4-8f6836f963da,TCGA-06-0128,TCGA-GBM,male,66,Dead,691.0,Glioblastoma,1,691.0
+3258cb3b-f63b-463c-b2e4-d638149157c5,TCGA-06-0145,TCGA-GBM,female,53,Dead,71.0,Glioblastoma,1,71.0
+33ae5566-3c72-4cae-b516-1708db090e32,TCGA-02-0011,TCGA-GBM,female,18,Dead,630.0,Glioblastoma,1,630.0
+34f216fb-09dc-48af-9e09-7d12cc07c1f7,TCGA-26-5136,TCGA-GBM,female,78,Dead,37.0,Glioblastoma,1,577.0
+352768f9-3ce1-419c-beef-6515c78f5d7a,TCGA-19-2620,TCGA-GBM,male,70,Dead,148.0,Glioblastoma,1,148.0
+357e2b63-6876-4c69-9728-c52fada81970,TCGA-06-0143,TCGA-GBM,male,58,Dead,357.0,Glioblastoma,1,357.0
+3726b315-6cf8-49a3-a581-b7f3f4ca6e16,TCGA-12-0772,TCGA-GBM,male,46,Dead,1615.0,Glioblastoma,1,1638.0
+37a47ea2-1daa-44a4-ade5-84d383c2b13c,TCGA-19-0960,TCGA-GBM,female,83,Alive,262.0,Glioblastoma,0,262.0
+386b629e-fab1-4033-b088-45d6eeb4a13e,TCGA-06-0745,TCGA-GBM,male,59,Dead,164.0,Glioblastoma,1,239.0
+38771a9a-f8b1-4867-b540-56c7d9f5820a,TCGA-02-0068,TCGA-GBM,male,57,Dead,804.0,Glioblastoma,1,804.0
+38dd826d-06dc-4a73-b852-c3d78c9c3ff4,TCGA-14-1821,TCGA-GBM,male,31,Dead,541.0,Glioblastoma,1,541.0
+3a3fc890-1985-4353-861b-dc3abfb364b1,TCGA-06-5416,TCGA-GBM,female,23,Alive,204.0,Glioblastoma,0,204.0
+3a56ef5c-9259-4cdc-905e-5fcf21dac09b,TCGA-19-1789,TCGA-GBM,female,69,Dead,99.0,Glioblastoma,1,99.0
+3ac8f759-2df0-4ef5-913f-ce05b8dd8937,TCGA-02-0004,TCGA-GBM,male,59,Dead,345.0,Glioblastoma,1,345.0
+3c5e7a3f-29b3-4af4-9023-dc7b151f0445,TCGA-28-1755,TCGA-GBM,female,52,Dead,47.0,Glioblastoma,1,47.0
+3caf009f-d9e0-4c57-b1d9-8eb59fc833bd,TCGA-02-0047,TCGA-GBM,male,78,Dead,448.0,Glioblastoma,1,448.0
+3ed101b5-0007-4957-a25d-4cf43bde08b6,TCGA-06-6390,TCGA-GBM,male,58,Dead,164.0,Glioblastoma,1,164.0
+3f960d3b-a58c-43d0-a8a4-f3555b399c9d,TCGA-06-5411,TCGA-GBM,male,51,Dead,254.0,Glioblastoma,1,254.0
+407849a8-8447-4ede-a9d1-c1dfb535222e,TCGA-12-3648,TCGA-GBM,female,61,Dead,784.0,Glioblastoma,1,819.0
+42e92d73-29eb-4508-a653-9b77f36021c0,TCGA-19-5959,TCGA-GBM,female,77,Dead,161.0,Glioblastoma,1,511.0
+42fbe95f-9068-45a8-a8a2-c24db757eae6,TCGA-02-0281,TCGA-GBM,female,78,Dead,121.0,Glioblastoma,1,121.0
+43d89926-2378-4498-bfba-6d6624d951b4,TCGA-02-0026,TCGA-GBM,male,27,Dead,748.0,Glioblastoma,1,748.0
+43d98306-8b1f-4840-a1a0-146ba0c36400,TCGA-41-3915,TCGA-GBM,male,48,Dead,360.0,Glioblastoma,1,360.0
+44ef426e-b67d-4b49-80a3-86681b9abf1a,TCGA-06-0747,TCGA-GBM,male,53,Dead,82.0,Glioblastoma,1,82.0
+456bcab3-165d-456f-94e3-f34f81a61d2e,TCGA-19-1787,TCGA-GBM,male,48,Dead,385.0,Glioblastoma,1,385.0
+45a58ede-e7a4-424d-851e-e6a4062e46e4,TCGA-02-0010,TCGA-GBM,female,20,Dead,1077.0,Glioblastoma,1,1077.0
+4644a15f-3115-4f27-86b2-b092419431e1,TCGA-06-5859,TCGA-GBM,male,63,Alive,139.0,Glioblastoma,0,139.0
+47679648-1e09-46c8-be46-35fdde5be9f7,TCGA-02-0285,TCGA-GBM,female,50,Dead,422.0,Glioblastoma,1,422.0
+4776b959-d5f5-41ad-ab39-dba6031f6884,TCGA-27-2521,TCGA-GBM,male,34,Dead,316.0,Glioblastoma,1,510.0
+47a4161c-9c61-48f5-b9bc-a6d1acad4e5a,TCGA-14-1829,TCGA-GBM,male,57,Alive,218.0,Glioblastoma,0,218.0
+4a85a43b-4dbc-4081-b552-df06eef1ad80,TCGA-06-0166,TCGA-GBM,male,51,Dead,161.0,Glioblastoma,1,178.0
+4b43da9d-60ee-4269-b44d-d92c034b844c,TCGA-06-0141,TCGA-GBM,male,62,Dead,280.0,Glioblastoma,1,313.0
+4b606edf-07fc-4665-a7cd-a794004e5aca,TCGA-26-6174,TCGA-GBM,female,65,Alive,71.0,Glioblastoma,0,71.0
+4c070166-025e-49b7-b4d0-fe25c8a355b1,TCGA-12-1092,TCGA-GBM,male,58,Dead,658.0,Glioblastoma,1,661.0
+4c42dc4e-66b7-40bf-9fbe-b92543248198,TCGA-15-1444,TCGA-GBM,male,21,Dead,,Glioblastoma,1,1537.0
+4d04939f-9509-4e9b-9406-16051afecf82,TCGA-06-0206,TCGA-GBM,male,40,Dead,197.0,Glioblastoma,1,233.0
+4d18f820-6396-46ae-b5d6-4ba446279be8,TCGA-27-1836,TCGA-GBM,female,33,Dead,,Glioblastoma,1,914.0
+4dc1ec79-1d64-45db-b357-903445c838e6,TCGA-02-0422,TCGA-GBM,male,50,Dead,441.0,Glioblastoma,1,441.0
+4df7d5e4-f762-4e80-b9d1-96ec21fb43ca,TCGA-02-0054,TCGA-GBM,female,44,Dead,199.0,Glioblastoma,1,199.0
+4f50397e-c4bd-4408-b6e9-776b8a14c8a9,TCGA-12-1089,TCGA-GBM,male,64,Dead,177.0,Glioblastoma,1,177.0
+502f47db-7d3d-4081-ab15-1c38e7e78652,TCGA-02-0440,TCGA-GBM,male,62,Dead,345.0,Glioblastoma,1,345.0
+50d1d4af-7d62-4c48-88c1-890bb2370353,TCGA-RR-A6KC,TCGA-GBM,male,55,Dead,,Glioblastoma,1,625.0
+513925f1-c450-4ab8-a84b-9613614eaa84,TCGA-02-0326,TCGA-GBM,female,82,Dead,5.0,Glioblastoma,1,223.0
+51c3409d-5df7-4720-83db-0e6de065f82c,TCGA-06-5418,TCGA-GBM,female,75,Dead,83.0,Glioblastoma,1,83.0
+51e5a60f-e7b1-4b8b-b0b1-447c28940fe6,TCGA-08-0522,TCGA-GBM,male,61,Dead,555.0,Glioblastoma,1,635.0
+5252c0b7-be05-4c0c-a8ac-afe9ad459489,TCGA-19-1390,TCGA-GBM,female,63,Dead,772.0,Glioblastoma,1,772.0
+53abce1d-7e33-4ebd-832f-f3789f67377f,TCGA-06-0178,TCGA-GBM,male,38,Dead,1642.0,Glioblastoma,1,2681.0
+548c3d4c-7993-40dc-bd02-5bb304188d28,TCGA-08-0357,TCGA-GBM,male,49,Dead,1084.0,Glioblastoma,1,1143.0
+54b4c27e-aaa6-4a79-b289-0ba251a5460e,TCGA-02-0332,TCGA-GBM,female,46,Dead,782.0,Glioblastoma,1,782.0
+5536201c-e739-46e6-8200-0bdcc28ae9ef,TCGA-08-0346,TCGA-GBM,male,69,Dead,132.0,Glioblastoma,1,256.0
+5613f5f6-086d-470b-8f77-6dcb7f8625b7,TCGA-06-0744,TCGA-GBM,male,66,Dead,595.0,Glioblastoma,1,1426.0
+562d2831-ea9e-4ee1-bcee-77138e0a7d9d,TCGA-06-0147,TCGA-GBM,female,51,Dead,508.0,Glioblastoma,1,541.0
+57b703b7-1b83-4c43-bbf6-0eea624c2137,TCGA-08-0345,TCGA-GBM,female,71,Dead,53.0,Glioblastoma,1,53.0
+580cf1c8-1558-413c-a039-458de59a1709,TCGA-28-1757,TCGA-GBM,male,71,Alive,4.0,Glioblastoma,0,4.0
+5a448bf3-8e87-4791-91f2-908307a32ed1,TCGA-02-0052,TCGA-GBM,male,49,Dead,383.0,Glioblastoma,1,383.0
+5a86d9f1-d38d-4b78-9a23-c7855a20ca2d,TCGA-14-0817,TCGA-GBM,female,69,Dead,164.0,Glioblastoma,1,164.0
+5bbeb8a7-3ac2-4ef1-bd48-6f83bc994a75,TCGA-06-0139,TCGA-GBM,male,40,Dead,327.0,Glioblastoma,1,362.0
+5c890137-e03c-4897-8af4-02aafa2fdb70,TCGA-14-0867,TCGA-GBM,male,67,Dead,62.0,Glioblastoma,1,62.0
+5c984433-33cf-42fc-b3ba-511efcdcab19,TCGA-06-0211,TCGA-GBM,male,47,Dead,360.0,Glioblastoma,1,360.0
+5d2487b9-e0cd-40fc-a158-7b1803c8dc88,TCGA-14-1458,TCGA-GBM,male,54,Dead,187.0,Glioblastoma,1,203.0
+5ef9486a-aeff-421d-b620-03ef119d85a5,TCGA-12-3650,TCGA-GBM,male,46,Dead,333.0,Glioblastoma,1,333.0
+5f9baf9b-6d2d-495a-83a1-77f7e4cb9ccd,TCGA-26-A7UX,TCGA-GBM,male,47,Alive,588.0,Glioblastoma,0,588.0
+60e69f41-571e-4a1b-ae75-9d49eed620ca,TCGA-26-6173,TCGA-GBM,male,57,Alive,241.0,Glioblastoma,0,241.0
+6176621d-8534-4fba-a0e7-74a5a78245a9,TCGA-14-1401,TCGA-GBM,male,54,Dead,114.0,Glioblastoma,1,114.0
+61e00782-b709-43b1-a164-ee7f89c867e4,TCGA-19-5951,TCGA-GBM,female,76,Dead,244.0,Glioblastoma,1,244.0
+61ed8fbd-b753-451e-9683-edd4b266b0f3,TCGA-14-1827,TCGA-GBM,male,51,Dead,179.0,Glioblastoma,1,179.0
+64fa7f09-724a-45ee-a802-09e4affe077e,TCGA-08-0518,TCGA-GBM,female,60,Dead,39.0,Glioblastoma,1,588.0
+652a39f0-c539-4303-bedc-f0d7f4669d9f,TCGA-06-0644,TCGA-GBM,male,71,Dead,375.0,Glioblastoma,1,384.0
+6573378a-ad14-4654-8810-9f3bd3597bc2,TCGA-06-0188,TCGA-GBM,male,71,Dead,866.0,Glioblastoma,1,1356.0
+65a48904-9532-4dfb-8e84-4deef1881197,TCGA-12-0688,TCGA-GBM,male,74,Dead,734.0,Glioblastoma,1,811.0
+6630e547-2596-4fb7-a657-c19497ff13b2,TCGA-02-0025,TCGA-GBM,male,47,Dead,1300.0,Glioblastoma,1,1300.0
+6633f338-34a9-44f6-8039-0b9408d6213d,TCGA-19-1791,TCGA-GBM,female,82,Alive,4.0,Glioblastoma,0,4.0
+66afd908-0c76-469e-abc3-89563de338c6,TCGA-41-4097,TCGA-GBM,female,63,Dead,6.0,Glioblastoma,1,6.0
+66bd4c9e-2ebd-4092-a2b0-69027e8af5b8,TCGA-06-0138,TCGA-GBM,male,43,Dead,674.0,Glioblastoma,1,737.0
+66d2e309-eaa1-4225-a34d-4565b4ef8019,TCGA-08-0246,TCGA-GBM,female,57,Dead,119.0,Glioblastoma,1,127.0
+66f3c936-272e-4a1e-8567-f609af411329,TCGA-06-0649,TCGA-GBM,female,73,Dead,62.0,Glioblastoma,1,64.0
+67e2af1c-3478-4652-8759-b9d5c5b6a3e0,TCGA-06-0195,TCGA-GBM,male,63,Dead,214.0,Glioblastoma,1,225.0
+68720179-d07f-44d8-8771-edcee5fecfea,TCGA-06-0173,TCGA-GBM,female,72,Dead,7.0,Glioblastoma,1,136.0
+6879e9da-dacf-48b3-8e95-760796f96a1b,TCGA-02-0317,TCGA-GBM,male,40,Dead,372.0,Glioblastoma,1,372.0
+68f6976e-d3f2-432d-a121-274e228735b0,TCGA-28-1752,TCGA-GBM,female,42,Alive,258.0,Glioblastoma,0,258.0
+69205453-c504-4684-8d32-57c82efc679d,TCGA-02-0034,TCGA-GBM,male,60,Dead,430.0,Glioblastoma,1,430.0
+697afd24-9632-4244-a455-f95b1fa4f0bf,TCGA-02-0015,TCGA-GBM,male,50,Dead,627.0,Glioblastoma,1,627.0
+69d0a566-5fbf-45f6-a240-649b06868e27,TCGA-27-2526,TCGA-GBM,female,79,Dead,87.0,Glioblastoma,1,87.0
+69d56f2d-6924-409b-9d1e-c8d69b400270,TCGA-26-5135,TCGA-GBM,female,72,Dead,,Glioblastoma,1,270.0
+6a9d719d-249a-4756-adc8-e92fa60da229,TCGA-14-1037,TCGA-GBM,female,66,Dead,587.0,Glioblastoma,1,587.0
+6cba1dae-0c3f-4f65-8aea-53ac84aad549,TCGA-06-0201,TCGA-GBM,female,51,Dead,12.0,Glioblastoma,1,12.0
+6d4ab866-ca0b-4455-898e-df8a6ac3e924,TCGA-06-0241,TCGA-GBM,female,65,Dead,455.0,Glioblastoma,1,1481.0
+6d4c3876-4453-4414-83c4-39dbc711012b,TCGA-19-1392,TCGA-GBM,female,72,Dead,106.0,Glioblastoma,1,111.0
+6d6dae20-431d-4fbe-ba47-e7ed8d73b4d8,TCGA-08-0360,TCGA-GBM,male,76,Dead,352.0,Glioblastoma,1,468.0
+6e72d2e2-96fe-4fbb-9fe6-39ec28753eb6,TCGA-27-1830,TCGA-GBM,male,57,Dead,146.0,Glioblastoma,1,154.0
+6f1b1011-d7a4-4a05-b6ff-288183e7254b,TCGA-RR-A6KB,TCGA-GBM,male,51,Alive,0.0,Glioblastoma,0,0.0
+6fac5bce-2bc0-4234-9e3e-11891c2fe00e,TCGA-41-3393,TCGA-GBM,female,81,Dead,135.0,Glioblastoma,1,135.0
+6fc40b53-5db2-4319-a039-b023e1bb1d64,TCGA-08-0380,TCGA-GBM,female,74,Dead,330.0,Glioblastoma,1,454.0
+6fc6b9ca-84d8-4647-bbc8-c5ab472b1c02,TCGA-27-1838,TCGA-GBM,female,59,Dead,350.0,Glioblastoma,1,350.0
+6ff96a7e-1b96-4530-b8a8-7f2e9e541955,TCGA-27-2519,TCGA-GBM,male,48,Dead,316.0,Glioblastoma,1,550.0
+70fc222d-7423-4921-9007-cdf27c7f1ff7,TCGA-02-0258,TCGA-GBM,female,36,Dead,503.0,Glioblastoma,1,503.0
+713190ed-c6c1-4695-814b-85ca9b95e6a0,TCGA-06-5415,TCGA-GBM,male,60,Alive,260.0,Glioblastoma,0,260.0
+722f462d-f939-4bc1-aae4-8f78b1335a87,TCGA-41-2571,TCGA-GBM,male,89,Dead,26.0,Glioblastoma,1,26.0
+72f88d18-03be-4b51-9f4a-1151521b7292,TCGA-14-0871,TCGA-GBM,female,74,Dead,880.0,Glioblastoma,1,880.0
+7340f325-579f-4b90-96aa-3a7b362129ca,TCGA-27-1834,TCGA-GBM,male,56,Dead,1008.0,Glioblastoma,1,1233.0
+737b35e1-d668-4fce-9b6e-76946c7952b6,TCGA-27-2523,TCGA-GBM,male,63,Dead,489.0,Glioblastoma,1,489.0
+7391f99d-9528-46a1-9799-c5f0a7bfc63e,TCGA-06-0176,TCGA-GBM,male,34,Alive,2768.0,Glioblastoma,0,2768.0
+73b1136f-c4b6-472a-b21d-2c789bd53d26,TCGA-02-0069,TCGA-GBM,female,31,Alive,873.0,Glioblastoma,0,873.0
+74139255-a635-4c87-814d-3dd04ed630a8,TCGA-06-0190,TCGA-GBM,male,62,Dead,313.0,Glioblastoma,1,317.0
+746aa9fb-0af2-4719-9d48-56e9bf21260c,TCGA-19-0964,TCGA-GBM,male,70,Alive,103.0,Glioblastoma,0,103.0
+74b42897-e88c-45da-a3e4-3b7d22481995,TCGA-02-0430,TCGA-GBM,female,67,Dead,321.0,Glioblastoma,1,321.0
+74ce7e7f-e214-4b6e-8551-114a153ab7fb,TCGA-06-5417,TCGA-GBM,female,45,Alive,155.0,Glioblastoma,0,155.0
+7638e294-2dcf-4c03-b238-24e40491c2ad,TCGA-19-A6J5,TCGA-GBM,male,40,Alive,868.0,Glioblastoma,0,868.0
+7751fc13-ec33-4057-965d-3b2ac6183344,TCGA-12-0775,TCGA-GBM,female,75,Dead,167.0,Glioblastoma,1,232.0
+7772b164-bd95-4dcd-981b-26158a31d67c,TCGA-08-0512,TCGA-GBM,male,48,Dead,358.0,Glioblastoma,1,1282.0
+77d4d3ef-3fe0-4f93-a863-b5840926576c,TCGA-12-1093,TCGA-GBM,female,66,Dead,364.0,Glioblastoma,1,486.0
+799bfae2-b189-43bc-a3bc-d425cd4fe556,TCGA-02-0330,TCGA-GBM,female,51,Dead,484.0,Glioblastoma,1,484.0
+7a4c0a14-ac97-4c2b-a9cc-68cb561b2494,TCGA-06-6391,TCGA-GBM,female,44,Dead,,Glioblastoma,1,45.0
+7a650a2c-bc3f-4e0c-820e-4f492977107b,TCGA-06-5414,TCGA-GBM,male,61,Alive,273.0,Glioblastoma,0,273.0
+7a8d2e13-315e-4512-85ce-b018d11c3bd3,TCGA-4W-AA9S,TCGA-GBM,male,69,Alive,44.0,Glioblastoma,0,44.0
+7c95ec5e-a078-481f-b1fc-3a3a001de7ec,TCGA-06-0237,TCGA-GBM,female,75,Dead,315.0,Glioblastoma,1,415.0
+7cada85b-00b1-41e5-9924-e09eb077ad56,TCGA-06-0130,TCGA-GBM,male,54,Dead,320.0,Glioblastoma,1,394.0
+7cbabf1d-ec38-4048-ae1c-7d0f3001691b,TCGA-14-0789,TCGA-GBM,male,54,Dead,342.0,Glioblastoma,1,342.0
+7db115ea-082b-45bb-97d2-4254270b8bb6,TCGA-14-1795,TCGA-GBM,male,66,Dead,60.0,Glioblastoma,1,60.0
+7e70a318-3acc-42f3-8287-158a2199f0bc,TCGA-19-5956,TCGA-GBM,female,53,Dead,198.0,Glioblastoma,1,684.0
+7eb1d526-923d-4b31-b8be-27d83b3dd025,TCGA-06-6388,TCGA-GBM,female,64,Dead,120.0,Glioblastoma,1,159.0
+81622677-9742-40ea-ad60-5f9b2a624ea7,TCGA-19-5958,TCGA-GBM,male,56,Dead,164.0,Glioblastoma,1,428.0
+82a3f532-ae59-4d06-9bfc-e5e7519c0a33,TCGA-12-1095,TCGA-GBM,female,65,Dead,482.0,Glioblastoma,1,482.0
+83264f30-94be-4573-b519-fb0b0fce36c3,TCGA-02-0014,TCGA-GBM,male,25,Dead,2512.0,Glioblastoma,1,2512.0
+863c285c-5b87-42b9-b8b3-1ae832a6ded3,TCGA-02-0070,TCGA-GBM,male,70,Alive,762.0,Glioblastoma,0,762.0
+872cb8e8-cd79-4c0b-9b54-5553b07a6ca6,TCGA-08-0353,TCGA-GBM,male,58,Dead,195.0,Glioblastoma,1,256.0
+878584ad-e6b6-493a-9f7f-3e284f5d9f68,TCGA-06-0645,TCGA-GBM,female,55,Dead,98.0,Glioblastoma,1,175.0
+883dc176-925a-44f7-9ec8-e0cce33c2a54,TCGA-02-0099,TCGA-GBM,male,46,Dead,106.0,Glioblastoma,1,106.0
+884f867b-4a8b-4b67-8fe4-ab3f068be84e,TCGA-06-5410,TCGA-GBM,female,72,Dead,108.0,Glioblastoma,1,108.0
+8ac5b22f-3925-47a9-8d09-d819c2e191e5,TCGA-12-1602,TCGA-GBM,male,58,Dead,195.0,Glioblastoma,1,206.0
+8d2e88d9-d8d0-4c42-8aa2-205a788dea58,TCGA-06-5413,TCGA-GBM,male,67,Alive,268.0,Glioblastoma,0,268.0
+8da3103e-3e6c-4176-a583-d5fe5e60601e,TCGA-06-0125,TCGA-GBM,female,63,Dead,1439.0,Glioblastoma,1,1448.0
+8e3fbea7-d22e-40fc-8031-58fe6fe091bb,TCGA-02-0086,TCGA-GBM,female,45,Dead,268.0,Glioblastoma,1,268.0
+8f3acbbd-b2ca-4e66-8fe5-dbb49277f35b,TCGA-06-0185,TCGA-GBM,male,54,Alive,2246.0,Glioblastoma,0,2246.0
+91063e7e-60db-47a5-aeca-af7c37b1074e,TCGA-08-0351,TCGA-GBM,male,40,Dead,1637.0,Glioblastoma,1,1987.0
+93737759-b088-4d64-adfe-c2d5ec715341,TCGA-12-3649,TCGA-GBM,male,76,Dead,351.0,Glioblastoma,1,463.0
+93ed7a2b-b0cb-4a84-871f-5c34a0b6a640,TCGA-19-5960,TCGA-GBM,male,56,Dead,165.0,Glioblastoma,1,455.0
+94d1e2d5-319a-44a4-849d-9434432339ed,TCGA-02-0338,TCGA-GBM,male,41,Dead,322.0,Glioblastoma,1,322.0
+96fa386d-f930-45da-96ba-e7ca3f9de5b2,TCGA-02-0289,TCGA-GBM,male,57,Dead,432.0,Glioblastoma,1,432.0
+97094aed-69f7-4f4e-a87e-533979e11514,TCGA-12-0829,TCGA-GBM,male,75,Dead,626.0,Glioblastoma,1,626.0
+97279d35-8db4-49a9-8b63-468443a9b959,TCGA-12-0707,TCGA-GBM,male,55,Dead,0.0,Glioblastoma,1,864.0
+9733968f-262f-4e97-9194-240cda8caf65,TCGA-06-0197,TCGA-GBM,female,65,Dead,79.0,Glioblastoma,1,169.0
+9734478b-05a2-4b5c-b8aa-9e6b0b0db02d,TCGA-02-0058,TCGA-GBM,female,28,Dead,254.0,Glioblastoma,1,254.0
+97686ab2-3b7e-4b21-9bf3-9a5a01709e04,TCGA-06-1086,TCGA-GBM,male,42,Dead,193.0,Glioblastoma,1,208.0
+9773acd0-e8bf-4991-8913-53f0d2adfc72,TCGA-08-0517,TCGA-GBM,female,34,Dead,1770.0,Glioblastoma,1,1785.0
+9853c6bb-a42c-4698-abe5-f3c897ebc8f6,TCGA-06-0214,TCGA-GBM,male,66,Dead,378.0,Glioblastoma,1,457.0
+98714d95-b62e-4f34-9cd1-91542da463eb,TCGA-02-0006,TCGA-GBM,female,56,Dead,558.0,Glioblastoma,1,558.0
+987cb702-057b-4198-8ef3-9cf6a9c51989,TCGA-27-1835,TCGA-GBM,female,53,Dead,648.0,Glioblastoma,1,648.0
+98dd5ea6-8d40-4963-bbae-2d37001d71c8,TCGA-06-1087,TCGA-GBM,male,75,Dead,109.0,Glioblastoma,1,123.0
+98e0344d-71c6-477c-a990-0bd0277606af,TCGA-06-0875,TCGA-GBM,female,61,Alive,1322.0,Glioblastoma,0,1322.0
+98e2f2ec-bdcd-490a-bf45-600e3b6c7491,TCGA-06-0878,TCGA-GBM,male,74,Alive,218.0,Glioblastoma,0,218.0
+998c8517-89c1-43b2-84e4-b60905787bf6,TCGA-4W-AA9T,TCGA-GBM,female,54,Alive,778.0,Glioblastoma,0,778.0
+9a41f05b-19b1-4269-9997-4b59e378280c,TCGA-19-1788,TCGA-GBM,male,39,Dead,112.0,Glioblastoma,1,112.0
+9b775a6a-242a-4bfa-818d-d2d2f5bac5bf,TCGA-26-1440,TCGA-GBM,male,48,Alive,296.0,Glioblastoma,0,296.0
+9f004b8a-f202-419d-a4d8-01f9430eaca5,TCGA-06-1805,TCGA-GBM,female,28,Alive,1031.0,Glioblastoma,0,1031.0
+a05c4aca-5b7c-452a-a92c-f252539f9e9a,TCGA-12-1098,TCGA-GBM,female,75,Dead,121.0,Glioblastoma,1,121.0
+a1eca6d7-09ba-418a-a787-77be67e672dd,TCGA-02-0027,TCGA-GBM,female,33,Dead,315.0,Glioblastoma,1,370.0
+a2338b30-f511-4163-af3b-1e4a40ff00e1,TCGA-14-0787,TCGA-GBM,male,69,Dead,68.0,Glioblastoma,1,68.0
+a23511df-ed31-4f3f-9fe5-87a3621c0de9,TCGA-08-0354,TCGA-GBM,female,52,Dead,458.0,Glioblastoma,1,546.0
+a262928c-e20a-4c02-8114-1227e05c43e1,TCGA-19-4065,TCGA-GBM,male,36,Alive,214.0,Glioblastoma,0,214.0
+a28b256e-e085-467d-bdba-5c39718012d7,TCGA-26-5133,TCGA-GBM,male,59,Alive,452.0,Glioblastoma,0,452.0
+a3cc2845-8a44-4b50-8a3e-17a3c2c3e077,TCGA-12-0662,TCGA-GBM,male,51,Dead,1161.0,Glioblastoma,1,1161.0
+a515cf2d-e918-4958-9bf6-e611b425a97e,TCGA-14-1823,TCGA-GBM,female,58,Dead,543.0,Glioblastoma,1,543.0
+a589e2dc-7649-492c-9569-592698acaa6f,TCGA-19-0957,TCGA-GBM,female,48,Dead,666.0,Glioblastoma,1,666.0
+a597bfa8-8c4d-4f8e-9d85-8a9fdc2c56ff,TCGA-27-2524,TCGA-GBM,male,56,Dead,231.0,Glioblastoma,1,231.0
+a5d3714d-1b1b-480e-8ec6-f01317cdbf14,TCGA-02-0451,TCGA-GBM,female,62,Dead,493.0,Glioblastoma,1,493.0
+a61e88cd-5121-4e6e-9319-2978071547c3,TCGA-27-2527,TCGA-GBM,male,81,Dead,438.0,Glioblastoma,1,438.0
+a6312802-12ad-4545-8109-178a7ebd618f,TCGA-26-1439,TCGA-GBM,male,63,Dead,,Glioblastoma,1,422.0
+a63ce9ac-24a4-484e-8bcc-717cd7aa92df,TCGA-81-5910,TCGA-GBM,male,64,Dead,,Glioblastoma,1,49.0
+a795a841-9fd6-4eac-b871-a8c70248700f,TCGA-06-0209,TCGA-GBM,male,76,Dead,119.0,Glioblastoma,1,232.0
+a79b97df-d7f7-4df4-861b-936f94a1ab30,TCGA-19-1385,TCGA-GBM,male,69,Dead,327.0,Glioblastoma,1,327.0
+a8033f85-ac9b-41f3-b775-a1aee3f21b8f,TCGA-06-0216,TCGA-GBM,female,61,Dead,684.0,Glioblastoma,1,735.0
+a9597785-a1d3-4788-a431-d25d69025690,TCGA-14-1453,TCGA-GBM,male,69,Dead,35.0,Glioblastoma,1,35.0
+a98afa02-6821-47db-8074-68ecc14b62a6,TCGA-02-0446,TCGA-GBM,male,61,Dead,282.0,Glioblastoma,1,282.0
+a9a0bad8-6074-4a7c-9f9e-7dbc1de01def,TCGA-12-0657,TCGA-GBM,male,69,Dead,3.0,Glioblastoma,1,3.0
+aa703529-7153-4f74-8577-2601876e3374,TCGA-19-5953,TCGA-GBM,male,58,Dead,144.0,Glioblastoma,1,144.0
+aaa7d45b-ce3c-4099-ab4a-377e3aee9f96,TCGA-08-0529,TCGA-GBM,female,56,Dead,527.0,Glioblastoma,1,560.0
+aad2c954-39a4-4ef3-9940-e754619007a4,TCGA-14-1396,TCGA-GBM,female,78,Dead,34.0,Glioblastoma,1,34.0
+ab327397-a510-4b39-a12e-185c726650ff,TCGA-19-2631,TCGA-GBM,female,74,Dead,213.0,Glioblastoma,1,213.0
+ac3582a9-46b1-4322-95fa-9e8b149b8044,TCGA-06-1084,TCGA-GBM,male,54,Dead,226.0,Glioblastoma,1,728.0
+ac72738c-8b33-4f03-917c-86b114a2b9bd,TCGA-12-1088,TCGA-GBM,female,53,Dead,3881.0,Glioblastoma,1,3881.0
+ad7a6a27-c517-49ef-a9f9-518dccda23b4,TCGA-19-5955,TCGA-GBM,male,83,Dead,54.0,Glioblastoma,1,54.0
+ada9c707-d49c-43d5-bee6-3e00732755ea,TCGA-06-0122,TCGA-GBM,female,84,Dead,8.0,Glioblastoma,1,187.0
+adc0c9c3-002a-4fab-b148-e162020ad051,TCGA-02-0016,TCGA-GBM,male,50,Dead,1699.0,Glioblastoma,1,2648.0
+aeeaf19a-3b0d-4c79-a029-44642581f4d8,TCGA-19-1790,TCGA-GBM,male,56,Dead,154.0,Glioblastoma,1,154.0
+aef8439b-2797-4c3a-b822-fcf640d200f6,TCGA-12-1090,TCGA-GBM,male,58,Dead,190.0,Glioblastoma,1,231.0
+af055b98-be6a-4012-ac64-f1b6539b23d0,TCGA-06-5408,TCGA-GBM,female,54,Dead,342.0,Glioblastoma,1,357.0
+b02aa13e-7fd9-40ba-9083-cbf7d4bfc948,TCGA-12-1096,TCGA-GBM,male,55,Dead,,Glioblastoma,1,277.0
+b0406065-73bd-4370-8133-7a1c7c11eac6,TCGA-19-A6J4,TCGA-GBM,male,68,Dead,,Glioblastoma,1,121.0
+b0ebaa85-476c-4f44-8b23-5bab107454a9,TCGA-08-0516,TCGA-GBM,male,14,Dead,561.0,Glioblastoma,1,596.0
+b196f82b-ef3f-4e05-99f7-da5df65e691e,TCGA-02-0075,TCGA-GBM,male,63,Dead,634.0,Glioblastoma,1,634.0
+b1ce95bf-7441-4aac-8131-19a177d2b8ac,TCGA-06-1800,TCGA-GBM,male,61,Dead,815.0,Glioblastoma,1,815.0
+b2a01580-d18f-40b5-875b-93e9c000b0e1,TCGA-08-0521,TCGA-GBM,male,17,Dead,146.0,Glioblastoma,1,146.0
+b75845ed-a19a-4caa-b362-e62b1e538152,TCGA-12-0827,TCGA-GBM,female,38,Dead,1179.0,Glioblastoma,1,1179.0
+b7b86c1f-9688-4129-891c-843e3a37b3e5,TCGA-28-1760,TCGA-GBM,male,48,Alive,143.0,Glioblastoma,0,143.0
+b92047e1-8a76-46dd-baa7-6e629cfaebdb,TCGA-28-1749,TCGA-GBM,male,73,Alive,280.0,Glioblastoma,0,280.0
+bb0aca6b-55ab-4b24-8e64-29e0c96a9862,TCGA-12-0691,TCGA-GBM,male,63,Dead,186.0,Glioblastoma,1,369.0
+bb8230b5-f984-4d28-9f10-b3c89bab1c28,TCGA-08-0355,TCGA-GBM,female,30,Dead,685.0,Glioblastoma,1,747.0
+bc316a17-9d73-4ef3-97e9-c4ac5516b75a,TCGA-06-0158,TCGA-GBM,male,73,Dead,166.0,Glioblastoma,1,329.0
+bc7a0c8f-c1c1-447c-8019-389e52525081,TCGA-27-1837,TCGA-GBM,male,36,Dead,427.0,Glioblastoma,1,427.0
+bcc72cf4-90ce-466e-a683-bb0ebfb3cf82,TCGA-06-0169,TCGA-GBM,male,68,Dead,95.0,Glioblastoma,1,100.0
+bd114e05-5a97-41e2-a0d5-5d39a1e9d461,TCGA-08-0514,TCGA-GBM,female,69,Dead,259.0,Glioblastoma,1,337.0
+bdc75722-1076-49f3-8dc7-f2b91e5a15eb,TCGA-06-1801,TCGA-GBM,female,56,Dead,263.0,Glioblastoma,1,360.0
+bde84ea9-55c9-4d6d-be86-58fd9222c1d6,TCGA-06-0129,TCGA-GBM,male,30,Dead,989.0,Glioblastoma,1,1024.0
+be3a7ef3-34ed-40e1-9d9c-187940596b26,TCGA-27-2528,TCGA-GBM,male,62,Dead,480.0,Glioblastoma,1,480.0
+bef21d11-f743-4d9d-8cba-fb5cd24b6927,TCGA-08-0344,TCGA-GBM,male,66,Dead,3310.0,Glioblastoma,1,3524.0
+bf339349-062f-4ea9-a0b2-d87d3a21099e,TCGA-14-1402,TCGA-GBM,female,58,Dead,975.0,Glioblastoma,1,975.0
+c01ae0ee-fa58-45d2-ac33-d7f64d053bbb,TCGA-19-2623,TCGA-GBM,male,65,Alive,229.0,Glioblastoma,0,229.0
+c184c3ca-7ad3-4202-b108-cb9fd5f5d947,TCGA-41-5651,TCGA-GBM,female,59,Dead,351.0,Glioblastoma,1,460.0
+c1a00516-091c-480b-991e-7db4e0a30aea,TCGA-12-0776,TCGA-GBM,male,52,Dead,277.0,Glioblastoma,1,296.0
+c1f590eb-21ed-4939-adc5-0f7e6f485b56,TCGA-02-0009,TCGA-GBM,female,61,Dead,322.0,Glioblastoma,1,322.0
+c2399f5d-dc29-42e9-81f1-1d164d4cc55d,TCGA-14-1454,TCGA-GBM,female,54,Dead,918.0,Glioblastoma,1,918.0
+c2651206-36c5-4f3c-a0d6-3ffc07b27a93,TCGA-06-0124,TCGA-GBM,male,67,Dead,123.0,Glioblastoma,1,620.0
+c29d73c0-c885-4105-bf74-38e9178e71c9,TCGA-26-1442,TCGA-GBM,male,43,Alive,953.0,Glioblastoma,0,953.0
+c45e9e8b-35ab-4477-acdc-b18be0b3497d,TCGA-02-0023,TCGA-GBM,female,38,Dead,612.0,Glioblastoma,1,612.0
+c46d44e2-182a-4692-a8a8-0a95112c2c64,TCGA-08-0509,TCGA-GBM,male,63,Dead,17.0,Glioblastoma,1,382.0
+c4ff28e5-9de7-43df-89a2-6832b8a0c00b,TCGA-12-0656,TCGA-GBM,female,48,Dead,2005.0,Glioblastoma,1,2883.0
+c5718c27-cef6-4612-a7cc-42d0e0c51a1a,TCGA-28-1746,TCGA-GBM,female,77,Alive,6.0,Glioblastoma,0,6.0
+c5e08764-822b-4214-9ce6-f3ec2756190e,TCGA-06-0876,TCGA-GBM,female,72,Alive,1405.0,Glioblastoma,0,1405.0
+c7b317a4-f5ba-4bd5-bbde-fd09418d3dee,TCGA-08-0531,TCGA-GBM,male,64,Dead,168.0,Glioblastoma,1,230.0
+c931f3bd-74c5-4ebd-bc0f-c7c6becd25ab,TCGA-06-0686,TCGA-GBM,male,53,Dead,286.0,Glioblastoma,1,432.0
+c9b25b65-ef41-4ffb-8b1c-a9e3a3c5cd8c,TCGA-02-0115,TCGA-GBM,male,52,Dead,476.0,Glioblastoma,1,476.0
+ca261ec9-888b-47c8-8e71-5a22545d7161,TCGA-12-0820,TCGA-GBM,male,40,Dead,562.0,Glioblastoma,1,562.0
+ca9ad9d3-0ac6-403a-98a2-f679d0ee009e,TCGA-02-0266,TCGA-GBM,male,14,Dead,539.0,Glioblastoma,1,539.0
+cb58b5fe-ee0d-46f1-8502-1c8bcf729f3b,TCGA-14-0813,TCGA-GBM,male,78,Dead,41.0,Glioblastoma,1,41.0
+cfc44ad0-c915-43f6-ab03-e0e67b735185,TCGA-02-0269,TCGA-GBM,male,68,Dead,327.0,Glioblastoma,1,327.0
+d0de6676-6ba1-4d79-a9b0-ec3f1e8a8775,TCGA-06-0137,TCGA-GBM,female,63,Dead,702.0,Glioblastoma,1,812.0
+d1547b99-3c96-4c62-8261-5111bcf860a9,TCGA-06-5858,TCGA-GBM,female,45,Alive,187.0,Glioblastoma,0,187.0
+d16ef9d7-9e9f-4dbb-9fb4-f8ceaf699e22,TCGA-02-0037,TCGA-GBM,female,74,Dead,110.0,Glioblastoma,1,110.0
+d3d27286-73e1-4cdd-914a-34c210fd6398,TCGA-27-2518,TCGA-GBM,male,52,Dead,753.0,Glioblastoma,1,753.0
+d540d6d2-266c-48f9-8e73-304389b2060b,TCGA-12-3651,TCGA-GBM,male,77,Dead,358.0,Glioblastoma,1,386.0
+d6830f6f-7bd5-4d43-81bd-42c64a73dd8b,TCGA-19-1786,TCGA-GBM,female,64,Alive,218.0,Glioblastoma,0,218.0
+d73ca945-b60b-4b5c-ac53-7ef2602a4951,TCGA-26-5139,TCGA-GBM,female,65,Alive,48.0,Glioblastoma,0,48.0
+d85fa9be-f7fb-407b-af46-31f495b210d6,TCGA-02-0021,TCGA-GBM,female,43,Dead,2362.0,Glioblastoma,1,2362.0
+d8628d35-c4c6-443f-9da2-8517a157f137,TCGA-19-A60I,TCGA-GBM,male,39,Alive,541.0,Glioblastoma,0,541.0
+d88bbd87-e876-4a44-96f5-c28ceac661b8,TCGA-06-0126,TCGA-GBM,male,86,Dead,3.0,Glioblastoma,1,211.0
+d9cae674-1100-44a4-8c61-2f15ea1b6214,TCGA-06-6389,TCGA-GBM,female,49,Alive,237.0,Glioblastoma,0,237.0
+dae7e5c3-0b17-419c-a5fc-3bb271222bce,TCGA-12-0828,TCGA-GBM,male,57,Dead,272.0,Glioblastoma,1,272.0
+db5ea0e6-4cac-4f18-8643-32afb1e0287d,TCGA-12-0778,TCGA-GBM,male,53,Dead,452.0,Glioblastoma,1,454.0
+dbb601ed-e39c-48a6-aa00-645f740fc6e2,TCGA-08-0347,TCGA-GBM,male,50,Dead,419.0,Glioblastoma,1,782.0
+dc624b20-2854-4235-ae7e-672156ee30e3,TCGA-08-0350,TCGA-GBM,male,32,Dead,104.0,Glioblastoma,1,889.0
+dca3a016-5e89-4850-80bf-e78dc19a2453,TCGA-12-1094,TCGA-GBM,male,56,Dead,346.0,Glioblastoma,1,372.0
+dcc5e92a-8dd4-4909-8f37-98bed374d722,TCGA-41-3392,TCGA-GBM,male,88,Dead,30.0,Glioblastoma,1,30.0
+dd76930a-1678-4b70-9864-730534174d41,TCGA-27-1832,TCGA-GBM,female,59,Dead,0.0,Glioblastoma,1,300.0
+de73fd2a-1337-42e6-b2bc-728e63f2f8be,TCGA-08-0392,TCGA-GBM,male,60,Dead,9.0,Glioblastoma,1,22.0
+de7b7cac-f094-4d59-8651-e991e34ea093,TCGA-06-0210,TCGA-GBM,female,72,Dead,151.0,Glioblastoma,1,225.0
+df3c1d61-79c1-43e9-971a-8029497ffeab,TCGA-02-0003,TCGA-GBM,male,50,Dead,144.0,Glioblastoma,1,144.0
+df4168bd-9f94-4323-9c33-a446a9fae999,TCGA-12-0773,TCGA-GBM,male,24,Dead,1311.0,Glioblastoma,1,1315.0
+e0e1b5b3-6e3c-4b79-aa2a-32b320c3e45a,TCGA-14-1825,TCGA-GBM,male,70,Dead,,Glioblastoma,1,232.0
+e1481049-c04e-48fe-8110-ac1d0ee86e75,TCGA-06-0189,TCGA-GBM,male,55,Dead,454.0,Glioblastoma,1,469.0
+e17a6048-7a72-42c0-ad3f-97cbff02bc9f,TCGA-19-2629,TCGA-GBM,male,60,Dead,501.0,Glioblastoma,1,737.0
+e1aabb11-f499-445e-a6fd-59a32b3c3531,TCGA-08-0348,TCGA-GBM,male,63,Dead,316.0,Glioblastoma,1,370.0
+e2e83064-7d1c-4dd5-993f-cc7a5ee228ed,TCGA-06-0743,TCGA-GBM,male,69,Dead,679.0,Glioblastoma,1,803.0
+e3711a9b-6d4c-44df-bbab-0a675046a5df,TCGA-06-0208,TCGA-GBM,female,52,Dead,167.0,Glioblastoma,1,256.0
+e4aafd82-fd32-4a52-96fe-21a21297849f,TCGA-26-1443,TCGA-GBM,female,60,Alive,217.0,Glioblastoma,0,217.0
+e57b296a-80e9-4446-a3d1-3dbfeaf04f5e,TCGA-12-0818,TCGA-GBM,female,45,Dead,2791.0,Glioblastoma,1,2791.0
+e67edc2e-5de7-4d3c-ba47-e8558a0b9f5a,TCGA-12-0654,TCGA-GBM,female,48,Dead,218.0,Glioblastoma,1,231.0
+e6dee2d7-ca05-44e2-bf25-1068a416bd14,TCGA-08-0245,TCGA-GBM,female,31,Dead,1057.0,Glioblastoma,1,1151.0
+e6e2d4c3-d37c-4de3-ac68-b301800770f0,TCGA-06-5412,TCGA-GBM,female,78,Dead,138.0,Glioblastoma,1,138.0
+e711a200-cdd5-459e-8dc0-1480bd9bc5df,TCGA-02-0079,TCGA-GBM,male,57,Dead,829.0,Glioblastoma,1,829.0
+e8e43a65-4ec8-4e07-a884-a6989eec28cc,TCGA-12-3646,TCGA-GBM,female,59,Dead,1315.0,Glioblastoma,1,1339.0
+e921772f-f81a-49bc-b35e-3354c94447c0,TCGA-06-0749,TCGA-GBM,male,50,Dead,66.0,Glioblastoma,1,82.0
+e924d7c6-c98f-4469-8089-70e4ac3ca306,TCGA-08-0520,TCGA-GBM,male,70,Dead,327.0,Glioblastoma,1,327.0
+ea3b5da2-6a12-400c-bf0f-e442f5ec1132,TCGA-06-0157,TCGA-GBM,female,63,Dead,97.0,Glioblastoma,1,97.0
+ea82c1da-eada-4108-80ec-77ce891d82a7,TCGA-06-0646,TCGA-GBM,male,60,Dead,136.0,Glioblastoma,1,175.0
+ea8b757b-3d33-47e1-8657-503cf69939bb,TCGA-08-0524,TCGA-GBM,female,17,Dead,199.0,Glioblastoma,1,221.0
+ea980264-d64d-410a-86dd-c129d7d8d1ee,TCGA-08-0389,TCGA-GBM,male,59,Dead,97.0,Glioblastoma,1,467.0
+eae44c1c-1628-4b58-8b90-d3372e3577d5,TCGA-12-0821,TCGA-GBM,male,62,Dead,323.0,Glioblastoma,1,323.0
+eb9c8e66-6710-4141-ae28-1e5c88eaee47,TCGA-14-1794,TCGA-GBM,male,59,Dead,30.0,Glioblastoma,1,30.0
+ec504558-e96a-44e9-835a-7b12680681ed,TCGA-08-0358,TCGA-GBM,male,50,Dead,594.0,Glioblastoma,1,678.0
+ec56b685-022b-44b4-8051-d8bbbcc17ee0,TCGA-19-5950,TCGA-GBM,female,52,Dead,343.0,Glioblastoma,1,523.0
+ed879063-e603-4151-bf5e-22a4ee210281,TCGA-87-5896,TCGA-GBM,female,50,Alive,800.0,Glioblastoma,0,800.0
+edcfac32-adb4-4fe7-86a0-309d3c6430e5,TCGA-12-0616,TCGA-GBM,female,36,Dead,439.0,Glioblastoma,1,448.0
+eddbca7a-d668-4c5d-9843-340d7f18e30e,TCGA-06-0238,TCGA-GBM,male,46,Dead,359.0,Glioblastoma,1,405.0
+ee3fc631-1e88-4f70-ab31-335851b38640,TCGA-06-0174,TCGA-GBM,male,54,Dead,67.0,Glioblastoma,1,98.0
+ef36cbd1-5d7d-4756-a628-b5339d41e228,TCGA-19-5952,TCGA-GBM,male,62,Dead,567.0,Glioblastoma,1,575.0
+ef646014-78a9-43af-b6fa-85fa288cd51b,TCGA-19-4068,TCGA-GBM,female,68,Alive,137.0,Glioblastoma,0,137.0
+ef6f6553-2575-457e-bc07-401215e54759,TCGA-06-0648,TCGA-GBM,male,77,Dead,294.0,Glioblastoma,1,298.0
+f077df02-5056-402f-8522-7198c42bcc98,TCGA-28-1750,TCGA-GBM,female,40,Alive,254.0,Glioblastoma,0,254.0
+f08280d6-2c80-4dd7-93d3-a0c55f7da5b3,TCGA-06-0192,TCGA-GBM,male,58,Dead,557.0,Glioblastoma,1,1185.0
+f19850cb-50c4-4f3a-ba80-b1464958ffa8,TCGA-15-0742,TCGA-GBM,male,65,Dead,,Glioblastoma,1,419.0
+f2de4316-026c-4c2d-b091-47bc0ec8612a,TCGA-19-2619,TCGA-GBM,female,55,Alive,294.0,Glioblastoma,0,294.0
+f40e45c8-2042-4844-99b5-b629f20afd58,TCGA-27-1833,TCGA-GBM,female,67,Dead,555.0,Glioblastoma,1,737.0
+f45f4a30-6b4c-4f15-9140-959d6a25a45f,TCGA-27-1831,TCGA-GBM,male,66,Dead,505.0,Glioblastoma,1,505.0
+f473a0d0-72b6-465e-93f7-122224960e80,TCGA-19-0955,TCGA-GBM,male,71,Alive,358.0,Glioblastoma,0,358.0
+f49b3e5a-6d40-4018-86ae-8396455d8878,TCGA-02-0325,TCGA-GBM,male,61,Dead,323.0,Glioblastoma,1,323.0
+f4fe7c02-be19-4929-8638-960e5776494c,TCGA-06-5856,TCGA-GBM,male,58,Dead,114.0,Glioblastoma,1,114.0
+f55a023c-84b8-4f7d-87db-7a9939733c59,TCGA-4W-AA9R,TCGA-GBM,male,61,Alive,124.0,Glioblastoma,0,124.0
+f5bc5d97-e054-4e53-992d-71b896bd97d5,TCGA-06-0152,TCGA-GBM,male,68,Dead,359.0,Glioblastoma,1,375.0
+f66d92ff-85ad-4c83-b127-ce34c8488040,TCGA-06-0127,TCGA-GBM,male,67,Dead,109.0,Glioblastoma,1,121.0
+f6b2f52b-284d-4bde-9a3d-a0f458d07f08,TCGA-19-2625,TCGA-GBM,female,76,Dead,124.0,Glioblastoma,1,124.0
+f6c6e2c9-a3d6-4b81-a421-04ffef6b8744,TCGA-12-3644,TCGA-GBM,female,47,Dead,1807.0,Glioblastoma,1,1818.0
+f7106bb6-332a-4542-bc08-59bba48f4b04,TCGA-12-1097,TCGA-GBM,male,61,Dead,442.0,Glioblastoma,1,442.0
+f7532982-524f-4ed5-9e0d-50d3a7d72c3c,TCGA-08-0356,TCGA-GBM,female,59,Dead,447.0,Glioblastoma,1,946.0
+f7ba48c8-46cf-40a9-8826-7e1f67d57171,TCGA-12-0618,TCGA-GBM,male,49,Dead,50.0,Glioblastoma,1,395.0
+f7dd387f-eca9-4028-b296-2ca6d56d3bde,TCGA-12-0670,TCGA-GBM,male,60,Dead,790.0,Glioblastoma,1,790.0
+f82bfa67-4e72-4a09-8022-a2fe0050090f,TCGA-14-1452,TCGA-GBM,male,60,Dead,216.0,Glioblastoma,1,216.0
+f8a5b835-b00b-421e-bdf5-9adb4ee84730,TCGA-12-1091,TCGA-GBM,female,10,Dead,929.0,Glioblastoma,1,1010.0
+f9ce2045-2821-4843-b5e9-cf7cc7e783d4,TCGA-06-0879,TCGA-GBM,male,52,Dead,699.0,Glioblastoma,1,1229.0
+fb75eb9d-05be-4e6b-a515-f39efb15e66c,TCGA-02-0007,TCGA-GBM,female,40,Dead,705.0,Glioblastoma,1,705.0
+fb86044c-161e-41d7-a49e-3d5ec18294ef,TCGA-19-1386,TCGA-GBM,male,51,Dead,276.0,Glioblastoma,1,276.0
+fc5ad666-d67a-4a5c-8e4e-1c8d099e9f85,TCGA-02-0033,TCGA-GBM,male,54,Dead,86.0,Glioblastoma,1,86.0
+fcce7f31-a392-4177-8dca-cfbe6e73fc2e,TCGA-02-0038,TCGA-GBM,female,48,Dead,326.0,Glioblastoma,1,326.0
+fef02e2e-d4e6-4b56-b8ef-c367b0c920cd,TCGA-12-0826,TCGA-GBM,female,38,Dead,845.0,Glioblastoma,1,845.0
+ff61d536-b505-47e7-9d3c-a7252e9037a1,TCGA-26-1799,TCGA-GBM,male,68,Dead,285.0,Glioblastoma,1,285.0
+001ad307-4ad3-4f1d-b2fc-efc032871c7e,TCGA-HT-A614,TCGA-LGG,male,47,Alive,82.0,Mixed glioma,0,82.0
+0073a136-d5f4-4fd6-88f9-711768f2abc6,TCGA-VM-A8CF,TCGA-LGG,female,44,Alive,609.0,"Astrocytoma, anaplastic",0,609.0
+00b18ad6-ff70-41fe-8f4d-0763ac8f28b9,TCGA-HT-7677,TCGA-LGG,male,53,Alive,494.0,"Oligodendroglioma, anaplastic",0,494.0
+010aac75-3bfe-4bf2-b866-af0f2d92f125,TCGA-DB-5278,TCGA-LGG,male,17,Alive,2772.0,"Oligodendroglioma, NOS",0,2772.0
+0167cf11-74be-4701-ab9a-4e057d4bb545,TCGA-DU-A5TY,TCGA-LGG,female,46,Dead,371.0,"Astrocytoma, anaplastic",1,1033.0
+019c5de9-74fd-48b7-95a3-227532e16c5a,TCGA-HT-7604,TCGA-LGG,male,50,Alive,3725.0,"Astrocytoma, NOS",0,3725.0
+01a13aba-74a4-4895-a5ad-e5119925c202,TCGA-S9-A7IZ,TCGA-LGG,female,48,Alive,608.0,"Astrocytoma, anaplastic",0,608.0
+01c4ca12-ac08-41dd-9e4f-bfb0971688a2,TCGA-DU-7009,TCGA-LGG,female,32,Dead,4206.0,"Oligodendroglioma, NOS",1,4695.0
+02194c0c-e2c1-4ea7-994a-07b61b2575e2,TCGA-HT-7902,TCGA-LGG,female,30,Alive,956.0,Mixed glioma,0,956.0
+029b33b1-7ea9-4b77-a615-7eb0e3ebd5e7,TCGA-FG-8191,TCGA-LGG,male,30,Alive,992.0,"Oligodendroglioma, anaplastic",0,992.0
+032096a6-1923-44b9-a1cb-181bed041c8e,TCGA-S9-A7J3,TCGA-LGG,female,52,Alive,629.0,"Oligodendroglioma, anaplastic",0,629.0
+033c1f48-9225-4159-b23b-7042272877da,TCGA-TM-A7CF,TCGA-LGG,female,41,Alive,1989.0,"Astrocytoma, NOS",0,1989.0
+048056cd-39dd-4134-a58b-70bebb3dd2ff,TCGA-S9-A6TV,TCGA-LGG,male,50,Alive,571.0,Mixed glioma,0,571.0
+04d56bed-98fb-45eb-8c90-95e69264dfe2,TCGA-HT-A5RB,TCGA-LGG,male,24,Alive,3.0,"Astrocytoma, NOS",0,3.0
+04e6e843-7f31-43da-b111-280ce2bd1949,TCGA-DU-A7T8,TCGA-LGG,male,35,Dead,3787.0,Mixed glioma,1,4229.0
+0536f465-1650-4411-823c-c660bc7f3adc,TCGA-DB-A64O,TCGA-LGG,male,59,Dead,573.0,Mixed glioma,1,775.0
+0639b753-4099-4ca4-adb9-763069a614ef,TCGA-HW-A5KL,TCGA-LGG,female,42,Alive,878.0,"Astrocytoma, NOS",0,878.0
+0709dbcc-0828-4066-aa01-96f059e5fa97,TCGA-DB-A75M,TCGA-LGG,male,47,Alive,544.0,"Astrocytoma, NOS",0,544.0
+081b6532-0ed4-445a-becb-cb2290f4854d,TCGA-S9-A6WP,TCGA-LGG,male,42,Alive,567.0,Mixed glioma,0,567.0
+083c0b78-88c2-4ec1-8a81-a0792b16e2cc,TCGA-DH-5144,TCGA-LGG,female,56,Alive,748.0,"Oligodendroglioma, anaplastic",0,748.0
+0906ddde-02fa-417d-927b-1c400b189cac,TCGA-HT-8114,TCGA-LGG,male,36,Alive,1040.0,Mixed glioma,0,1040.0
+09552b53-4393-4811-a671-a9ef6eff4790,TCGA-WY-A85A,TCGA-LGG,male,20,Alive,1320.0,"Astrocytoma, NOS",0,1320.0
+0b283f95-dbd4-4c36-9201-2198a90ee0d6,TCGA-S9-A6WI,TCGA-LGG,female,56,Alive,2585.0,Mixed glioma,0,2585.0
+0b54cda4-7568-481e-b0c6-2c5c6de0026c,TCGA-DB-5274,TCGA-LGG,female,37,Alive,2289.0,Mixed glioma,0,2289.0
+0bde34dd-dae9-4533-98ef-f5a61a11e7c4,TCGA-S9-A6WH,TCGA-LGG,female,73,Alive,1173.0,Mixed glioma,0,1173.0
+0c52a842-c220-486e-88de-8a4fec5d6a58,TCGA-DB-A75O,TCGA-LGG,male,29,Alive,935.0,"Astrocytoma, anaplastic",0,935.0
+0ce8d92b-54e2-45d4-a551-0faf94a27d46,TCGA-HT-7611,TCGA-LGG,male,36,Alive,1752.0,Mixed glioma,0,1752.0
+0d5a4c63-c3fb-4295-a433-d90cdbfc4ed6,TCGA-WY-A85D,TCGA-LGG,male,60,Alive,1147.0,Mixed glioma,0,1147.0
+0d61bdbd-24b1-4885-a099-9e42ca7eedcd,TCGA-HT-7620,TCGA-LGG,male,40,Alive,434.0,"Oligodendroglioma, anaplastic",0,434.0
+0db80dff-5586-4d9f-b253-df82e6fd6901,TCGA-HW-A5KM,TCGA-LGG,male,35,Alive,630.0,"Astrocytoma, NOS",0,630.0
+0df37550-9421-4571-9844-51b457d7cb2b,TCGA-FG-8187,TCGA-LGG,male,31,Alive,611.0,Mixed glioma,0,611.0
+0efaf8f9-177c-4ffb-b03f-f0316adf5dc1,TCGA-DU-A7TI,TCGA-LGG,male,32,Dead,,"Astrocytoma, anaplastic",1,1183.0
+0f0d9a7f-dd85-48aa-b5b2-deff5bb6bdeb,TCGA-FG-7641,TCGA-LGG,male,31,Alive,627.0,"Oligodendroglioma, NOS",0,627.0
+106709ec-72df-44f0-8c71-87b7c755f8f0,TCGA-FG-8188,TCGA-LGG,male,41,Alive,455.0,Mixed glioma,0,455.0
+10887e42-444d-49fc-aee5-dd0e9fc4ea54,TCGA-VV-A829,TCGA-LGG,male,44,Alive,1127.0,Mixed glioma,0,1127.0
+114902c7-77b2-42ca-926b-6895e6db5e36,TCGA-HT-8010,TCGA-LGG,female,64,Alive,50.0,"Oligodendroglioma, NOS",0,50.0
+1159c88c-39d0-4c03-9c66-36af5340a67a,TCGA-FG-8181,TCGA-LGG,male,23,Alive,862.0,Mixed glioma,0,862.0
+11dffe71-b516-41e8-9987-e0ff5d2356d1,TCGA-DU-8165,TCGA-LGG,female,60,Alive,582.0,"Oligodendroglioma, NOS",0,582.0
+12f02422-585d-4068-bbde-bc279c6a89ab,TCGA-DB-A64P,TCGA-LGG,male,40,Alive,916.0,"Oligodendroglioma, anaplastic",0,916.0
+135a149a-d153-465e-aa58-06d47bb18e00,TCGA-TQ-A8XE,TCGA-LGG,female,42,Dead,,"Oligodendroglioma, NOS",1,954.0
+141f0546-f6f2-408f-ac86-07ca4aadf3d0,TCGA-P5-A72Z,TCGA-LGG,female,64,Alive,354.0,"Oligodendroglioma, anaplastic",0,354.0
+14375753-a69f-41e0-b910-2bb8e84cc43a,TCGA-DU-6408,TCGA-LGG,female,23,Dead,,"Oligodendroglioma, anaplastic",1,3470.0
+145c3685-f6de-4669-8ec4-6c3431a90532,TCGA-RY-A83Z,TCGA-LGG,female,54,Alive,301.0,"Astrocytoma, anaplastic",0,301.0
+145f87a3-5e86-4a87-8e49-b166a2271d02,TCGA-DU-7292,TCGA-LGG,male,69,Dead,,"Astrocytoma, anaplastic",1,242.0
+14e6c57d-d78e-4660-a21f-4f90a4503080,TCGA-S9-A6WQ,TCGA-LGG,female,57,Alive,428.0,Mixed glioma,0,428.0
+152eaa99-05f5-4d30-bfb1-494a9a900e49,TCGA-DU-6396,TCGA-LGG,female,31,Dead,,Mixed glioma,1,2286.0
+152f028e-ee29-40e0-8e75-5cafffacbd45,TCGA-DU-6402,TCGA-LGG,male,52,Dead,,"Astrocytoma, anaplastic",1,214.0
+15a6ad18-a81c-4f5b-80ae-ef56ccf722f9,TCGA-DB-5281,TCGA-LGG,male,61,Alive,2381.0,Mixed glioma,0,2381.0
+1701f4ad-58c5-40d8-90c4-99e3acac0104,TCGA-DB-A4XE,TCGA-LGG,female,27,Alive,1139.0,Mixed glioma,0,1139.0
+172701cf-709b-4e8f-b2fa-e2690a9e272d,TCGA-RY-A83Y,TCGA-LGG,male,45,Alive,166.0,"Oligodendroglioma, NOS",0,166.0
+176d89d7-f8f1-4a72-b45a-31cbe1632a30,TCGA-DB-A64V,TCGA-LGG,male,54,Alive,889.0,"Oligodendroglioma, NOS",0,889.0
+178ab87c-0582-4b02-bf6b-3a4c59a5ee1b,TCGA-DU-6400,TCGA-LGG,female,66,Dead,,"Oligodendroglioma, NOS",1,37.0
+183dd089-e932-4be2-b252-0e8572e7da4e,TCGA-HT-7483,TCGA-LGG,male,14,Alive,5255.0,Mixed glioma,0,5255.0
+1937318f-a1bb-4f48-b8ec-4aadd406e52a,TCGA-DU-6393,TCGA-LGG,male,66,Dead,,"Oligodendroglioma, anaplastic",1,1585.0
+194e8231-e8d4-477f-8c62-e11f2484ecce,TCGA-S9-A7J2,TCGA-LGG,male,25,Alive,62.0,"Oligodendroglioma, anaplastic",0,62.0
+1a20f675-d9bb-48b0-a49f-d52270bd8973,TCGA-HT-A74J,TCGA-LGG,male,33,Alive,320.0,Mixed glioma,0,320.0
+1b43ff0c-cf13-4620-b5c7-7abd9129612f,TCGA-DU-7019,TCGA-LGG,male,39,Alive,800.0,Mixed glioma,0,800.0
+1b77d1e8-0a02-41de-a408-dcf33a43407a,TCGA-P5-A737,TCGA-LGG,male,47,Alive,372.0,Mixed glioma,0,372.0
+1bff1e07-4923-43d5-b2d3-cb46b6568eed,TCGA-DB-A4XD,TCGA-LGG,male,32,Alive,1210.0,"Astrocytoma, anaplastic",0,1210.0
+1c095c4a-df97-402e-902c-fc83bcf8ef88,TCGA-DU-A5TU,TCGA-LGG,female,62,Alive,796.0,"Astrocytoma, NOS",0,796.0
+1ca2e1b3-e3eb-4740-a69a-800e3eb60787,TCGA-QH-A6X9,TCGA-LGG,female,73,Alive,58.0,"Oligodendroglioma, NOS",0,58.0
+1cc53ade-73c0-492b-a7dc-328269fd0e66,TCGA-DU-5874,TCGA-LGG,female,62,Alive,461.0,"Oligodendroglioma, NOS",0,461.0
+1e713e76-064d-46dc-a53c-20a17eb68341,TCGA-DU-A6S3,TCGA-LGG,male,60,Alive,656.0,"Oligodendroglioma, NOS",0,656.0
+1ebdabea-8931-47af-a1cf-de1bd1de2a5b,TCGA-R8-A6MO,TCGA-LGG,female,53,Alive,993.0,"Oligodendroglioma, NOS",0,993.0
+1f2f3bf6-acdd-4a72-8c33-230de40910eb,TCGA-RY-A843,TCGA-LGG,male,30,Alive,63.0,"Astrocytoma, anaplastic",0,63.0
+1f54d21e-752f-496d-8453-4b9b8738cbce,TCGA-FG-7638,TCGA-LGG,female,31,Alive,686.0,"Oligodendroglioma, anaplastic",0,686.0
+1f5b6b07-45f5-4da4-932a-df9665f6c538,TCGA-FG-A711,TCGA-LGG,female,33,Dead,1329.0,"Oligodendroglioma, NOS",1,1481.0
+215e117c-4d76-463c-8f8a-fd6a28d23929,TCGA-DU-7006,TCGA-LGG,female,60,Dead,,"Astrocytoma, anaplastic",1,349.0
+21bbe030-8dbb-47eb-a670-13eb57c12159,TCGA-TM-A84R,TCGA-LGG,male,46,Alive,566.0,"Oligodendroglioma, NOS",0,566.0
+2272dff7-a509-496f-b500-467c1bce2f79,TCGA-WY-A85E,TCGA-LGG,female,48,Alive,633.0,Mixed glioma,0,633.0
+230f5fa7-aa36-41ea-b40b-08f520767bd5,TCGA-CS-4942,TCGA-LGG,female,44,Dead,,"Astrocytoma, anaplastic",1,1335.0
+23c335f6-5749-4443-8ae8-61cccbb137cb,TCGA-E1-A7YV,TCGA-LGG,female,26,Dead,,Mixed glioma,1,987.0
+24ebd152-f8d7-44eb-af7f-8ee7f2e458e4,TCGA-HT-7607,TCGA-LGG,female,61,Dead,,"Astrocytoma, NOS",1,96.0
+274496d6-0a9b-45ca-876f-b91f7277963c,TCGA-HT-A4DV,TCGA-LGG,female,51,Alive,792.0,"Oligodendroglioma, anaplastic",0,792.0
+275cb949-2f61-48c9-84f0-ba8ae4fa35c4,TCGA-HT-7881,TCGA-LGG,male,38,Alive,1079.0,"Oligodendroglioma, NOS",0,1079.0
+27d0d3cb-16c0-4ba8-9662-95917f665004,TCGA-HT-7476,TCGA-LGG,male,26,Alive,199.0,"Astrocytoma, NOS",0,199.0
+284680b2-f961-402d-8740-e5f9e4fb4a98,TCGA-VV-A86M,TCGA-LGG,female,36,Alive,487.0,"Astrocytoma, anaplastic",0,487.0
+288f6c7e-d96f-4be1-8312-77c67f75c467,TCGA-TM-A7CA,TCGA-LGG,male,44,Alive,1058.0,"Astrocytoma, NOS",0,1058.0
+292cf158-dd47-44a1-912b-73626095a0f7,TCGA-DU-7298,TCGA-LGG,female,38,Dead,,"Astrocytoma, anaplastic",1,576.0
+29e95c77-f55b-42e1-b81e-eab4bb3cf803,TCGA-QH-A6CV,TCGA-LGG,male,51,Alive,442.0,Mixed glioma,0,442.0
+2c03e8b9-8856-43a7-853d-5ec51a6e5330,TCGA-DH-5140,TCGA-LGG,female,38,Dead,,Mixed glioma,1,607.0
+2cf49bac-dea1-45ff-9e1d-09f5a2ac5215,TCGA-DH-5141,TCGA-LGG,male,32,Alive,968.0,"Oligodendroglioma, anaplastic",0,968.0
+2cfc07f3-a31c-41a2-a9e3-b708d2421a78,TCGA-FG-5965,TCGA-LGG,female,39,Dead,979.0,Mixed glioma,1,1120.0
+2d42dd0e-be3a-46ae-a635-c6f9c52f9fa2,TCGA-DU-5853,TCGA-LGG,male,29,Alive,407.0,Mixed glioma,0,407.0
+2d860614-b772-46e2-b1cd-43bb3ead7255,TCGA-FG-7634,TCGA-LGG,male,28,Alive,467.0,"Oligodendroglioma, NOS",0,467.0
+2f8c789e-bbd8-4753-a48b-6894c21162f8,TCGA-TQ-A7RK,TCGA-LGG,male,29,Alive,1341.0,"Oligodendroglioma, NOS",0,1341.0
+2fb951f1-00a0-4caf-ac93-096056e77b1f,TCGA-P5-A72X,TCGA-LGG,male,21,Alive,403.0,"Astrocytoma, anaplastic",0,403.0
+30bf5895-0671-4fb1-a96d-857847fcf7b0,TCGA-DU-A76K,TCGA-LGG,male,87,Dead,,"Oligodendroglioma, NOS",1,347.0
+325138ab-2947-4131-b40e-971f024723cc,TCGA-HT-7480,TCGA-LGG,male,33,Alive,2287.0,"Oligodendroglioma, NOS",0,2287.0
+334f715e-08dc-4a29-b8e4-b010b829c478,TCGA-CS-4938,TCGA-LGG,female,31,Alive,3574.0,"Astrocytoma, NOS",0,3574.0
+335bc811-8bdc-4f66-bdd0-703b7cc7464b,TCGA-P5-A731,TCGA-LGG,female,59,Alive,274.0,Mixed glioma,0,274.0
+33600812-1894-4471-a365-75ae4d990b72,TCGA-VM-A8CB,TCGA-LGG,male,33,Alive,3.0,"Oligodendroglioma, anaplastic",0,3.0
+33615113-791b-4286-a23a-ad3d1f8d4b09,TCGA-DB-A4XC,TCGA-LGG,male,26,Alive,1421.0,Mixed glioma,0,1421.0
+33bedfb7-33fb-479d-b997-50c3284c0ac9,TCGA-S9-A7J1,TCGA-LGG,male,43,Alive,249.0,"Oligodendroglioma, NOS",0,249.0
+3431a71c-fabf-440c-b11c-8acfee04724f,TCGA-TQ-A7RM,TCGA-LGG,female,41,Alive,1116.0,Mixed glioma,0,1116.0
+345d975c-e666-4614-81eb-5ccbb5bd2cf7,TCGA-QH-A870,TCGA-LGG,female,38,Alive,395.0,Mixed glioma,0,395.0
+36615695-921c-4c8a-93d6-6c788079beae,TCGA-RY-A845,TCGA-LGG,female,40,Alive,596.0,Mixed glioma,0,596.0
+36cf458b-3c8e-48e7-92ab-aea1c698e417,TCGA-HW-8321,TCGA-LGG,male,31,Alive,1294.0,"Astrocytoma, NOS",0,1294.0
+38eca720-ad68-43a7-8a1c-f79f838d5d03,TCGA-S9-A6U9,TCGA-LGG,male,36,Alive,2918.0,"Astrocytoma, anaplastic",0,2918.0
+38f4b9f3-6709-40ff-9a81-5fa2111b1ce6,TCGA-HT-7477,TCGA-LGG,male,62,Alive,738.0,"Astrocytoma, anaplastic",0,738.0
+395798c5-3136-4a30-8557-a67a3abdecaf,TCGA-DU-A76L,TCGA-LGG,male,54,Dead,,"Oligodendroglioma, anaplastic",1,814.0
+3ac41cc6-5dfb-40a1-bd13-5dc7ca2bb6f3,TCGA-E1-A7Z3,TCGA-LGG,female,31,Dead,,"Astrocytoma, NOS",1,2235.0
+3b19b5d1-13af-4669-a082-1bd546048185,TCGA-DH-A7UV,TCGA-LGG,male,49,Alive,566.0,"Astrocytoma, anaplastic",0,566.0
+3b68b6ff-7efb-4d53-8bd8-c76cd68ab7c0,TCGA-TM-A84F,TCGA-LGG,male,48,Alive,1796.0,"Astrocytoma, anaplastic",0,1796.0
+3baa0015-885c-487a-9076-236f404feb3e,TCGA-DU-A6S6,TCGA-LGG,female,35,Alive,2893.0,Mixed glioma,0,2893.0
+3c6dc0eb-e94b-4293-b665-f3cba04fc8de,TCGA-P5-A781,TCGA-LGG,female,34,Alive,134.0,"Astrocytoma, anaplastic",0,134.0
+3d58ded1-b7cf-420c-ba59-5b424683f0df,TCGA-HT-7686,TCGA-LGG,female,29,Alive,1300.0,"Astrocytoma, anaplastic",0,1300.0
+3e4851ca-4d69-4035-a2dd-8ed6e70f1ffb,TCGA-S9-A6WD,TCGA-LGG,male,58,Alive,2289.0,"Oligodendroglioma, anaplastic",0,2289.0
+3f36cd97-eb22-47de-b447-5c96378e4a2b,TCGA-HT-7687,TCGA-LGG,male,74,Alive,3.0,"Oligodendroglioma, anaplastic",0,3.0
+3f6ffb08-32a9-4555-bfd1-243b7f526105,TCGA-DU-7294,TCGA-LGG,female,53,Alive,2869.0,"Oligodendroglioma, NOS",0,2869.0
+3f70c3e3-0131-466f-92aa-0a63ab3d4258,TCGA-CS-6188,TCGA-LGG,male,48,Dead,725.0,"Astrocytoma, anaplastic",1,814.0
+40343ebd-0d62-401e-83a4-6cdb57662ec0,TCGA-HT-7855,TCGA-LGG,male,39,Alive,585.0,"Astrocytoma, anaplastic",0,585.0
+40587b69-0f62-4a2a-88cb-1bd711377f19,TCGA-DB-A4XF,TCGA-LGG,female,41,Alive,1021.0,"Astrocytoma, anaplastic",0,1021.0
+40ae8507-c08a-45d5-9bbb-65d236c82319,TCGA-HT-7875,TCGA-LGG,male,56,Alive,10.0,"Oligodendroglioma, NOS",0,10.0
+41456932-436e-4cdb-bfe8-97d089656786,TCGA-HT-7475,TCGA-LGG,male,67,Alive,530.0,Mixed glioma,0,530.0
+41e4dc71-7767-44c2-9d38-110dcd37b451,TCGA-S9-A6TS,TCGA-LGG,female,48,Dead,,"Astrocytoma, anaplastic",1,1891.0
+41fbb9f1-4a13-48ab-8649-0608c89cdd9f,TCGA-S9-A6U2,TCGA-LGG,female,48,Alive,908.0,"Oligodendroglioma, NOS",0,908.0
+42156c6a-416e-4832-9c95-cee6084b0910,TCGA-WH-A86K,TCGA-LGG,male,65,Alive,405.0,"Astrocytoma, NOS",0,405.0
+42251e02-b687-4bf1-a1b6-e3dd978542e4,TCGA-HW-7487,TCGA-LGG,male,39,Alive,1382.0,"Oligodendroglioma, NOS",0,1382.0
+4240c137-ee3a-474c-9426-470380cb41a2,TCGA-HT-7880,TCGA-LGG,male,30,Alive,162.0,Mixed glioma,0,162.0
+4250ac3c-c8b0-46ce-b9c8-7963bc386041,TCGA-E1-A7YM,TCGA-LGG,male,63,Dead,,"Astrocytoma, anaplastic",1,648.0
+427c40f6-d1bd-49f2-b303-a975793b937e,TCGA-DU-7008,TCGA-LGG,female,41,Alive,4752.0,"Oligodendroglioma, NOS",0,4752.0
+427f4d23-2b76-4a2a-a498-0c3473f57169,TCGA-S9-A7QX,TCGA-LGG,female,36,Alive,564.0,"Astrocytoma, anaplastic",0,564.0
+4289a50b-c6be-495e-9826-53aeb67b6a22,TCGA-QH-A6XA,TCGA-LGG,female,23,Alive,502.0,Mixed glioma,0,502.0
+42cc9620-98fb-4164-a3b2-28d084ca5a03,TCGA-DU-6394,TCGA-LGG,male,53,Dead,,"Oligodendroglioma, anaplastic",1,682.0
+42fe260f-520b-4fac-8c09-d2b31aed59fb,TCGA-CS-6290,TCGA-LGG,male,31,Dead,546.0,"Astrocytoma, anaplastic",1,1137.0
+432fe4a9-2cdc-4323-aff0-59e2fdeda194,TCGA-S9-A6TX,TCGA-LGG,male,46,Alive,1245.0,"Oligodendroglioma, anaplastic",0,1245.0
+442df188-b678-45bb-bd9d-7071ed8aaa5a,TCGA-KT-A74X,TCGA-LGG,male,26,Alive,438.0,Mixed glioma,0,438.0
+446d76df-3e78-4272-a942-ced0de27c794,TCGA-P5-A730,TCGA-LGG,male,22,Alive,333.0,Mixed glioma,0,333.0
+448d3e3b-622c-4e79-bb1d-b5f2e92970e8,TCGA-HT-7482,TCGA-LGG,female,18,Alive,3253.0,Mixed glioma,0,3253.0
+451bad4f-6d72-4526-9978-38e090fc479f,TCGA-QH-A65X,TCGA-LGG,female,28,Alive,482.0,Mixed glioma,0,482.0
+457ec7f6-8612-4641-aaef-8a7f2c44c30c,TCGA-E1-A7YD,TCGA-LGG,male,57,Dead,,"Astrocytoma, anaplastic",1,435.0
+45b6d41b-3a1b-47e9-80e4-59355170aee7,TCGA-HT-7608,TCGA-LGG,male,61,Alive,671.0,Mixed glioma,0,671.0
+467a7e6a-8cba-4ef1-8afd-6c8eaccbc3df,TCGA-DU-6410,TCGA-LGG,male,56,Alive,242.0,"Oligodendroglioma, anaplastic",0,242.0
+4797c600-f024-42fe-b287-d919b24dcb79,TCGA-DB-5280,TCGA-LGG,male,43,Alive,1112.0,Mixed glioma,0,1112.0
+482d4078-7576-48cf-bf7c-29014935fd47,TCGA-HT-7472,TCGA-LGG,male,38,Alive,1.0,"Oligodendroglioma, NOS",0,1.0
+4839a058-fbca-44c7-bd61-81943b4d45d5,TCGA-HT-7610,TCGA-LGG,female,25,Alive,1706.0,Mixed glioma,0,1706.0
+484dd45b-a16c-4650-bac9-832fbe4d96eb,TCGA-VM-A8CH,TCGA-LGG,female,24,Alive,714.0,"Astrocytoma, NOS",0,714.0
+48607130-c09a-491d-882f-7d2591d13182,TCGA-DU-5872,TCGA-LGG,female,43,Alive,532.0,Mixed glioma,0,532.0
+491ea65b-86c8-4686-99cf-f09505e20183,TCGA-HT-7693,TCGA-LGG,female,51,Alive,533.0,"Oligodendroglioma, NOS",0,533.0
+49967a57-7c12-46bb-8d71-cebbb17c9935,TCGA-HW-7495,TCGA-LGG,female,45,Alive,1078.0,"Oligodendroglioma, NOS",0,1078.0
+49a87025-d0a4-44b3-b6ad-563bf9651093,TCGA-HT-7694,TCGA-LGG,male,60,Alive,210.0,"Oligodendroglioma, anaplastic",0,210.0
+49d5acbb-d75c-4485-b456-6b50667fef99,TCGA-P5-A72U,TCGA-LGG,female,71,Alive,7.0,"Oligodendroglioma, anaplastic",0,7.0
+4a7d4805-09e3-4044-9800-73239f4d66d4,TCGA-HT-7854,TCGA-LGG,male,62,Alive,1201.0,"Astrocytoma, NOS",0,1201.0
+4bd8ebc1-6f6e-44a2-8544-106901a7bae5,TCGA-DU-A5TR,TCGA-LGG,male,51,Alive,908.0,Mixed glioma,0,908.0
+4c167f09-d664-425f-bd84-6ff8c21b272b,TCGA-DU-A5TW,TCGA-LGG,female,33,Alive,760.0,"Astrocytoma, anaplastic",0,760.0
+4c3e709a-fd52-431c-8be5-3d9b1f80ecd2,TCGA-HT-7478,TCGA-LGG,male,36,Alive,194.0,"Astrocytoma, NOS",0,194.0
+4e1606e5-f4c1-41a2-9f2c-ad0d02650070,TCGA-HT-7857,TCGA-LGG,female,24,Alive,7.0,"Astrocytoma, anaplastic",0,7.0
+4ef429be-c345-4258-9b42-b56e215e1a2c,TCGA-DU-6399,TCGA-LGG,male,54,Dead,,"Oligodendroglioma, NOS",1,2000.0
+5017c115-39b8-4c5c-8be6-2cb298d7c641,TCGA-HT-7695,TCGA-LGG,female,29,Alive,442.0,"Oligodendroglioma, NOS",0,442.0
+505e9812-d13e-42d3-aee2-55a85d6f4551,TCGA-QH-A65R,TCGA-LGG,female,38,Alive,461.0,"Oligodendroglioma, anaplastic",0,461.0
+50975570-c0d5-4ee7-9226-40b3db1bde84,TCGA-VM-A8C9,TCGA-LGG,female,37,Alive,1314.0,"Astrocytoma, NOS",0,1314.0
+5119aceb-ad95-4904-b6c0-a0a4b42c17d0,TCGA-R8-A6ML,TCGA-LGG,male,52,Alive,2860.0,"Oligodendroglioma, anaplastic",0,2860.0
+5469c0e8-0c58-4870-b897-8fa0704599a7,TCGA-FG-8189,TCGA-LGG,female,33,Alive,685.0,"Oligodendroglioma, NOS",0,685.0
+559a8f6f-dd60-43b7-ae09-16cc4206064c,TCGA-HT-A74L,TCGA-LGG,female,22,Alive,336.0,Mixed glioma,0,336.0
+55a67639-ed05-4143-af96-a377bc5489ee,TCGA-HW-7486,TCGA-LGG,male,37,Alive,1721.0,"Oligodendroglioma, NOS",0,1721.0
+55c78413-d102-4113-930e-6d842862fe75,TCGA-DU-5851,TCGA-LGG,female,40,Alive,531.0,Mixed glioma,0,531.0
+5795a884-b62a-46a9-81d6-f24058424660,TCGA-E1-A7YI,TCGA-LGG,female,33,Dead,,"Astrocytoma, anaplastic",1,111.0
+58650d08-7685-41de-9ae0-21665f8f449f,TCGA-S9-A7R4,TCGA-LGG,male,46,Alive,914.0,"Astrocytoma, anaplastic",0,914.0
+58c82c76-9198-4c95-80f8-c043d1cea5eb,TCGA-DU-8167,TCGA-LGG,female,69,Alive,471.0,Mixed glioma,0,471.0
+58de25d5-8a32-4412-866b-acac2e321bfa,TCGA-HT-8011,TCGA-LGG,male,55,Alive,494.0,"Astrocytoma, anaplastic",0,494.0
+59012b43-ab0b-42c3-aed3-94e224a3dfa7,TCGA-P5-A72W,TCGA-LGG,male,35,Alive,317.0,"Astrocytoma, anaplastic",0,317.0
+5a2d3bfa-4bdd-417d-9796-e3699760114c,TCGA-HT-A5RA,TCGA-LGG,female,65,Alive,832.0,"Astrocytoma, anaplastic",0,832.0
+5a3edeb6-133e-4116-9f80-2485bd70754d,TCGA-TQ-A7RV,TCGA-LGG,male,27,Alive,1868.0,"Astrocytoma, NOS",0,1868.0
+5a3ef1cb-c98e-473a-b097-20307b04bc1b,TCGA-DU-A7TC,TCGA-LGG,male,32,Alive,1137.0,"Astrocytoma, NOS",0,1137.0
+5a769292-c3ce-4e18-b821-2bfe0e24978c,TCGA-DU-7302,TCGA-LGG,female,48,Alive,1834.0,"Oligodendroglioma, anaplastic",0,1834.0
+5af8ada5-86b5-4832-8a8e-e975ecca5515,TCGA-DU-5849,TCGA-LGG,male,48,Alive,443.0,"Oligodendroglioma, NOS",0,443.0
+5b199e7e-cc23-4065-88ad-fdfe3d0683d6,TCGA-FG-A710,TCGA-LGG,female,50,Alive,1115.0,"Oligodendroglioma, NOS",0,1115.0
+5b744051-7355-4e15-b035-0621e709a5d7,TCGA-DH-5142,TCGA-LGG,male,29,Alive,1943.0,"Astrocytoma, anaplastic",0,1943.0
+5b9d7565-a933-449d-8ffa-ec5f82db2e77,TCGA-FN-7833,TCGA-LGG,male,25,Alive,837.0,Mixed glioma,0,837.0
+5ccd86ab-2587-4f35-b96a-4f4320b10fb9,TCGA-DB-A4XH,TCGA-LGG,female,53,Alive,962.0,Mixed glioma,0,962.0
+5de6fd84-ed02-4c27-9947-db57f05faf6d,TCGA-HT-8104,TCGA-LGG,female,51,Alive,372.0,"Astrocytoma, anaplastic",0,372.0
+5e0748f1-990b-43a9-9ff1-6a667cc228a8,TCGA-DB-A4X9,TCGA-LGG,female,33,Alive,1412.0,Mixed glioma,0,1412.0
+5e2539e0-2088-43df-ad2a-f854d8bb6d30,TCGA-E1-A7YS,TCGA-LGG,male,71,Dead,,"Oligodendroglioma, anaplastic",1,466.0
+5eef573e-6a44-4dc7-8aa7-b136863ce910,TCGA-E1-A7YW,TCGA-LGG,male,28,Dead,,Mixed glioma,1,1120.0
+5f10cd91-1e03-4016-b35a-8629a1a8fcc9,TCGA-FG-6692,TCGA-LGG,male,63,Dead,413.0,"Oligodendroglioma, anaplastic",1,561.0
+5f853a88-811d-4eb4-914e-d90862c5d2a2,TCGA-DB-A75K,TCGA-LGG,female,55,Alive,368.0,Mixed glioma,0,368.0
+607b1f22-b744-43c5-91f7-fc69142ba30e,TCGA-TQ-A7RR,TCGA-LGG,male,38,Alive,787.0,Mixed glioma,0,787.0
+60b30a95-3e4c-413a-9de6-16a5bca163c4,TCGA-CS-6670,TCGA-LGG,male,43,Alive,1426.0,"Oligodendroglioma, anaplastic",0,1426.0
+6105c037-90f1-42d9-ac38-6e2252999a64,TCGA-HW-8322,TCGA-LGG,male,39,Alive,758.0,"Oligodendroglioma, NOS",0,758.0
+618f2aa7-d1b6-430d-a157-d3d956edefbe,TCGA-HT-A5R5,TCGA-LGG,female,33,Alive,4.0,"Oligodendroglioma, NOS",0,4.0
+619e18c1-09b9-468c-816d-6789c0bef0a8,TCGA-TQ-A7RG,TCGA-LGG,male,36,Alive,599.0,Mixed glioma,0,599.0
+61ff31a4-4fdc-476c-b456-2a2fed4bae6b,TCGA-TM-A84M,TCGA-LGG,male,40,Alive,754.0,"Oligodendroglioma, anaplastic",0,754.0
+62088274-a45b-4616-b086-b0ddd64895f0,TCGA-QH-A6XC,TCGA-LGG,male,48,Alive,508.0,"Astrocytoma, anaplastic",0,508.0
+621424ec-67bc-4c42-b0ad-64c5654b5ad9,TCGA-S9-A6U5,TCGA-LGG,male,33,Alive,992.0,"Astrocytoma, NOS",0,992.0
+62e27075-7ddc-4f15-ac21-0a8244abb12d,TCGA-HT-7680,TCGA-LGG,female,32,Alive,23.0,"Astrocytoma, NOS",0,23.0
+62ec50e7-636e-46c6-afed-66bf217b59c1,TCGA-DU-A7TG,TCGA-LGG,male,40,Dead,,"Oligodendroglioma, NOS",1,1351.0
+6355cade-7b3a-43a8-9f1f-8e7bc45755a8,TCGA-DU-6395,TCGA-LGG,male,31,Dead,,Mixed glioma,1,1491.0
+63f4aa26-dec0-4309-8b75-6446a7241527,TCGA-TM-A84G,TCGA-LGG,female,54,Alive,1236.0,"Oligodendroglioma, anaplastic",0,1236.0
+648252da-dd86-48d1-ae75-4257e3142b0b,TCGA-FG-5964,TCGA-LGG,male,62,Alive,1588.0,"Oligodendroglioma, NOS",0,1588.0
+64cd17eb-c778-45e9-b994-02b68182e51b,TCGA-CS-4944,TCGA-LGG,male,50,Alive,1828.0,"Astrocytoma, NOS",0,1828.0
+65836b59-b469-4b89-adf5-e65735e494f5,TCGA-R8-A6MK,TCGA-LGG,male,40,Alive,2702.0,"Oligodendroglioma, NOS",0,2702.0
+669605f6-39a1-4f8c-81dc-39430ff5f892,TCGA-DU-A5TP,TCGA-LGG,male,33,Alive,1012.0,"Astrocytoma, anaplastic",0,1012.0
+66990a9d-8c40-4c56-b931-5c3826c3bc27,TCGA-DB-A64S,TCGA-LGG,male,20,Alive,835.0,Mixed glioma,0,835.0
+66c52a31-6503-40b5-a55e-fa476eaf0567,TCGA-VM-A8CE,TCGA-LGG,male,25,Alive,1191.0,"Oligodendroglioma, NOS",0,1191.0
+67e9b426-72eb-4475-9689-eb75b22c4fd5,TCGA-DB-A64R,TCGA-LGG,female,24,Alive,955.0,"Oligodendroglioma, NOS",0,955.0
+688fc346-a14d-4859-8727-057cd0a0b880,TCGA-S9-A6TU,TCGA-LGG,male,38,Alive,2650.0,"Astrocytoma, NOS",0,2650.0
+68f550ca-3a33-45e4-b1c9-14f99e543263,TCGA-FG-5963,TCGA-LGG,male,23,Dead,547.0,"Astrocytoma, anaplastic",1,775.0
+6957d45e-7ccb-457d-800d-c2a2037f4f01,TCGA-HW-7489,TCGA-LGG,male,38,Dead,253.0,Mixed glioma,1,1262.0
+699d3ba1-94c8-409f-90c3-e7fe2f1cf825,TCGA-DU-A5TT,TCGA-LGG,male,70,Alive,743.0,"Oligodendroglioma, anaplastic",0,743.0
+6a0b306b-f73d-45b2-93a6-b9bd625644a3,TCGA-HT-7692,TCGA-LGG,male,43,Alive,90.0,Mixed glioma,0,90.0
+6a0bcf0c-fa4c-4119-99d2-f722b781d20f,TCGA-FG-8182,TCGA-LGG,male,35,Alive,416.0,"Oligodendroglioma, NOS",0,416.0
+6a3e577a-4e07-4468-857a-79edbe6833cd,TCGA-HT-7691,TCGA-LGG,female,31,Alive,3.0,"Astrocytoma, NOS",0,3.0
+6a8241a8-d9ee-414b-89fd-4c3b9f181cc7,TCGA-S9-A7J0,TCGA-LGG,female,30,Alive,609.0,"Oligodendroglioma, anaplastic",0,609.0
+6b225409-09c0-4a51-8f42-8fefe3855c4d,TCGA-HT-7605,TCGA-LGG,male,38,Alive,139.0,"Oligodendroglioma, NOS",0,139.0
+6d020185-bdde-4c43-9e38-71c6ed0c13d1,TCGA-HT-A4DS,TCGA-LGG,female,55,Alive,7.0,"Astrocytoma, anaplastic",0,7.0
+6d17c327-435a-4cba-9626-3b5b7b7375bb,TCGA-QH-A6CS,TCGA-LGG,male,41,Alive,588.0,"Astrocytoma, anaplastic",0,588.0
+6d2c49c3-0721-4bd2-b39f-7872f2de996d,TCGA-S9-A6WE,TCGA-LGG,male,34,Alive,4113.0,"Oligodendroglioma, NOS",0,4113.0
+6ef2d9ab-f72e-48cf-92b8-f3159d28160c,TCGA-TQ-A7RH,TCGA-LGG,male,39,Alive,486.0,Mixed glioma,0,486.0
+6fab9c30-354b-4f99-9b60-6823c12b9b0a,TCGA-DU-8162,TCGA-LGG,female,61,Dead,121.0,Mixed glioma,1,444.0
+70939245-41e0-4845-a473-5fef719b9828,TCGA-DU-6407,TCGA-LGG,female,35,Dead,,"Oligodendroglioma, NOS",1,2875.0
+7116ce06-d730-40e4-92d7-aef1f869b1d5,TCGA-TQ-A7RP,TCGA-LGG,male,66,Alive,914.0,Mixed glioma,0,914.0
+71ec4c84-4aef-4c1f-ab07-dc264c5c0602,TCGA-TM-A84I,TCGA-LGG,male,30,Alive,854.0,"Astrocytoma, anaplastic",0,854.0
+722c172f-46e6-47a1-82e5-3207278df89b,TCGA-E1-A7YY,TCGA-LGG,female,27,Dead,,"Oligodendroglioma, NOS",1,4445.0
+723cad09-aa2d-4492-b19d-661b310e1c58,TCGA-HT-A74O,TCGA-LGG,male,34,Alive,3.0,"Astrocytoma, anaplastic",0,3.0
+72aa812d-5daa-4bd7-9028-ec541b1f25bd,TCGA-HT-7474,TCGA-LGG,male,52,Alive,114.0,Mixed glioma,0,114.0
+732df38e-d32c-4d63-ac97-ad655e2e5732,TCGA-W9-A837,TCGA-LGG,male,47,Alive,1553.0,"Oligodendroglioma, NOS",0,1553.0
+735b1100-07f6-43d4-b29c-46d0f025573f,TCGA-F6-A8O4,TCGA-LGG,male,44,Alive,6.0,"Astrocytoma, NOS",0,6.0
+738143b3-2d82-42f0-9fd4-8cbabc9c9b4f,TCGA-RY-A840,TCGA-LGG,male,47,Alive,854.0,"Oligodendroglioma, anaplastic",0,854.0
+738f5c96-ee44-4fd7-bb8c-e2b86f8053c8,TCGA-FG-A60L,TCGA-LGG,female,34,Alive,655.0,"Astrocytoma, NOS",0,655.0
+739cc9f1-71be-4f81-a5d1-eda673903e45,TCGA-RY-A83X,TCGA-LGG,female,46,Alive,939.0,"Oligodendroglioma, NOS",0,939.0
+765588aa-075f-477f-9c18-099d018d3a1b,TCGA-S9-A7QW,TCGA-LGG,female,54,Alive,458.0,"Astrocytoma, anaplastic",0,458.0
+7662940a-22de-44d8-b59a-2f2b090ea6d5,TCGA-FG-A4MU,TCGA-LGG,male,58,Alive,326.0,Mixed glioma,0,326.0
+76cb16f9-37be-450e-b60a-5f0d0f1ec2bc,TCGA-QH-A6CU,TCGA-LGG,female,52,Alive,451.0,"Oligodendroglioma, anaplastic",0,451.0
+76e54ef6-1799-4fd9-bec3-0ea960e8461e,TCGA-DH-A669,TCGA-LGG,male,70,Dead,,"Oligodendroglioma, anaplastic",1,919.0
+7704e4a8-c7aa-4288-b1ed-68c23abbe924,TCGA-DB-A4XG,TCGA-LGG,male,34,Alive,2219.0,"Oligodendroglioma, anaplastic",0,2219.0
+77396ae6-3838-47bf-aaae-f9a0f401ec7f,TCGA-HT-A61C,TCGA-LGG,male,66,Dead,103.0,"Oligodendroglioma, anaplastic",1,537.0
+7740824e-905f-47a0-b235-54561ef58ba3,TCGA-HT-7688,TCGA-LGG,male,59,Alive,964.0,"Oligodendroglioma, anaplastic",0,964.0
+77472095-030d-4679-921d-8e8e217956c5,TCGA-KT-A7W1,TCGA-LGG,female,45,Alive,438.0,"Astrocytoma, anaplastic",0,438.0
+775c04e6-a02d-44a4-86f7-496056edd249,TCGA-HT-7874,TCGA-LGG,female,41,Alive,1130.0,"Oligodendroglioma, anaplastic",0,1130.0
+784ecaa5-7fb8-402a-8240-396aad96be83,TCGA-F6-A8O3,TCGA-LGG,male,34,Alive,7.0,"Oligodendroglioma, NOS",0,7.0
+7883e417-a793-4614-9528-6c2e9e44379f,TCGA-S9-A7R8,TCGA-LGG,female,44,Dead,,"Astrocytoma, anaplastic",1,961.0
+78a212bc-a740-46bf-a10d-0b9809a5bb3f,TCGA-S9-A7R1,TCGA-LGG,male,35,Dead,5000.0,"Oligodendroglioma, NOS",1,5166.0
+79627774-078d-4056-84b3-f1f370f643e0,TCGA-S9-A7QZ,TCGA-LGG,male,41,Alive,826.0,"Oligodendroglioma, NOS",0,826.0
+7989b7fb-b9d9-4d3f-9352-cd0c1f28d828,TCGA-TQ-A7RI,TCGA-LGG,female,37,Alive,62.0,"Oligodendroglioma, NOS",0,62.0
+799e9106-e62e-4681-8861-137f474ee8b8,TCGA-HT-7602,TCGA-LGG,male,21,Alive,908.0,"Oligodendroglioma, NOS",0,908.0
+7e17e6fd-ed83-471f-91e3-5934885c8e87,TCGA-FG-A87Q,TCGA-LGG,female,61,Alive,174.0,"Astrocytoma, anaplastic",0,174.0
+7e41baba-7ef6-4030-b595-d95cd96336b5,TCGA-HT-A5R7,TCGA-LGG,female,33,Alive,615.0,"Astrocytoma, anaplastic",0,615.0
+80db28ec-ab3d-42a7-af88-b60fe8acb5b5,TCGA-HT-8018,TCGA-LGG,female,40,Dead,654.0,Mixed glioma,1,1152.0
+81076cfb-f9d7-4add-b696-6eab0bad7945,TCGA-HT-8015,TCGA-LGG,male,21,Alive,3.0,"Astrocytoma, NOS",0,3.0
+81622da8-9f36-4ea3-b223-d831d8c10f87,TCGA-DU-7299,TCGA-LGG,male,33,Dead,,"Astrocytoma, anaplastic",1,1339.0
+81fb338f-1023-49aa-ac0f-ba763a6cd68c,TCGA-HT-8108,TCGA-LGG,female,26,Alive,76.0,"Oligodendroglioma, NOS",0,76.0
+823f571a-3cfd-465d-95fd-187a398ccf6f,TCGA-DU-A76R,TCGA-LGG,male,51,Dead,,"Oligodendroglioma, anaplastic",1,648.0
+82fd02ab-d628-469f-8853-4c603cf04964,TCGA-DH-A7US,TCGA-LGG,male,50,Alive,706.0,"Oligodendroglioma, NOS",0,706.0
+834e560a-a506-456d-baf2-a206ca058153,TCGA-DU-7010,TCGA-LGG,female,58,Dead,,"Astrocytoma, anaplastic",1,456.0
+84ae73e4-3b39-4444-9bfb-3fc6057eab32,TCGA-DU-7301,TCGA-LGG,male,53,Dead,,"Oligodendroglioma, NOS",1,788.0
+84d80bcf-da24-4b93-bfe3-3d2d53b8b07d,TCGA-TM-A7C5,TCGA-LGG,male,30,Alive,1500.0,Mixed glioma,0,1500.0
+85f77526-791e-47cd-904d-d1dbb49eaeab,TCGA-DB-5279,TCGA-LGG,male,59,Alive,1354.0,"Oligodendroglioma, NOS",0,1354.0
+8643437f-cd1b-47c8-86bd-87b6c2f80747,TCGA-TM-A84C,TCGA-LGG,male,32,Dead,459.0,"Astrocytoma, NOS",1,492.0
+8655fa51-d784-4f8d-9bc8-f1da7303d22f,TCGA-HT-A5RC,TCGA-LGG,female,70,Dead,,"Astrocytoma, anaplastic",1,162.0
+86aa5790-9afd-4653-926a-625516df1f56,TCGA-HT-7884,TCGA-LGG,female,44,Alive,343.0,"Astrocytoma, NOS",0,343.0
+872a12b4-8cbd-49d2-ac98-d846587f5794,TCGA-FG-A87N,TCGA-LGG,female,37,Alive,567.0,"Astrocytoma, anaplastic",0,567.0
+878ced76-3144-4141-896f-50e3e863df36,TCGA-P5-A77X,TCGA-LGG,female,55,Alive,105.0,Mixed glioma,0,105.0
+8839f236-bc04-416f-84d4-50f67fb338dc,TCGA-TM-A84O,TCGA-LGG,female,61,Dead,,"Oligodendroglioma, anaplastic",1,1011.0
+887def39-e212-490d-8849-2bc932fceff0,TCGA-DB-A64Q,TCGA-LGG,female,31,Alive,182.0,Mixed glioma,0,182.0
+8996dc64-8c5e-4e07-8ed8-2eb11c03626b,TCGA-HW-A5KJ,TCGA-LGG,male,68,Dead,860.0,"Oligodendroglioma, anaplastic",1,962.0
+8a94ff28-a74d-4fe2-b9c0-06c01f0a3fb6,TCGA-HW-A5KK,TCGA-LGG,male,64,Dead,240.0,"Astrocytoma, anaplastic",1,388.0
+8b10f00f-fde6-423d-bc36-027931359a5a,TCGA-E1-A7Z6,TCGA-LGG,female,41,Dead,,"Astrocytoma, NOS",1,984.0
+8cba230b-46db-4d35-8123-3879eba32402,TCGA-CS-6666,TCGA-LGG,male,22,Alive,1428.0,"Astrocytoma, anaplastic",0,1428.0
+8d06226e-500b-4172-ae96-c674913909e6,TCGA-HT-7485,TCGA-LGG,male,42,Alive,122.0,"Astrocytoma, NOS",0,122.0
+8d07b1e8-5d1d-4a43-b616-d29dd58ce5fe,TCGA-FG-6689,TCGA-LGG,male,30,Alive,454.0,"Astrocytoma, NOS",0,454.0
+8daa29c0-f652-4130-a004-5183bbe30c63,TCGA-DU-6403,TCGA-LGG,female,60,Dead,,Mixed glioma,1,354.0
+8e2dcc00-9f7e-4dee-b24d-43c8b30294c5,TCGA-DU-7007,TCGA-LGG,male,33,Dead,,"Astrocytoma, NOS",1,1915.0
+8e44fb97-c649-4056-80ac-257cef61d226,TCGA-S9-A7R2,TCGA-LGG,male,69,Dead,,"Astrocytoma, anaplastic",1,316.0
+8ed09a8a-3284-4a1b-b369-e25d2fab0f61,TCGA-S9-A6U6,TCGA-LGG,male,28,Alive,1069.0,"Astrocytoma, anaplastic",0,1069.0
+904371b0-1e2c-4cd7-a69d-29ae8c5fec8b,TCGA-DB-A75P,TCGA-LGG,female,25,Alive,492.0,"Astrocytoma, NOS",0,492.0
+912d6455-0a50-4fde-b785-f6c09b00b7e4,TCGA-HT-7882,TCGA-LGG,male,66,Dead,52.0,"Oligodendroglioma, anaplastic",1,113.0
+9239a22e-80b1-49a2-b0d5-cbab7e415254,TCGA-DU-6405,TCGA-LGG,female,51,Dead,,"Astrocytoma, anaplastic",1,605.0
+92a7c445-2217-400a-bdcd-df41502416b6,TCGA-DU-5847,TCGA-LGG,female,34,Alive,548.0,"Astrocytoma, anaplastic",0,548.0
+92ebe72e-508d-4547-b14b-b8e02e6233ca,TCGA-QH-A65S,TCGA-LGG,female,32,Alive,77.0,Mixed glioma,0,77.0
+9351b1ae-89e6-4091-934f-d50da06cd01d,TCGA-HT-8012,TCGA-LGG,female,30,Alive,286.0,"Oligodendroglioma, NOS",0,286.0
+94a2ff09-f7ac-4aea-a2b2-0dc1b82ae635,TCGA-S9-A7QY,TCGA-LGG,female,35,Alive,863.0,Mixed glioma,0,863.0
+94b95c07-5f70-4a1b-b40f-dc13f6a160d5,TCGA-S9-A7IY,TCGA-LGG,male,39,Alive,715.0,Mixed glioma,0,715.0
+952dfd5d-e65a-4307-b6a9-2ed2b0d2d9ce,TCGA-CS-4943,TCGA-LGG,male,37,Dead,552.0,"Astrocytoma, anaplastic",1,1106.0
+96d9249e-501c-49e0-9559-01da978a9ca6,TCGA-E1-A7YL,TCGA-LGG,male,46,Dead,,"Astrocytoma, anaplastic",1,492.0
+975c76cd-f88a-4d88-93a4-fbf2cb9e2e3b,TCGA-HT-8111,TCGA-LGG,male,32,Alive,7.0,Mixed glioma,0,7.0
+975e17c2-b93c-4d45-8a85-786f365e4a93,TCGA-E1-A7Z4,TCGA-LGG,male,35,Dead,,"Astrocytoma, NOS",1,4412.0
+976d067b-9d7f-4920-a04d-e831edc6c2c2,TCGA-QH-A6X4,TCGA-LGG,male,47,Alive,442.0,Mixed glioma,0,442.0
+977118c8-b446-4696-aa6e-9f1a1055e241,TCGA-DH-A7UU,TCGA-LGG,male,43,Alive,417.0,"Astrocytoma, anaplastic",0,417.0
+97bf8065-3e7d-4702-a426-24908f4d66a4,TCGA-CS-5394,TCGA-LGG,male,40,Alive,8.0,"Astrocytoma, anaplastic",0,8.0
+97cb8701-7d63-4142-b404-006fbb3ecb0b,TCGA-DU-6401,TCGA-LGG,female,31,Dead,,"Oligodendroglioma, NOS",1,2660.0
+97ffbe14-9070-4a5a-8760-225a88834b40,TCGA-E1-A7Z2,TCGA-LGG,female,58,Dead,,"Oligodendroglioma, NOS",1,398.0
+98e82e98-341a-4bca-92c0-23c65c1bf94f,TCGA-FG-A70Z,TCGA-LGG,female,53,Alive,328.0,Mixed glioma,0,328.0
+9922de10-9280-44c0-b86f-6d1ca7e55bf2,TCGA-DB-A64X,TCGA-LGG,female,56,Alive,563.0,"Astrocytoma, anaplastic",0,563.0
+992452ee-8d9f-406b-9708-7bcb60062743,TCGA-E1-A7YO,TCGA-LGG,male,45,Dead,,"Oligodendroglioma, anaplastic",1,2282.0
+99d396bb-5f51-4ee4-a149-244e8fcaf522,TCGA-DB-A64U,TCGA-LGG,female,38,Alive,846.0,Mixed glioma,0,846.0
+9b161c41-4f76-4ed1-b60f-2b093bc70edb,TCGA-TM-A84L,TCGA-LGG,male,31,Dead,,Mixed glioma,1,1242.0
+9b288f0e-5155-4736-bc22-e0e801d8b738,TCGA-HT-8558,TCGA-LGG,female,29,Alive,418.0,"Oligodendroglioma, NOS",0,418.0
+9cd3b3c6-2268-4e43-964b-b7a4daf6fc6f,TCGA-DU-A6S8,TCGA-LGG,female,74,Alive,678.0,"Oligodendroglioma, anaplastic",0,678.0
+9d0c1552-00a7-4f0a-a04a-a82e721ee4e3,TCGA-DB-5276,TCGA-LGG,male,32,Alive,2218.0,Mixed glioma,0,2218.0
+9d93834a-3bf0-41fd-8c74-5ac49a6e78cd,TCGA-HT-8019,TCGA-LGG,female,34,Alive,1004.0,"Oligodendroglioma, anaplastic",0,1004.0
+9e621541-d603-4d2d-b86e-2834d3b9f9a5,TCGA-HT-8113,TCGA-LGG,female,49,Alive,900.0,"Oligodendroglioma, NOS",0,900.0
+9ed5af0e-c87f-46ff-81e7-9d3041b4034e,TCGA-DU-5852,TCGA-LGG,female,61,Dead,,Mixed glioma,1,205.0
+9ee268a7-fa71-4f3f-919f-cf4ee1de2658,TCGA-HT-7676,TCGA-LGG,male,26,Alive,5.0,"Oligodendroglioma, NOS",0,5.0
+9ee6e821-3af2-42d7-9d14-f0ca455f338c,TCGA-CS-6186,TCGA-LGG,male,58,Dead,,Mixed glioma,1,538.0
+9f469edb-6b12-4eab-bd6f-9c10034d4cb7,TCGA-E1-A7YH,TCGA-LGG,female,47,Dead,,"Astrocytoma, anaplastic",1,2835.0
+a0672f6f-6406-4d49-96d0-6afd571bbd00,TCGA-DU-A7T6,TCGA-LGG,female,73,Dead,,"Oligodendroglioma, anaplastic",1,547.0
+a0b7c7c8-a6f2-41ba-9e61-9b7f8fbbbe1f,TCGA-IK-8125,TCGA-LGG,male,62,Alive,1301.0,Mixed glioma,0,1301.0
+a1192df3-7667-4d1e-a1a0-79f6cc827dcf,TCGA-S9-A6WG,TCGA-LGG,male,31,Alive,2602.0,"Astrocytoma, anaplastic",0,2602.0
+a144e4e4-2877-4340-a2bf-524adbde8bc8,TCGA-DU-7300,TCGA-LGG,female,53,Dead,,"Oligodendroglioma, anaplastic",1,1886.0
+a2202233-4a83-4163-9532-b6edb9941453,TCGA-S9-A6WO,TCGA-LGG,male,29,Alive,566.0,"Astrocytoma, NOS",0,566.0
+a343fbe3-147a-4656-9e90-5408298ca12c,TCGA-S9-A6U0,TCGA-LGG,male,46,Dead,698.0,"Astrocytoma, anaplastic",1,742.0
+a3822b5e-d794-4126-b31f-c70e1cc47f22,TCGA-P5-A735,TCGA-LGG,female,38,Alive,292.0,"Astrocytoma, NOS",0,292.0
+a3be4e6f-c845-4d64-8111-d63fdf8cc8f1,TCGA-HT-A74K,TCGA-LGG,female,58,Alive,467.0,"Oligodendroglioma, anaplastic",0,467.0
+a418fe65-dfdd-4c84-b27c-b4567b50f457,TCGA-S9-A6WN,TCGA-LGG,female,38,Alive,805.0,"Astrocytoma, anaplastic",0,805.0
+a4e2e507-7ddf-43df-b959-fe451971af1e,TCGA-HT-A618,TCGA-LGG,female,37,Alive,512.0,"Astrocytoma, anaplastic",0,512.0
+a56c2083-33d5-4c98-b85f-3b68a3d80add,TCGA-DU-A6S7,TCGA-LGG,female,27,Alive,638.0,"Astrocytoma, anaplastic",0,638.0
+a5d3f3fb-6541-419d-b47e-720d438f1bff,TCGA-CS-6668,TCGA-LGG,female,57,Alive,1519.0,"Oligodendroglioma, NOS",0,1519.0
+a5e10e2e-5157-487b-88dc-6c70ad5e244a,TCGA-S9-A6U1,TCGA-LGG,female,22,Alive,785.0,"Astrocytoma, anaplastic",0,785.0
+a5f851c5-6130-4ea1-9f86-be59331a92f7,TCGA-IK-7675,TCGA-LGG,male,43,Dead,,"Oligodendroglioma, NOS",1,578.0
+a66a3847-7570-4486-8845-86b6125104a2,TCGA-VM-A8C8,TCGA-LGG,female,50,Alive,1397.0,"Oligodendroglioma, NOS",0,1397.0
+a6975eb0-cfa6-4b7a-bbe4-72bbdd3d3b6f,TCGA-S9-A7R7,TCGA-LGG,male,27,Alive,3000.0,"Astrocytoma, NOS",0,3000.0
+a776cfd0-db9f-450a-943c-5a9a80a75fb7,TCGA-DU-7014,TCGA-LGG,male,59,Dead,,"Oligodendroglioma, NOS",1,3571.0
+a80b0fab-6189-497f-997f-77234b69179c,TCGA-S9-A7IX,TCGA-LGG,male,57,Dead,679.0,"Astrocytoma, anaplastic",1,819.0
+a85aebda-b182-41ba-815a-3ff055e22829,TCGA-FG-A60K,TCGA-LGG,female,34,Alive,542.0,Mixed glioma,0,542.0
+a85fdb41-24c1-420d-8905-ec297f018bd9,TCGA-HW-7491,TCGA-LGG,male,35,Alive,2078.0,"Oligodendroglioma, NOS",0,2078.0
+a96bca45-ecc7-44f6-acb6-48b0cec3de4d,TCGA-QH-A86X,TCGA-LGG,male,33,Alive,337.0,"Oligodendroglioma, NOS",0,337.0
+a96fabfa-e830-476a-b2a1-899689570bd9,TCGA-HT-7479,TCGA-LGG,male,44,Alive,1227.0,"Astrocytoma, anaplastic",0,1227.0
+ab24cdc3-74a1-443f-831f-b7fb3821de6a,TCGA-HT-7616,TCGA-LGG,male,75,Dead,,"Oligodendroglioma, anaplastic",1,7.0
+ac3779f6-cc8b-428b-9531-03562a614515,TCGA-P5-A736,TCGA-LGG,female,44,Alive,230.0,"Astrocytoma, anaplastic",0,230.0
+ad1c5951-ca93-4102-889b-e28e2bcfea76,TCGA-HT-8110,TCGA-LGG,male,57,Alive,419.0,"Astrocytoma, anaplastic",0,419.0
+ad202887-88b3-4e0f-a4c3-7e135d4cb258,TCGA-FG-6690,TCGA-LGG,male,70,Alive,1294.0,"Oligodendroglioma, NOS",0,1294.0
+ad72e61e-51e3-4992-ac77-65e895935736,TCGA-QH-A65V,TCGA-LGG,female,43,Alive,384.0,"Oligodendroglioma, NOS",0,384.0
+ad80a042-c4b4-445c-9678-1c2614422684,TCGA-FG-A4MX,TCGA-LGG,male,47,Alive,569.0,"Astrocytoma, NOS",0,569.0
+ae081e4a-efa9-4b52-b15e-29085c0612d3,TCGA-CS-6667,TCGA-LGG,female,39,Alive,1469.0,"Astrocytoma, NOS",0,1469.0
+ae2db022-eb4f-4b65-89b6-9fd4439ddeef,TCGA-DB-5273,TCGA-LGG,male,33,Alive,2493.0,"Astrocytoma, anaplastic",0,2493.0
+ae4f0714-3b74-46c0-9c1b-f028c7cf2e62,TCGA-FG-A6J3,TCGA-LGG,female,52,Alive,677.0,"Astrocytoma, anaplastic",0,677.0
+ae61a71e-53a1-4884-a4a6-729744d1c309,TCGA-DB-A4XA,TCGA-LGG,male,30,Alive,573.0,Mixed glioma,0,573.0
+b027ab77-70eb-4877-91a3-702064d9cc8b,TCGA-HT-7684,TCGA-LGG,male,58,Alive,184.0,Mixed glioma,0,184.0
+b10a9314-fd40-459e-97ea-affc636dceea,TCGA-S9-A6U8,TCGA-LGG,male,24,Dead,2878.0,"Astrocytoma, NOS",1,2988.0
+b19dcbc2-b0d4-4759-9213-1a5b99df7e76,TCGA-TQ-A7RU,TCGA-LGG,male,51,Alive,1032.0,"Oligodendroglioma, NOS",0,1032.0
+b297c4dc-ec58-4392-908a-586e81d57ef0,TCGA-S9-A6TZ,TCGA-LGG,female,39,Alive,1120.0,"Astrocytoma, NOS",0,1120.0
+b2b57e93-2722-4546-9a0b-20155b86edef,TCGA-DH-A7UT,TCGA-LGG,male,30,Dead,407.0,"Astrocytoma, anaplastic",1,531.0
+b342e980-8383-4f1b-bf57-4098c37a536c,TCGA-FG-7636,TCGA-LGG,male,48,Alive,544.0,"Astrocytoma, anaplastic",0,544.0
+b3720405-ce3f-49c7-a5d9-bbffd06f6aef,TCGA-TM-A84J,TCGA-LGG,male,63,Alive,735.0,"Oligodendroglioma, anaplastic",0,735.0
+b37abdc8-b9e3-4f1a-b16d-2e59442db335,TCGA-DH-A7UR,TCGA-LGG,female,59,Alive,1650.0,"Oligodendroglioma, anaplastic",0,1650.0
+b3f0dece-94e8-4eaf-91bc-4b3f4dae12d2,TCGA-VM-A8CD,TCGA-LGG,male,58,Dead,,"Astrocytoma, anaplastic",1,240.0
+b435e88b-f105-4c65-b725-126e5a299113,TCGA-HT-7603,TCGA-LGG,male,29,Alive,705.0,"Oligodendroglioma, NOS",0,705.0
+b4f4c9b5-bc50-4f35-a7da-fd011c3b2c02,TCGA-QH-A6CZ,TCGA-LGG,male,38,Alive,279.0,Mixed glioma,0,279.0
+b60fce04-9779-42c0-8161-d29d8a1d7c64,TCGA-QH-A6X3,TCGA-LGG,male,27,Alive,313.0,Mixed glioma,0,313.0
+b6951c37-377e-49b9-862c-968082e8682f,TCGA-HT-7858,TCGA-LGG,male,28,Alive,1540.0,"Astrocytoma, NOS",0,1540.0
+b6c2c9bd-625b-4a98-830c-49c344f6cb5f,TCGA-CS-5396,TCGA-LGG,female,53,Alive,1631.0,"Oligodendroglioma, anaplastic",0,1631.0
+b6f13250-31b3-46ad-b514-5a684f1094a9,TCGA-FG-7643,TCGA-LGG,female,49,Alive,611.0,Mixed glioma,0,611.0
+b7395082-415b-4ab3-bf1e-59d0f4e4b488,TCGA-S9-A7R3,TCGA-LGG,female,28,Alive,3013.0,"Astrocytoma, NOS",0,3013.0
+b7cd3b44-ef6a-4207-a44f-14f5b3b56ed4,TCGA-DB-5270,TCGA-LGG,female,38,Alive,3733.0,Mixed glioma,0,3733.0
+b8df1577-2a75-4eb7-ab27-f2dd76160730,TCGA-DU-8158,TCGA-LGG,female,57,Dead,,"Astrocytoma, anaplastic",1,155.0
+b95afb1a-a1df-4d85-ad34-191928e28a77,TCGA-DU-5854,TCGA-LGG,female,57,Alive,257.0,"Astrocytoma, anaplastic",0,257.0
+b9a3b647-61b3-4d98-90ca-e307ab50984a,TCGA-DU-8161,TCGA-LGG,female,63,Dead,,Mixed glioma,1,722.0
+b9e2f4d1-866c-4c62-a9c8-8de7eb364a6e,TCGA-HT-7469,TCGA-LGG,male,30,Dead,238.0,"Oligodendroglioma, anaplastic",1,351.0
+ba62b5eb-e169-4b41-b949-e004d66e98a1,TCGA-DB-A75L,TCGA-LGG,female,36,Alive,342.0,"Astrocytoma, anaplastic",0,342.0
+ba910760-ebb5-41ba-81a1-c5355e3d3087,TCGA-DU-A7TJ,TCGA-LGG,male,55,Alive,17.0,"Astrocytoma, anaplastic",0,17.0
+baaddd76-277f-4c90-9cc2-0fece30c9735,TCGA-DU-A6S2,TCGA-LGG,female,37,Alive,777.0,"Oligodendroglioma, NOS",0,777.0
+bae316e3-1fa4-4fa7-8ad6-a458857a85d4,TCGA-HT-8106,TCGA-LGG,male,53,Alive,3.0,"Astrocytoma, anaplastic",0,3.0
+bb4a30d5-4eba-45db-b05a-bd843044d508,TCGA-E1-A7YK,TCGA-LGG,male,52,Dead,,"Astrocytoma, anaplastic",1,378.0
+bbfb5399-8d43-4b75-bf90-23ec142697d7,TCGA-DB-5275,TCGA-LGG,male,36,Alive,1458.0,Mixed glioma,0,1458.0
+bc3b4816-df1d-44ed-a8c6-f32c8e011a1f,TCGA-HW-8319,TCGA-LGG,female,34,Dead,660.0,"Astrocytoma, anaplastic",1,1209.0
+bc6fbb3c-870d-40b5-983b-7c88705e020d,TCGA-E1-A7YJ,TCGA-LGG,male,55,Dead,,"Astrocytoma, anaplastic",1,592.0
+bcc17e9a-6fe3-44ff-963c-d2d850a431f1,TCGA-E1-A7YN,TCGA-LGG,female,63,Dead,,"Astrocytoma, anaplastic",1,727.0
+bdfade49-9059-4665-beea-c55117ba6564,TCGA-CS-5397,TCGA-LGG,female,54,Dead,,"Astrocytoma, anaplastic",1,194.0
+bfbc0d1e-2a0b-4c60-8a37-91e3ce4b79ee,TCGA-HT-7609,TCGA-LGG,male,34,Alive,1399.0,Mixed glioma,0,1399.0
+bff37de3-dc68-4e69-bdfc-8b524dd7774f,TCGA-HT-7481,TCGA-LGG,male,39,Alive,2918.0,"Oligodendroglioma, NOS",0,2918.0
+c031f2a5-a563-4d5b-bd62-49d4fa5eca78,TCGA-FG-A60J,TCGA-LGG,female,47,Alive,449.0,Mixed glioma,0,449.0
+c05f9e21-b8fa-4537-9ae7-39d6fc9d7933,TCGA-TQ-A7RN,TCGA-LGG,male,32,Alive,1026.0,"Oligodendroglioma, NOS",0,1026.0
+c0d47e0f-4918-4e06-9db6-201671b1259c,TCGA-DU-6404,TCGA-LGG,female,24,Dead,,"Oligodendroglioma, anaplastic",1,4068.0
+c13a429c-99ea-478c-ae95-fa499b9ea9fa,TCGA-DU-6406,TCGA-LGG,female,59,Dead,,Mixed glioma,1,512.0
+c13bac88-c85b-4ee3-a51c-fd503cd7e726,TCGA-HT-A619,TCGA-LGG,female,51,Alive,651.0,"Oligodendroglioma, anaplastic",0,651.0
+c16d9f69-26f9-4ec7-b2d5-ff9f7dacfe0f,TCGA-CS-6665,TCGA-LGG,female,51,Alive,1568.0,"Astrocytoma, anaplastic",0,1568.0
+c2c16878-b615-496c-8fcb-d49c97e15551,TCGA-HT-7856,TCGA-LGG,male,35,Alive,1189.0,"Oligodendroglioma, anaplastic",0,1189.0
+c2f9dff7-751b-4704-8e6e-f4f800297030,TCGA-QH-A65Z,TCGA-LGG,male,54,Alive,427.0,"Oligodendroglioma, NOS",0,427.0
+c35f36b1-ba3d-4eea-bf5a-c95480202176,TCGA-DU-7306,TCGA-LGG,male,67,Alive,1277.0,Mixed glioma,0,1277.0
+c371e2b4-209f-40f3-a30c-51df8270b5de,TCGA-HT-7873,TCGA-LGG,male,29,Alive,718.0,Mixed glioma,0,718.0
+c3c41fd2-f0d7-4f46-9e18-cce4626538c2,TCGA-HW-7490,TCGA-LGG,male,41,Alive,1387.0,"Astrocytoma, NOS",0,1387.0
+c40ab957-fe46-43b1-992d-b4e2040a3f57,TCGA-FG-7637,TCGA-LGG,male,49,Alive,1219.0,Mixed glioma,0,1219.0
+c45e02e5-7e3c-4f36-8b8d-f54617e8a436,TCGA-S9-A6TW,TCGA-LGG,male,40,Alive,1250.0,"Oligodendroglioma, anaplastic",0,1250.0
+c4f522c9-bff5-4899-8d27-c105dab795a9,TCGA-S9-A89V,TCGA-LGG,male,70,Alive,569.0,"Astrocytoma, anaplastic",0,569.0
+c50c984f-316a-4f24-968d-618691c54c3d,TCGA-DU-7012,TCGA-LGG,female,74,Dead,,"Astrocytoma, anaplastic",1,199.0
+c56fa247-ad97-4dce-a2d3-9bdfc5dc7b1b,TCGA-DU-A76O,TCGA-LGG,male,30,Alive,522.0,"Astrocytoma, NOS",0,522.0
+c6ceb220-282e-4eef-8d36-4ce0a625cf7e,TCGA-FG-A70Y,TCGA-LGG,female,20,Alive,868.0,"Oligodendroglioma, NOS",0,868.0
+c7b2833a-9fe8-49f6-b888-2d27b0516f5c,TCGA-HT-8109,TCGA-LGG,male,64,Alive,169.0,"Oligodendroglioma, anaplastic",0,169.0
+c81d4681-c02f-4b33-abe0-b6ad7d61194d,TCGA-DU-8163,TCGA-LGG,male,29,Alive,629.0,Mixed glioma,0,629.0
+c8700ca3-8c0b-4b2a-9e87-79d244a0f892,TCGA-WY-A858,TCGA-LGG,female,32,Alive,1337.0,"Astrocytoma, anaplastic",0,1337.0
+c916b9a4-008e-4d79-a50c-f15c3549fcf6,TCGA-HT-7879,TCGA-LGG,male,31,Alive,112.0,Mixed glioma,0,112.0
+ca427acb-034e-42e2-961a-b9d5dc30b741,TCGA-DU-7309,TCGA-LGG,female,41,Alive,84.0,"Oligodendroglioma, anaplastic",0,84.0
+cb041720-0efa-4eb6-a9a5-b6e138bb1a99,TCGA-WY-A85B,TCGA-LGG,male,24,Alive,1393.0,"Astrocytoma, NOS",0,1393.0
+cb1e9916-c03f-405a-a797-15823df09c8e,TCGA-DH-A66B,TCGA-LGG,male,52,Alive,1279.0,"Astrocytoma, anaplastic",0,1279.0
+cb598780-9e42-4167-b487-eec90ad4f36f,TCGA-DU-7011,TCGA-LGG,male,25,Dead,,Mixed glioma,1,3200.0
+cc451e2a-fa85-42d7-b7af-9fc0166945fa,TCGA-S9-A7IQ,TCGA-LGG,female,45,Alive,1099.0,Mixed glioma,0,1099.0
+cc8614c4-d535-4ad9-82f0-f4dc7ad11d0f,TCGA-S9-A89Z,TCGA-LGG,male,40,Alive,623.0,"Astrocytoma, anaplastic",0,623.0
+cd50aea8-a5db-48d3-ad28-cbe9f9e75ae3,TCGA-TM-A84S,TCGA-LGG,male,36,Alive,454.0,"Oligodendroglioma, anaplastic",0,454.0
+cdd1fd4c-3427-496c-8391-4aeb6730d3cc,TCGA-VM-A8CA,TCGA-LGG,male,54,Alive,411.0,"Oligodendroglioma, NOS",0,411.0
+cf29547a-305b-4e6e-8342-36aac0850065,TCGA-QH-A6CX,TCGA-LGG,male,66,Dead,-1.0,"Astrocytoma, NOS",1,372.0
+cf2a1b98-5693-4c04-9167-f85e69a88a4a,TCGA-HT-A61B,TCGA-LGG,male,22,Alive,533.0,"Astrocytoma, anaplastic",0,533.0
+cfcd3835-bb09-400e-b7eb-55ac139d01f8,TCGA-DH-A66F,TCGA-LGG,male,49,Alive,523.0,"Oligodendroglioma, NOS",0,523.0
+d05079f2-9883-46e6-ad06-9e561f08d819,TCGA-DB-5277,TCGA-LGG,male,34,Dead,1419.0,"Astrocytoma, anaplastic",1,1547.0
+d13ac936-87a9-4164-bdab-02ccf3908cfe,TCGA-TM-A7C3,TCGA-LGG,female,43,Dead,1504.0,"Astrocytoma, anaplastic",1,1666.0
+d209cffc-fe21-4ae7-b610-e5668ea84a3b,TCGA-QH-A6X8,TCGA-LGG,female,56,Alive,509.0,"Oligodendroglioma, anaplastic",0,509.0
+d3d8987d-0a54-45f8-b9c9-17ec89fa864e,TCGA-DU-A7TB,TCGA-LGG,male,56,Alive,1567.0,"Oligodendroglioma, NOS",0,1567.0
+d43581a5-3d49-4263-862b-ca99d15ec03d,TCGA-HT-A616,TCGA-LGG,female,36,Alive,55.0,"Astrocytoma, NOS",0,55.0
+d58b535a-6c95-43bb-ad88-0600e6447537,TCGA-HT-7689,TCGA-LGG,female,58,Alive,455.0,"Oligodendroglioma, NOS",0,455.0
+d61710c1-8ac3-44e3-b567-66288a6ab731,TCGA-DU-7304,TCGA-LGG,male,43,Dead,,Mixed glioma,1,709.0
+d61b5d20-4d6d-4fdc-afe8-4b100b686eda,TCGA-DU-7013,TCGA-LGG,male,59,Dead,,"Astrocytoma, anaplastic",1,269.0
+d62d871b-4612-4bf4-b53c-9dd431e507a0,TCGA-S9-A6WL,TCGA-LGG,male,52,Alive,946.0,"Astrocytoma, anaplastic",0,946.0
+d698946e-57dd-4ff2-b5fa-7a1d15c828be,TCGA-TQ-A7RO,TCGA-LGG,male,29,Alive,949.0,Mixed glioma,0,949.0
+d766c3af-f0b3-4791-a754-d6546d370f8f,TCGA-HT-8105,TCGA-LGG,male,54,Alive,190.0,"Oligodendroglioma, anaplastic",0,190.0
+d81b9957-8c82-4006-b111-449fa9fb95ed,TCGA-P5-A733,TCGA-LGG,female,52,Alive,414.0,"Astrocytoma, NOS",0,414.0
+da13446a-c4dc-4d02-80c8-410273925ac4,TCGA-FG-A6IZ,TCGA-LGG,male,60,Alive,457.0,"Oligodendroglioma, NOS",0,457.0
+da40e6d3-a2a9-4517-aaa2-aef6c3892ebf,TCGA-DH-A66G,TCGA-LGG,female,49,Alive,523.0,"Oligodendroglioma, anaplastic",0,523.0
+da735a88-d811-49f1-9091-a097c59ed68e,TCGA-DB-A64L,TCGA-LGG,female,67,Alive,736.0,"Oligodendroglioma, NOS",0,736.0
+dadd7428-9e4d-4652-9469-ab521b88d529,TCGA-FG-6688,TCGA-LGG,female,59,Alive,571.0,"Astrocytoma, anaplastic",0,571.0
+dbfaccb0-e8c0-48e8-9aef-570267574822,TCGA-HT-7473,TCGA-LGG,male,28,Alive,503.0,Mixed glioma,0,503.0
+dc5bdd21-b23f-400e-bbe2-4c98a517fc9e,TCGA-CS-6669,TCGA-LGG,female,26,Alive,1494.0,"Oligodendroglioma, NOS",0,1494.0
+dc7ec60b-5ea5-48a4-8908-55caf9214272,TCGA-R8-A73M,TCGA-LGG,female,48,Alive,1806.0,"Oligodendroglioma, NOS",0,1806.0
+dcbbaca6-a24b-4bed-95de-314cff71e436,TCGA-S9-A6TY,TCGA-LGG,male,50,Alive,1076.0,"Oligodendroglioma, NOS",0,1076.0
+dcd0856d-423a-40d7-8070-4c0988d61416,TCGA-DH-5143,TCGA-LGG,male,30,Alive,1401.0,Mixed glioma,0,1401.0
+dcd45077-f068-490b-bdcc-4d4a62285116,TCGA-FG-8186,TCGA-LGG,female,42,Alive,487.0,Mixed glioma,0,487.0
+dce168b1-d2a9-4409-8437-ab382f6d7d31,TCGA-FG-A4MW,TCGA-LGG,male,63,Dead,160.0,Mixed glioma,1,559.0
+dd163547-43ad-4fe4-873e-83c4c6be4465,TCGA-DU-A5TS,TCGA-LGG,male,42,Alive,964.0,"Oligodendroglioma, NOS",0,964.0
+dd7b23a7-b41b-4670-9fc8-78895fb00cff,TCGA-HT-8563,TCGA-LGG,female,30,Alive,860.0,"Astrocytoma, anaplastic",0,860.0
+dd85dbb2-31c3-4bc2-9dff-3bd27c79a9ad,TCGA-S9-A6UB,TCGA-LGG,male,52,Alive,3761.0,"Oligodendroglioma, NOS",0,3761.0
+ddfd76dc-15d6-4efc-85ea-31674161ebf3,TCGA-DU-5871,TCGA-LGG,female,37,Alive,576.0,Mixed glioma,0,576.0
+de6f01bf-2de9-4d07-a956-e6a4c0acb371,TCGA-WY-A859,TCGA-LGG,female,34,Alive,1213.0,"Astrocytoma, NOS",0,1213.0
+debe24c5-e4df-4e80-82f6-8f40395aa9e6,TCGA-HW-7493,TCGA-LGG,female,40,Alive,2107.0,"Astrocytoma, NOS",0,2107.0
+df22bc30-96e2-42de-9a39-2954db49841d,TCGA-DB-A64W,TCGA-LGG,female,65,Dead,415.0,Mixed glioma,1,438.0
+df78e63d-4387-4177-b24f-f0e2c6c7ac32,TCGA-TQ-A7RJ,TCGA-LGG,female,25,Alive,1229.0,Mixed glioma,0,1229.0
+e00a9855-c15e-46ef-988f-25ca64ec4717,TCGA-DU-7290,TCGA-LGG,female,45,Dead,,"Astrocytoma, anaplastic",1,315.0
+e09f93e1-1649-48fa-9e2e-d13ac6d50b97,TCGA-FG-5962,TCGA-LGG,male,54,Alive,1453.0,"Oligodendroglioma, anaplastic",0,1453.0
+e0f8e70a-ac91-4d3c-806c-ba9c14ed43ab,TCGA-HT-A617,TCGA-LGG,male,47,Alive,491.0,"Oligodendroglioma, NOS",0,491.0
+e117fcf4-2c01-4b4d-8faf-5de7d0e839f1,TCGA-HT-A5R9,TCGA-LGG,female,48,Alive,2.0,"Oligodendroglioma, anaplastic",0,2.0
+e1758d75-b2a0-4386-bd72-6b2421d4da6b,TCGA-QH-A6CY,TCGA-LGG,male,38,Alive,408.0,Mixed glioma,0,408.0
+e2b1d161-d8cc-4eba-87ac-9449c6cd2977,TCGA-TQ-A7RQ,TCGA-LGG,female,38,Alive,795.0,"Oligodendroglioma, NOS",0,795.0
+e30f1994-3622-43d0-bec2-6d7e2d9881d2,TCGA-FG-A4MT,TCGA-LGG,female,27,Alive,1164.0,"Oligodendroglioma, NOS",0,1164.0
+e326c1dd-2ef8-431b-a657-440aa3f35ff3,TCGA-DU-5855,TCGA-LGG,female,49,Alive,207.0,Mixed glioma,0,207.0
+e349d8aa-bb82-4ce8-b14c-61216289f25b,TCGA-DU-A7TD,TCGA-LGG,male,52,Dead,,Mixed glioma,1,228.0
+e3ed0c19-6acc-4be1-aae2-73fe73cc9f24,TCGA-HW-8320,TCGA-LGG,male,36,Alive,1217.0,"Astrocytoma, anaplastic",0,1217.0
+e488f613-f155-4e11-87d4-8c789ea81691,TCGA-DU-8166,TCGA-LGG,female,29,Alive,516.0,Mixed glioma,0,516.0
+e4d9b696-3311-44e7-9191-fde56c080a00,TCGA-FG-6691,TCGA-LGG,female,23,Alive,1257.0,"Astrocytoma, NOS",0,1257.0
+e661e157-c6bc-4024-9905-97954759aad6,TCGA-P5-A780,TCGA-LGG,female,44,Alive,72.0,"Astrocytoma, anaplastic",0,72.0
+e669a4b7-a494-490a-b78c-e664c59d0697,TCGA-HT-8013,TCGA-LGG,female,37,Dead,,Mixed glioma,1,1933.0
+e695b780-17f4-4e71-9120-7c6bcafaa3a7,TCGA-DU-6397,TCGA-LGG,male,45,Dead,,"Oligodendroglioma, anaplastic",1,1401.0
+e6b7420f-4315-46a8-aed5-5c47cce5ded3,TCGA-S9-A6UA,TCGA-LGG,male,66,Dead,,"Astrocytoma, anaplastic",1,178.0
+e6c55ba6-4c8a-4ea4-8dde-74d01915db02,TCGA-HT-7468,TCGA-LGG,male,30,Alive,203.0,"Oligodendroglioma, anaplastic",0,203.0
+e78e8845-9fba-48ba-8cf3-418429ea5f56,TCGA-HT-7690,TCGA-LGG,male,29,Alive,3.0,Mixed glioma,0,3.0
+e7fdf164-a85d-4ff5-9676-d2215ca35403,TCGA-HT-7601,TCGA-LGG,female,30,Alive,153.0,"Astrocytoma, anaplastic",0,153.0
+e89f7631-fdac-4be9-9997-70e400efdc04,TCGA-HT-A615,TCGA-LGG,female,38,Alive,515.0,"Oligodendroglioma, NOS",0,515.0
+e8d3d888-e5fc-4469-ad0b-2c1df6e04790,TCGA-CS-5393,TCGA-LGG,male,39,Alive,1222.0,"Astrocytoma, anaplastic",0,1222.0
+ea31c705-4cf8-48f5-8d13-e43563213c91,TCGA-FG-A6J1,TCGA-LGG,female,44,Alive,500.0,"Oligodendroglioma, NOS",0,500.0
+ea7f3ed6-e44b-49a1-8b5c-ce35539e7bdf,TCGA-HT-7877,TCGA-LGG,female,20,Alive,4.0,"Oligodendroglioma, NOS",0,4.0
+eb42625e-fbbb-4bee-bbe9-315b3ca2138a,TCGA-DU-5870,TCGA-LGG,female,34,Alive,5546.0,"Oligodendroglioma, NOS",0,5546.0
+ec82a00f-3909-4781-8ae2-e54cbc1ac7ac,TCGA-DU-7015,TCGA-LGG,female,41,Alive,2761.0,"Oligodendroglioma, NOS",0,2761.0
+ed833be3-0e9b-4c9b-b6d5-1098f08265a0,TCGA-QH-A6X5,TCGA-LGG,female,58,Alive,497.0,Mixed glioma,0,497.0
+edbf86e5-3f55-4ddf-a97f-3e9dc607e53d,TCGA-TM-A84H,TCGA-LGG,female,44,Alive,926.0,Mixed glioma,0,926.0
+ee6bf12f-8a73-49e2-b566-368b2b42165b,TCGA-TM-A84B,TCGA-LGG,male,40,Dead,365.0,"Astrocytoma, anaplastic",1,758.0
+eef15b5c-5fbe-482a-b3b0-dd091888a6a2,TCGA-P5-A77W,TCGA-LGG,female,37,Alive,584.0,Mixed glioma,0,584.0
+ef12bfb7-4147-407f-84e9-586dbb10d583,TCGA-DU-A7TA,TCGA-LGG,male,32,Alive,2565.0,"Oligodendroglioma, NOS",0,2565.0
+effb5839-24a2-4b8c-8b6d-08cb66503d16,TCGA-HT-A61A,TCGA-LGG,female,20,Alive,194.0,"Oligodendroglioma, NOS",0,194.0
+f005fa99-7e4e-4308-b11c-83b25683b1fd,TCGA-DH-A66D,TCGA-LGG,female,43,Alive,846.0,"Astrocytoma, anaplastic",0,846.0
+f18dab99-26b0-4727-89a9-7f16bd382356,TCGA-DU-7018,TCGA-LGG,female,57,Dead,,"Oligodendroglioma, anaplastic",1,933.0
+f2d3fea5-0d20-42d3-b918-adad715be4ee,TCGA-HT-8107,TCGA-LGG,male,62,Alive,14.0,"Oligodendroglioma, NOS",0,14.0
+f4a1fc14-0d32-4e77-a8a3-fd8fea82188a,TCGA-HT-7467,TCGA-LGG,male,54,Alive,3.0,"Oligodendroglioma, NOS",0,3.0
+f5268956-789d-4b22-8f19-a3ac9353d33d,TCGA-TQ-A7RF,TCGA-LGG,female,27,Alive,650.0,"Oligodendroglioma, anaplastic",0,650.0
+f5416dc4-d161-4776-9827-e4ceaf42d19f,TCGA-TM-A7C4,TCGA-LGG,female,39,Alive,1470.0,"Astrocytoma, NOS",0,1470.0
+f625e522-226b-450f-af94-dd2f5adb605e,TCGA-HT-8564,TCGA-LGG,male,47,Alive,478.0,"Astrocytoma, anaplastic",0,478.0
+f62be2b8-88c4-4a7e-8c80-8176fb5f6c56,TCGA-WY-A85C,TCGA-LGG,male,36,Alive,1426.0,"Astrocytoma, NOS",0,1426.0
+f6a81d81-7df4-4273-8a86-e0cd3b8b1df5,TCGA-S9-A7IS,TCGA-LGG,female,33,Dead,,"Astrocytoma, anaplastic",1,241.0
+f79420ca-b0ae-417c-95f7-d28c35760202,TCGA-S9-A6WM,TCGA-LGG,female,59,Alive,604.0,"Astrocytoma, anaplastic",0,604.0
+f842f756-ce78-4c99-bcf8-3bce18a4d9ef,TCGA-E1-A7YE,TCGA-LGG,female,32,Dead,,"Astrocytoma, anaplastic",1,886.0
+f86fa219-34e9-4812-8edf-2b66d7219779,TCGA-CS-5395,TCGA-LGG,male,43,Dead,,Mixed glioma,1,639.0
+f878bf8d-70eb-4b74-bf74-bdf63cb9bfae,TCGA-TQ-A7RW,TCGA-LGG,male,32,Dead,,Mixed glioma,1,821.0
+f9052682-b689-4696-9ab9-3f55976b43ee,TCGA-TM-A84T,TCGA-LGG,male,19,Alive,724.0,Mixed glioma,0,724.0
+f97a9afe-e54a-4ef0-b458-0c77f938552e,TCGA-DU-8164,TCGA-LGG,male,51,Alive,651.0,"Oligodendroglioma, NOS",0,651.0
+fa878a23-cd20-44ef-b438-33033b5fb1fe,TCGA-FG-A713,TCGA-LGG,female,74,Alive,622.0,Mixed glioma,0,622.0
+fb3884df-3680-4c5b-8092-981007aeba03,TCGA-FG-8185,TCGA-LGG,male,37,Alive,433.0,"Astrocytoma, anaplastic",0,433.0
+fb6437f9-ade8-4c33-a0d0-ceacb2bf784d,TCGA-DB-A4XB,TCGA-LGG,male,38,Alive,919.0,"Astrocytoma, anaplastic",0,919.0
+fbe32b94-b3ba-4a56-aeba-4cffe8de2da4,TCGA-HT-7681,TCGA-LGG,female,29,Alive,1359.0,Mixed glioma,0,1359.0
+fc222f23-b3b2-4ac0-bc61-e8e8fa5cc160,TCGA-CS-4941,TCGA-LGG,male,67,Dead,,"Astrocytoma, anaplastic",1,234.0
+fc3948fb-df27-4149-bbfb-04443dfecc19,TCGA-E1-A7YU,TCGA-LGG,male,42,Dead,,Mixed glioma,1,23.0
+fc3b7596-f515-446f-81db-fed0154ca2c5,TCGA-EZ-7264,TCGA-LGG,female,47,Alive,1201.0,"Oligodendroglioma, NOS",0,1201.0
+fc8828ae-484d-4fc8-a168-f8bc58ad65b9,TCGA-DU-8168,TCGA-LGG,female,55,Alive,431.0,"Oligodendroglioma, anaplastic",0,431.0
+fcd9e1c4-bddb-4856-844c-03df48fba499,TCGA-DU-6392,TCGA-LGG,female,35,Alive,6423.0,"Astrocytoma, anaplastic",0,6423.0
+fcf14e9d-4671-453d-b8e0-5008e916f56d,TCGA-TM-A84Q,TCGA-LGG,male,31,Alive,772.0,"Astrocytoma, NOS",0,772.0
+fdff46a7-f92a-45cf-8756-6c73a406c923,TCGA-HT-A74H,TCGA-LGG,male,62,Alive,74.0,"Astrocytoma, anaplastic",0,74.0
+fe5c5c11-ef39-4907-9a70-67f37bb62fd7,TCGA-QH-A6CW,TCGA-LGG,male,43,Alive,414.0,Mixed glioma,0,414.0
+fea46eef-6b7f-44c3-93bf-2dec16bdeb79,TCGA-HT-7860,TCGA-LGG,female,60,Alive,15.0,"Astrocytoma, anaplastic",0,15.0
+febe2ce5-737b-43b8-bc70-4194fe3ed5fb,TCGA-FG-A4MY,TCGA-LGG,female,44,Alive,721.0,Mixed glioma,0,721.0
+fee2114e-f723-4374-91f8-f1dcc6b3eaee,TCGA-HT-7470,TCGA-LGG,male,37,Dead,268.0,"Oligodendroglioma, anaplastic",1,1220.0
+ffcec8e5-9fd3-4b42-a7cb-74761f713cf4,TCGA-HT-7606,TCGA-LGG,female,30,Alive,526.0,"Astrocytoma, NOS",0,526.0
+fff304a2-113f-499d-a88c-9d3660c348d9,TCGA-RY-A847,TCGA-LGG,male,45,Alive,933.0,"Oligodendroglioma, NOS",0,933.0

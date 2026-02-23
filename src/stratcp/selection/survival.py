@@ -13,13 +13,16 @@ from scipy.stats import norm
 
 
 def get_sel_survival(
-    cal_labels: np.ndarray,  # calibration survival times T_i (n,)
-    cal_scores: np.ndarray,  # calibration scores s_i (n,) — lower = more confident long survival
-    cal_threshold: np.ndarray,  # calibration thresholds c_i (n,)
-    test_scores: np.ndarray,  # test scores s_j (m,) — lower = more confident long survival
-    test_threshold: np.ndarray,  # test thresholds c_j (m,)
-    alpha: float,  # target FDR level in (0, 1)
-    w_ipcw: np.ndarray | None = None,  # optional IPCW weights for calibration (n,)
+    cal_labels: np.ndarray,
+    cal_loc_hat: np.ndarray,
+    cal_scale_hat: np.ndarray | float,
+    cal_threshold: np.ndarray,
+    test_loc_hat: np.ndarray,
+    test_scale_hat: np.ndarray | float,
+    test_threshold: np.ndarray,
+    alpha: float,
+    w_ipcw: np.ndarray | None = None,
+    model_family: str = "log_normal",
 ) -> tuple[np.ndarray, np.ndarray, float]:
     """
     Select test samples predicted to survive beyond their thresholds with FDR control.
@@ -32,12 +35,16 @@ def get_sel_survival(
     ----------
     cal_labels : np.ndarray
         Calibration survival times T_i, shape (n,)
-    cal_scores : np.ndarray
-        Calibration scores s_i, shape (n,)
+    cal_loc_hat : np.ndarray
+        Calibration location parameters, shape (n,)
+    cal_scale_hat : np.ndarray | float
+        Calibration scale parameters, shape (n,) or scalar
     cal_threshold : np.ndarray
         Calibration thresholds c_i, shape (n,)
-    test_scores : np.ndarray
-        Test scores s_j, shape (m,)
+    test_loc_hat : np.ndarray
+        Test location parameters, shape (m,)
+    test_scale_hat : np.ndarray | float
+        Test scale parameters, shape (m,) or scalar
     test_threshold : np.ndarray
         Test thresholds c_j, shape (m,)
     alpha : float
@@ -45,6 +52,8 @@ def get_sel_survival(
     w_ipcw : np.ndarray | None, optional
         IPCW weights for calibration, shape (n,). If provided, we estimate FDP
         using the weighted calibration error count.
+    model_family : {"log_normal"}, optional
+        Parametric family for the time-to-event model. Currently only "log_normal" is implemented
 
     Returns
     -------
@@ -62,17 +71,20 @@ def get_sel_survival(
     """
     # -------------------- Basic validation & shapes --------------------
     cal_labels = np.asarray(cal_labels)
-    cal_scores = np.asarray(cal_scores)
+    cal_loc_hat = np.asarray(cal_loc_hat)
+    cal_scale_hat = np.asarray(cal_scale_hat)
+
     cal_threshold = np.asarray(cal_threshold)
-    test_scores = np.asarray(test_scores)
+    test_loc_hat = np.asarray(test_loc_hat)
+    test_scale_hat = np.asarray(test_scale_hat)
     test_threshold = np.asarray(test_threshold)
 
-    n = cal_scores.shape[0]
-    m = test_scores.shape[0]
+    n = cal_loc_hat.shape[0]
+    m = test_loc_hat.shape[0]
 
-    if not (cal_labels.shape == cal_scores.shape == cal_threshold.shape == (n,)):
+    if not (cal_labels.shape == cal_loc_hat.shape == cal_threshold.shape == (n,)):
         raise ValueError("bad calibration shapes")
-    if not (test_scores.shape == test_threshold.shape == (m,)):
+    if not (test_loc_hat.shape == test_threshold.shape == (m,)):
         raise ValueError("bad test shapes")
     if np.any(cal_threshold <= 0) or np.any(test_threshold <= 0):
         raise ValueError("thresholds must be > 0")
@@ -85,6 +97,10 @@ def get_sel_survival(
             raise ValueError("w_ipcw must be (n,)")
         if np.any(w_ipcw < 0):
             raise ValueError("w_ipcw must be nonnegative")
+        
+    # Get scores for calibration and test (lower = stronger evidence of long survival)
+    cal_scores = _score_from_threshold(model_family, cal_threshold, cal_loc_hat, cal_scale_hat)
+    test_scores = _score_from_threshold(model_family, test_threshold, test_loc_hat, test_scale_hat)
 
     # Rank calibration + test together
     # We sort all (n + m) observations by ascending score. For any cut tau,
@@ -143,7 +159,6 @@ def get_sel_survival(
 
     # Complement set for downstream procedures (e.g., LCBs).
     unsel_idx = np.setdiff1d(np.arange(m, dtype=int), sel_idx)
-
     return sel_idx, unsel_idx, tau_hat
 
 
@@ -195,21 +210,17 @@ def _inv_time_from_ppf(
 
 
 def get_jomi_survival_lcb(
-    unsel_idx: np.ndarray,  # test indices to conformalize (subset of 0..m-1)
-    # calibration split (size n)
-    cal_labels: np.ndarray,  # observed follow-up times T_i (must be > 0)
-    cal_threshold: np.ndarray,  # horizons c_i (> 0)
-    cal_loc: np.ndarray,  # model location parameter (e.g., log-mean) for calibration
-    cal_scale: np.ndarray | float,  # model scale parameter for calibration (scalar or (n,))
-    # test split (size m)
-    test_threshold: np.ndarray,  # horizons c_j (> 0)
-    test_loc: np.ndarray,  # model location parameter for test
-    test_scale: np.ndarray | float,  # model scale parameter for test (scalar or (m,))
-    # selector settings
-    alpha: float,  # nominal level for one-sided LCBs
-    w_ipcw: np.ndarray | None,  # IPCW weights for calibration; None ⇒ unweighted
-    clip_ppf: float = 1e-12,  # numerical guard for Phi^{-1} inputs
-    # model family
+    unsel_idx: np.ndarray,
+    cal_labels: np.ndarray,
+    cal_loc: np.ndarray,
+    cal_scale: np.ndarray | float,
+    cal_threshold: np.ndarray,
+    test_loc: np.ndarray,
+    test_scale: np.ndarray | float,
+    test_threshold: np.ndarray,
+    alpha: float,
+    w_ipcw: np.ndarray | None,
+    clip_ppf: float = 1e-12,
     model_family: str = "log_normal",
 ) -> np.ndarray:
     """
@@ -225,10 +236,12 @@ def get_jomi_survival_lcb(
     cal_loc, cal_scale : array-like
         Model parameters for calibration; for `log_normal`, loc=log-mean, scale=log-std.
         `cal_scale` can be scalar or shape (n,).
-    test_threshold : np.ndarray
-        Horizons c_j (>0) on the test split, shape (m,).
+    cal_threshold : np.ndarray
+        Horizons c_i (>0) on the calibration split, shape (n,).
     test_loc, test_scale : array-like
         Model parameters for test; `test_scale` can be scalar or shape (m,).
+    test_threshold : np.ndarray
+        Horizons c_j (>0) for test units, shape (m,).
     alpha : float
         Nominal miscoverage level in (0,1) for the one-sided LCBs.
     w_ipcw : np.ndarray | None, optional

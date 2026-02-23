@@ -22,12 +22,16 @@ Note:
 import os
 import pickle
 from collections import defaultdict
-from typing import Any, Dict, List, Optional, Tuple, Iterable, Mapping, Sequence
+from collections.abc import Iterable, Mapping, Sequence
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
 import tqdm
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, KFold
+from scipy.stats import norm
+from lifelines import CoxPHFitter
+from lifelines.utils import concordance_index
 
 from stratcp.conformal.core import conformal
 from stratcp.conformal.scores import (
@@ -64,19 +68,24 @@ def evaluate_naive_cumulative(
         - mgn_size = (1/n) * Σ_i row_size[i]
             = average prediction set size over all samples.
 
-        Selection rule (for "selected_*" metrics when return_per_class_metrics=False):
-            selected := { i : |S_i| = 1 }  (singleton prediction sets only)
+        Selected / unselected definitions (used when return_per_class_metrics=False):
+            selected   := { i : |S_i| = 1 }   (singleton prediction sets)
+            unselected := { i : |S_i| > 1 }   (non-singleton prediction sets)
 
         - selected_coverage = mean(row_cov[i] for i with |S_i|=1)
             = (1/|Sel|) * Σ_{i∈Sel} 1{ y_i ∈ S_i }.
-            Since |S_i|=1 for selected i, this is identical to Top-1 accuracy restricted
-            to the subset of singleton-set samples, but computed via membership.
 
         - selected_set_size = mean(row_size[i] for i with |S_i|=1)
             = 1.0 when at least one singleton exists; otherwise nan.
 
-        - num_sel = |Sel|
-            = number of singleton prediction sets.
+        - unselected_coverage = mean(row_cov[i] for i with |S_i|>1)
+            = (1/|Unsel|) * Σ_{i∈Unsel} 1{ y_i ∈ S_i }.
+
+        - unselected_set_size = mean(row_size[i] for i with |S_i|>1)
+            = (1/|Unsel|) * Σ_{i∈Unsel} |S_i|.
+
+        - num_unsel = |Unsel|
+            = number of non-singleton prediction sets.
 
         Per-class singleton precision metrics (when return_per_class_metrics=True):
             For selected samples (|S_i|=1), define p_i as the unique class in S_i.
@@ -99,7 +108,7 @@ def evaluate_naive_cumulative(
             Miscoverage level in [0, 1]; target coverage is approximately 1 - alpha.
         return_per_class_metrics:
             If True, return per-class singleton precision + singleton counts.
-            If False, return selected_coverage where selected := singleton prediction sets.
+            If False, return aggregate metrics plus selected/unselected metrics.
         classes:
             Optional iterable of class IDs to include in per-class metrics. If None, uses
             the union of singleton predicted classes and all labels.
@@ -117,14 +126,19 @@ def evaluate_naive_cumulative(
                     "mgn_size": float,
                     "coverage_by_pred_class": Dict[int, float],
                     "num_sel_by_class": Dict[int, int],
+                    "unselected_coverage": float | np.nan,
+                    "unselected_set_size": float | np.nan,
+                    "num_unsel": int,
                 }
             Otherwise:
                 {
                     "mgn_cov": float,
                     "mgn_size": float,
-                    "selected_coverage": float|np.nan,
-                    "selected_set_size": float|np.nan,
-                    "num_sel": int,
+                    "selected_coverage": float | np.nan,
+                    "selected_set_size": float | np.nan,
+                    "unselected_coverage": float | np.nan,
+                    "unselected_set_size": float | np.nan,
+                    "num_unsel": int,
                 }
 
     Raises:
@@ -143,6 +157,7 @@ def evaluate_naive_cumulative(
     n, K = probs.shape
     if not (0.0 <= float(alpha) <= 1.0):
         raise ValueError("alpha must be in [0, 1].")
+
     thr = 1.0 - float(alpha)
 
     # Build naive cumulative prediction sets
@@ -154,7 +169,8 @@ def evaluate_naive_cumulative(
     cum = np.cumsum(sorted_probs, axis=1)  # (n, K)
 
     # Minimal cut position k_i such that cum[i, k_i] >= (1 - alpha).
-    # k_pos[i] is the first index where cum >= thr.
+    # k_pos[i] equals the count of entries strictly below thr, i.e., the first index
+    # where cum >= thr.
     k_pos = np.sum(cum < thr, axis=1)  # (n,)
 
     # Include all positions <= k_pos[i] in the sorted order, then scatter back.
@@ -163,22 +179,23 @@ def evaluate_naive_cumulative(
     pred_set[np.arange(n)[:, None], sorted_idx] = mask_sorted.astype(np.uint8)
 
     # Compute per-sample coverage and set size
-    row_cov = pred_set[np.arange(n), labels].astype(float)  # 1{y_i in S_i}
+    row_cov = pred_set[np.arange(n), labels].astype(float)  # 1{ y_i ∈ S_i }
     row_size = pred_set.sum(axis=1).astype(float)           # |S_i|
 
     # Marginal (across-all-samples) metrics
     mgn_cov = float(row_cov.mean())
     mgn_size = float(row_size.mean())
 
-    # Selected := singleton prediction sets
-    singleton_mask = row_size == 1
+    # Selected := singleton prediction sets; Unselected := non-singletons
+    selected_mask = row_size == 1
+    unselected_mask = row_size > 1
 
-    # Per-class singleton precision metrics
+    # Per-class singleton precision metrics (if requested)
     if return_per_class_metrics:
-        if singleton_mask.any():
-            # For singleton sets, the argmax of the binary set indicator is the unique class.
-            preds_single = np.argmax(pred_set[singleton_mask], axis=1).astype(int)  # p_i
-            labels_single = labels[singleton_mask].astype(int)                      # y_i
+        if selected_mask.any():
+            # For singleton sets, argmax over the binary set indicator gives the unique class.
+            preds_single = np.argmax(pred_set[selected_mask], axis=1).astype(int)  # p_i
+            labels_single = labels[selected_mask].astype(int)                      # y_i
         else:
             preds_single = np.array([], dtype=int)
             labels_single = np.array([], dtype=int)
@@ -206,32 +223,52 @@ def evaluate_naive_cumulative(
         num_sel_by_class: Dict[int, int] = {}
 
         for k in classes_arr:
-            # Selected samples whose singleton prediction is class k
             mask_k = preds_single == int(k)
             n_k = int(mask_k.sum())
             num_sel_by_class[int(k)] = n_k
 
-            # Precision among those samples: mean(1{y_i=k})
+            # Precision among singleton predictions of class k:
+            # coverage_by_pred_class[k] = mean(1{y_i=k} | p_i=k)
             if n_k > 0:
                 coverage_by_pred_class[int(k)] = float(np.mean(labels_single[mask_k] == int(k)))
             else:
                 coverage_by_pred_class[int(k)] = float(empty_val) if not np.isnan(empty_val) else np.nan
 
+        # Report unselected metrics in this branch
+        if unselected_mask.any():
+            unselected_coverage = float(row_cov[unselected_mask].mean())
+            unselected_set_size = float(row_size[unselected_mask].mean())
+            num_unsel = int(unselected_mask.sum())
+        else:
+            unselected_coverage = np.nan
+            unselected_set_size = np.nan
+            num_unsel = 0
+
         return dict(
             mgn_cov=mgn_cov,
             mgn_size=mgn_size,
+            unselected_coverage=unselected_coverage,
+            unselected_set_size=unselected_set_size,
+            num_unsel=num_unsel,
             coverage_by_pred_class=coverage_by_pred_class,
             num_sel_by_class=num_sel_by_class,
         )
 
-    # Selected metrics (singleton sets only)
-    if singleton_mask.any():
-        selected_coverage = float(row_cov[singleton_mask].mean())
-        selected_set_size = float(row_size[singleton_mask].mean())  # == 1.0
-        num_unsel = int((~singleton_mask).sum())
+    # Selected / unselected metrics (when return_per_class_metrics=False)
+    if selected_mask.any():
+        selected_coverage = float(row_cov[selected_mask].mean())
+        selected_set_size = float(row_size[selected_mask].mean())  # should be 1.0
     else:
         selected_coverage = np.nan
         selected_set_size = np.nan
+
+    if unselected_mask.any():
+        unselected_coverage = float(row_cov[unselected_mask].mean())
+        unselected_set_size = float(row_size[unselected_mask].mean())
+        num_unsel = int(unselected_mask.sum())
+    else:
+        unselected_coverage = np.nan
+        unselected_set_size = np.nan
         num_unsel = 0
 
     return dict(
@@ -239,6 +276,8 @@ def evaluate_naive_cumulative(
         mgn_size=mgn_size,
         selected_coverage=selected_coverage,
         selected_set_size=selected_set_size,
+        unselected_coverage=unselected_coverage,
+        unselected_set_size=unselected_set_size,
         num_unsel=num_unsel,
     )
 
@@ -250,7 +289,7 @@ def evaluate_top1(
     empty_policy: str = "nan",
     return_per_class_metrics: bool = False,
 ) -> Dict[str, Any]:
-    """Evaluate Top-1 multiclass predictions and compute accuracy (and optional per-class precision).
+    r"""Evaluate Top-1 multiclass predictions and compute accuracy (and optional per-class precision).
 
     Metric definitions (exact computations):
         Let \hat{y}_i be the Top-1 prediction (argmax over classes) and y_i the true label.
@@ -455,7 +494,7 @@ def aggregate_conformal_results(
 
     Supports two input nestings:
 
-    (A) One-level (common in your prints):
+    (A) One-level:
         {split_id: {method_name: DataFrame}}
 
     (B) Two-level:
@@ -567,7 +606,9 @@ def aggregate_conformal_results(
         numeric_cols = [c for c in cat.columns if c not in dict_cols]
 
         # Pre-coerce numeric part to numeric (object -> float) safely.
-        cat_num = cat[numeric_cols].apply(pd.to_numeric, errors="coerce") if numeric_cols else pd.DataFrame(index=cat.index)
+        cat_num = (
+            cat[numeric_cols].apply(pd.to_numeric, errors="coerce") if numeric_cols else pd.DataFrame(index=cat.index)
+        )
 
         # Aggregate per α.
         alphas = sorted(cat.index.unique())
@@ -634,9 +675,7 @@ def aggregate_conformal_results(
     template_split = splits_to_include[0]
     template_obj = split_to_conformal_results[template_split]
 
-    is_one_level = isinstance(template_obj, dict) and all(
-        isinstance(v, pd.DataFrame) for v in template_obj.values()
-    )
+    is_one_level = isinstance(template_obj, dict) and all(isinstance(v, pd.DataFrame) for v in template_obj.values())
 
     agg_dict: dict = {}
     se_dict: dict | None = {} if method == "mean" else None
@@ -815,6 +854,7 @@ def summarize_methods_at_alpha(
           (``num_sel_cls_one``, ``num_sel_cls_zero``, ``num_unsel``) exist,
           ``num_total`` is derived as their sum.
     """
+
     def _as_float_or_nan(x: Any) -> float:
         try:
             if x is None or (isinstance(x, float) and np.isnan(x)):
@@ -884,9 +924,7 @@ def summarize_methods_at_alpha(
                             se_row = None
                             # Prefer exact alpha_selected if we already picked it from main.
                             if alpha_selected_set and not pd.isna(rec["alpha_selected"]):
-                                se_row = _pick_alpha_row(
-                                    df_se, float(rec["alpha_selected"]), nearest=False, atol=0.0
-                                )
+                                se_row = _pick_alpha_row(df_se, float(rec["alpha_selected"]), nearest=False, atol=0.0)
                             if se_row is None:
                                 se_row = _pick_alpha_row(df_se, alpha, nearest=nearest, atol=atol)
 
@@ -933,9 +971,7 @@ def summarize_methods_at_alpha(
 
                         se_row = None
                         if alpha_selected_set and not pd.isna(rec["alpha_selected"]):
-                            se_row = _pick_alpha_row(
-                                df_se, float(rec["alpha_selected"]), nearest=False, atol=0.0
-                            )
+                            se_row = _pick_alpha_row(df_se, float(rec["alpha_selected"]), nearest=False, atol=0.0)
                         if se_row is None:
                             se_row = _pick_alpha_row(df_se, alpha, nearest=nearest, atol=atol)
 
@@ -1108,6 +1144,8 @@ def extract_split_arrays(
             Key in each ``results_dict[slide_id]`` giving per-slide probabilities.
         label_key:
             Key in each ``results_dict[slide_id]`` giving per-slide labels.
+        task_type:
+            Type of task, e.g., "classification" or "time_to_event_regression".
 
     Returns:
         Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
@@ -1162,6 +1200,83 @@ def extract_split_arrays(
         test_probs_arr,
         np.asarray(test_labels).flatten(),
     )
+
+
+def extract_split_arrays_tte(
+    split_info: Dict[str, Any],
+    dataset_df: pd.DataFrame,
+    model_preds: Dict[str, Dict[str, Any]],
+    patient_id_col: str = "case_id",
+    slide_id_col: str = "slide_id",
+    loc_key: str = "mu_pred",
+    scale_key: str = "log_sigma",
+    label_key: str = "time",
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Extract calibration/test TTE prediction and label arrays from slide-level results using case-level split membership.
+
+    Args:
+        split_info: Split metadata containing calibration and test case IDs (e.g., in "calib_cases" and "test_cases").
+        dataset_df: DataFrame with slide-to-patient mapping and (optionally) labels.
+        model_preds: Slide-level model outputs keyed by slide ID; each payload contains prediction/location/scale/label entries.
+        patient_id_col: Column name in dataset_df for patient/case ID.
+        slide_id_col: Column name in dataset_df for slide ID.
+        loc_key: Key in each model_preds payload for the predicted location/mean (mu).
+        scale_key: Key in each model_preds payload for the predicted scale (default assumes log sigma if "log_sigma").
+        label_key: Key in each model_preds payload for the target survival label.
+
+    Returns:
+        A dictionary with NumPy arrays:
+            - "calib_mu_pred", "test_mu_pred"
+            - "calib_sigma_hat", "test_sigma_hat"
+            - "calib_labels", "test_labels"
+            - "calib_case_ids", "test_case_ids"
+    """
+    # Map each slide to its case id.
+    slide_to_case = dataset_df.set_index(slide_id_col)[patient_id_col].to_dict()
+
+    # Collectors for each partition.
+    calib_mu_pred, test_mu_pred = [], []
+    calib_sigma_hat, test_sigma_hat = [], []
+    calib_labels, test_labels = [], []
+    calib_case_ids, test_case_ids = [], []
+
+    # Case sets for fast membership testing.
+    calib_case_set = set(split_info["calib_cases"].values)
+    test_case_set = set(split_info["test_cases"].values)
+
+    # Route each slide to calibration or test by its case_id.
+    for slide_id, payload in model_preds.items():
+        case_id = slide_to_case[slide_id]
+        loc = np.asarray(payload[loc_key])
+        log_sigma = np.asarray(payload[scale_key])
+        sigma = np.exp(log_sigma)  # Convert log sigma to sigma for interpretability.
+        label = payload[label_key]
+
+        if case_id in test_case_set:
+            test_mu_pred.append(loc)
+            test_sigma_hat.append(sigma)
+            test_labels.append(label)
+            test_case_ids.append(case_id)
+        elif case_id in calib_case_set:
+            calib_mu_pred.append(loc)
+            calib_sigma_hat.append(sigma)
+            calib_labels.append(label)
+            calib_case_ids.append(case_id)
+        else:
+            # Defensive: split definitions must cover all cases in model_preds.
+            raise ValueError(f"Case ID {case_id} not assigned to calibration or test split.")
+
+    return {
+        "calib_mu_pred": np.asarray(calib_mu_pred),
+        "test_mu_pred": np.asarray(test_mu_pred),
+        "calib_sigma_hat": np.asarray(calib_sigma_hat),
+        "test_sigma_hat": np.asarray(test_sigma_hat),
+        "calib_labels": np.asarray(calib_labels),
+        "test_labels": np.asarray(test_labels),
+        "calib_case_ids": np.asarray(calib_case_ids),
+        "test_case_ids": np.asarray(test_case_ids),
+    }
 
 
 def compute_baselines_for_split(
@@ -1470,7 +1585,7 @@ def run_vanilla_cp_for_split(
         col_order = base_cols + per_class_cov_cols + per_class_num_cols
     else:
         col_order = base_cols
-    
+
     def _attach_grade_consistency(
         row: Dict[str, Any],
         pred_sets_unsel: np.ndarray,
@@ -1590,7 +1705,6 @@ def run_vanilla_cp_for_split(
                         row[f"coverage_cls_{c}_sel"] = 1.0
                         row[f"num_sel_cls_{c}"] = 0
 
-            
             rows.append(row)
             pred_sets_unsel = set_mat[unsel_mask]
             _attach_grade_consistency(row, pred_sets_unsel, unsel_mask)
@@ -1617,6 +1731,7 @@ def run_stratified_cp_for_split(
     eligibility: str = "overall",
     return_per_class_metrics: bool = False,
     grade_consist_set: bool = False,
+    grade_consist_eval: bool = False,
     grade_map: Dict[Any, List[int]] | None = None,
     size_bins: List[Tuple[int, int]] | None = None,
     pbar_desc: str = "Stratified CP",
@@ -1662,6 +1777,10 @@ def run_stratified_cp_for_split(
             If ``True`` and a ``grade_map`` is supplied, APS is routed through a
             utility-aware score (score_fn="utility") with a block similarity
             matrix to encourage grade-consistent expansions.
+        grade_consist_eval:
+            If ``True`` and a ``grade_map`` is supplied, compute grade-range
+            consistency diagnostics on the unselected cohort and attach them to
+            each row as a dict under 'grade_range_consistency'.
         grade_map:
             Mapping grade → list[int] of class IDs in that grade, used when
             ``grade_consist_set=True``.
@@ -1903,7 +2022,7 @@ def run_stratified_cp_for_split(
         'grade_range_consistency'. Keys are size-bin tuples; values are the
         corresponding consistency scores.
         """
-        if not grade_consist_set or grade_map is None:
+        if not (grade_consist_set or grade_consist_eval) or grade_map is None:
             return
         if pred_sets_unsel.shape[0] == 0:
             row["grade_range_consistency"] = {}
@@ -1965,7 +2084,8 @@ def run_stratified_cp_for_split(
                 # Optional per-class (partition selected union by predicted class)
                 _add_per_class_from_selected_partition(row, selected_mask)
                 # Optional grade diagnostics (unselected only)
-                _attach_grade_consistency(row, pred_sets_unsel, unselected_mask)
+                if grade_consist_set or grade_consist_eval:
+                    _attach_grade_consistency(row, pred_sets_unsel, unselected_mask)
             else:
                 # Per-class eligibility (K thresholds + residual unselected)
                 res = scp.predict(test_probs, test_labels)
@@ -1997,12 +2117,12 @@ def run_stratified_cp_for_split(
                 # Optional per-class fields (true class per selected-for-class-i)
                 _add_per_class_from_per_class_selection(row, all_selected, tau_list, n_test)
                 # Optional grade diagnostics (unselected only)
-                _attach_grade_consistency(row, pred_sets_unsel, unselected_mask)
+                if grade_consist_set or grade_consist_eval:
+                    _attach_grade_consistency(row, pred_sets_unsel, unselected_mask)
 
             method_rows.append(row)
 
         out[method] = pd.DataFrame(method_rows).set_index("alpha")
-
     return out
 
 
@@ -2177,3 +2297,1269 @@ def label_to_grade(lbl, grade_map):
         if lbl in labels:
             return grade  # Return the grade name if the label is found
     return None  # Return None if the label is not found in any grade
+
+
+def apply_administrative_censoring(
+    df: pd.DataFrame,
+    study_end_time: float,
+    duration_col: str = "survival_time",
+    event_col: str = "event",
+) -> pd.DataFrame:
+    """Apply administrative censoring at `study_end_time` and normalize survival time to [0, 1].
+
+    Args:
+        df: Input DataFrame containing survival duration and event indicator columns.
+        study_end_time: Administrative study cutoff time. Durations at or beyond this
+            cutoff are censored and clipped to this value before normalization.
+        duration_col: Name of the survival duration column.
+        event_col: Name of the event indicator column (1 = event observed, 0 = censored).
+
+    Returns:
+        A copy of `df` with administrative censoring applied:
+            - durations > `study_end_time` are clipped to `study_end_time`
+            - rows with duration >= `study_end_time` are marked censored (`event_col = 0`)
+            - `duration_col` is normalized by dividing by `study_end_time`
+    """
+    df = df.copy()
+
+    # Keep the original durations so the administrative-censoring rule is explicit/readable.
+    original_duration = df[duration_col].astype(float)
+
+    # Mark samples at/after the study cutoff as administratively censored.
+    # (This matches the original behavior: durations >= study_end_time -> event = 0.)
+    admin_censored_mask = original_duration >= float(study_end_time)
+
+    # Clip follow-up time at the study end.
+    df[duration_col] = np.where(
+        original_duration > float(study_end_time),
+        float(study_end_time),
+        original_duration,
+    )
+
+    # Overwrite event indicator for administratively censored rows.
+    df[event_col] = np.where(
+        admin_censored_mask,
+        0,
+        df[event_col],
+    )
+
+    # Normalize durations to [0, 1] relative to the study horizon.
+    df[duration_col] = df[duration_col] / float(study_end_time)
+
+    return df
+
+
+def get_ipcw_weights(
+    df_cal: pd.DataFrame,
+    duration_col: str = "survival_time",  # Y_i
+    event_col: str = "event",             # Δ_i  (1 = event observed, 0 = censored)
+    covar_cols: list = ("age_at_index", "gender_male", "mu_pred"),
+    n_folds: int = 10,
+    clip_eps: float = 0.05,
+    random_state: int = 42,
+) -> Tuple[np.ndarray, CoxPHFitter]:
+    """
+    Compute cross-fitted inverse-probability-of-censoring weights (IPCW) for calibration samples using a Cox censoring model.
+
+    Args:
+        df_cal: Calibration dataframe containing survival duration, event indicator, gender, and covariates used for the censoring model.
+        duration_col: Column name for observed follow-up time / survival time \(Y_i\).
+        event_col: Column name for event indicator \(\Delta_i\), where 1 means event observed and 0 means censored.
+        covar_cols: Covariate column names used to fit the Cox proportional hazards censoring model (after gender_male is created).
+        n_folds: Number of folds for cross-fitting the censoring model when estimating out-of-fold IPCW weights.
+        clip_eps: Lower bound used to clip \(\hat G_c(Y_i \mid X_i)\) to avoid unstable/extremely large weights.
+        random_state: Random seed for shuffled K-fold splits.
+
+    Returns:
+        A tuple `(weights, cph_full)` where:
+        - `weights` is a NumPy array of shape `(n_samples,)` containing cross-fitted IPCW weights \(w_i = \Delta_i / \hat G_c(Y_i \mid X_i)\).
+        - `cph_full` is a `CoxPHFitter` trained on the full calibration set for the censoring process (useful for downstream prediction/inspection).
+    """
+    n = len(df_cal)
+    weights = np.empty(n)
+
+    # Make a copy and one‑hot‑encode gender → gender_male ∈ {0,1}
+    df = df_cal.copy()
+    df["gender_male"] = (df["gender"].str.lower() == "male").astype(int)
+
+    # Event for *censoring* model: 1 = censored, 0 = death
+    df["censor_event"] = 1 - df[event_col]
+
+    kf = KFold(n_splits=n_folds, shuffle=True, random_state=random_state)
+
+    for train_idx, test_idx in kf.split(np.arange(n)):
+        df_train = df.iloc[train_idx]
+        df_test  = df.iloc[test_idx]
+
+        # Fit Cox PH for censoring
+        cph = CoxPHFitter()
+        cph.fit(
+            df_train[[duration_col, "censor_event", *covar_cols]],
+            duration_col=duration_col,
+            event_col="censor_event",
+            show_progress=False,
+        )
+
+        # Predict survival probability of *remaining uncensored* at own Y_i
+        # lifelines returns a survival curve; take value at each Y_i
+        surv_funcs = cph.predict_survival_function(
+            df_test[covar_cols], times=df_test[duration_col]
+        )
+
+        # surv_funcs is shape (len(times), len(test_idx)); diagonal contains Ĝ_c(Y_i|X_i)
+        G_hat = np.diag(surv_funcs.values)
+
+        # clip to avoid huge weights
+        G_hat = np.maximum(G_hat, clip_eps)
+
+        weights[test_idx] = df_test[event_col].values / G_hat
+
+        # Print concordance index for predicting censoring for the held-out test set
+        try:
+            cindex = concordance_index(
+                df_test[duration_col].values,
+                -1*cph.predict_partial_hazard(df_test[covar_cols]).values,
+                df_test["censor_event"].values
+            )
+            # print(f"CoxPH censoring model concordance index (fold): {cindex:.4f}")
+        except Exception as e:
+            print(f"Error computing concordance index: {e}")
+        
+
+    # Fit Cox PH model on the entire calibration data for censoring
+    cph_full = CoxPHFitter()
+    cph_full.fit(
+        df[[duration_col, "censor_event", *covar_cols]],
+        duration_col=duration_col,
+        event_col="censor_event",
+        show_progress=False,
+    )
+
+
+    return weights, cph_full
+
+
+def compute_baselines_for_split_tte(
+    alphas: np.ndarray,
+    df_test: pd.DataFrame,
+    mu_pred: np.ndarray,
+    sigma_hat: np.ndarray,
+    favorable_thresh_norm: float,
+    censor_model,  # e.g., lifelines.CoxPHFitter fit on calibration with event = 1-Δ
+    covar_cols: List[str],
+    clip_eps: float = 0.05,
+    study_end_time_year: float = 5.0,
+    pbar_desc: str = "Baselines (Top1 and LNQ)",
+) -> Dict[str, pd.DataFrame]:
+    """Compute Top1 and LNQ TTE baseline metrics across alphas using IPCW-based coverage estimates.
+
+    Args:
+        alphas: 1D array of miscoverage levels in (0, 1). Each alpha produces one LNQ row;
+            Top1 is alpha-independent and repeated across all alpha rows for convenience.
+        df_test: Test DataFrame containing at least:
+            - `survival_time` (observed/censored follow-up time)
+            - `event` (1 if event observed, 0 if censored)
+            - any covariates listed in `covar_cols`
+            - `gender` or `gender_male` if required by downstream utilities.
+        mu_pred: Predicted location parameter (e.g., log-time mean) for each test sample;
+            must have length `len(df_test)`.
+        sigma_hat: Predicted scale parameter for each test sample, either scalar or length
+            `len(df_test)`. Must be strictly positive.
+        favorable_thresh_norm: Normalized clinical/favorable horizon `c` (in [0, 1]) used for selected-side
+            thresholding and Top1/LNQ selection via `S_hat(c | x)`.
+        censor_model: Fitted censoring model used by IPCW helper functions to estimate
+            `G_hat(Y | X)`.
+        covar_cols: Covariate column names used as inputs to the censoring model.
+        clip_eps: Lower clipping value for `G_hat` to stabilize IPCW weights.
+        study_end_time_year: Administrative study endpoint (in years) used for set-size
+            calculations.
+        pbar_desc: Progress-bar description for the alpha loop (LNQ baseline).
+
+    Returns:
+        A dictionary with two DataFrames:
+            - `"top1"`: Top1 baseline metrics (alpha-independent row repeated for each alpha)
+            - `"lnq"`: LNQ baseline metrics (alpha-dependent)
+        Both DataFrames are indexed by `alphas` and contain columns:
+            [
+                "selected_coverage_ipcw",
+                "mgn_cov_ipcw",
+                "mgn_size",
+                "unselected_coverage_ipcw",
+                "unselected_set_size",
+                "num_unsel",
+                "num_total",
+            ]
+
+    Raises:
+        ValueError: If inputs are malformed (e.g., invalid alpha values, size mismatches,
+            non-positive sigma, or invalid horizon values).
+    """
+    # ------------------------------------------------------------------
+    # 0) Validate and normalize inputs
+    # ------------------------------------------------------------------
+    alphas = np.asarray(alphas, dtype=float).reshape(-1)
+    if alphas.size == 0:
+        raise ValueError("alphas must be non-empty.")
+    if np.any(~np.isfinite(alphas)):
+        raise ValueError("alphas contains non-finite values.")
+    if np.any((alphas <= 0.0) | (alphas >= 1.0)):
+        raise ValueError(
+            "alphas must be strictly between 0 and 1 for norm.ppf(alpha) to be finite."
+        )
+
+    if not np.isfinite(favorable_thresh_norm) or favorable_thresh_norm <= 0 or favorable_thresh_norm > 1:
+        raise ValueError("favorable_thresh_norm must be in (0, 1].")
+    if not np.isfinite(study_end_time_year) or study_end_time_year <= 0:
+        raise ValueError("study_end_time_year must be > 0.")
+
+    m = len(df_test)
+
+    mu = np.asarray(mu_pred, dtype=float).reshape(-1)
+    sig = np.asarray(sigma_hat, dtype=float).reshape(-1)
+
+    if mu.shape[0] != m:
+        raise ValueError(f"mu_pred must have length {m}, got {mu.shape[0]}.")
+
+    # Allow sigma_hat to be scalar and broadcast to all test samples.
+    if sig.size == 1:
+        sig = np.full(m, float(sig.item()), dtype=float)
+    if sig.shape[0] != m:
+        raise ValueError(f"sigma_hat must be scalar or length {m}, got {sig.shape[0]}.")
+    if np.any(~np.isfinite(sig)) or np.any(sig <= 0):
+        raise ValueError("sigma_hat must be finite and > 0 everywhere.")
+
+    # 1) Compute S_hat(c | x) once (used by both Top1 and LNQ selectors)
+    # Assuming a log-normal style survival model:
+    #   T | x ~ LogNormal(mu, sigma^2), so
+    #   S_hat(c|x) = P(T > c | x) = 1 - Phi((log c - mu)/sigma)
+    z_val = (np.log(float(favorable_thresh_norm)) - mu) / sig
+    S_hat_c = 1.0 - norm.cdf(z_val)  # shape (m,)
+
+    base_cols: List[str] = [
+        "selected_coverage_ipcw",
+        "mgn_cov_ipcw",
+        "mgn_size",
+        "unselected_coverage_ipcw",
+        "unselected_set_size",
+        "num_unsel",
+        "num_total",
+    ]
+
+    # 2) Top1 baseline (alpha-independent): select if S_hat(c|x) >= 0.5
+    #    We compute once and repeat the row across all alpha indices.
+    sel_mask_top1 = S_hat_c >= 0.5
+    sel_idx_top1 = np.flatnonzero(sel_mask_top1)
+    unsel_idx_top1 = np.flatnonzero(~sel_mask_top1)
+
+    # Selected-side IPCW coverage at horizon c.
+    sel_cov_ipcw_top1 = test_fdp_triplet(
+        df_test=df_test,
+        sel_idx=sel_idx_top1,
+        horizon_c=favorable_thresh_norm,
+        cph_censor=censor_model,
+        covar_cols=covar_cols,
+        clip_eps=clip_eps,
+    )
+
+    # Unselected Top1 baseline uses an uninformative LPB = 0 => prediction set [0, inf).
+    lpb_top1_unsel = np.zeros(len(unsel_idx_top1), dtype=float)
+
+    if len(unsel_idx_top1) > 0:
+        unsel_cov_ipcw_top1 = coverage_lpb_tte(
+            df_test=df_test,
+            unsel_idx=unsel_idx_top1,
+            hat_LPB=lpb_top1_unsel,
+            cph_censor=censor_model,
+            covar_cols=covar_cols,
+            clip_eps=clip_eps,
+        )
+    else:
+        unsel_cov_ipcw_top1 = float("nan")
+
+    # Marginal coverage across all rows:
+    #   selected -> threshold c
+    #   unselected -> threshold LPB (= 0 for Top1 baseline)
+    mgn_cov_ipcw_top1 = marginal_coverage_tte(
+        df_test=df_test,
+        sel_idx=sel_idx_top1,
+        unsel_idx=unsel_idx_top1,
+        hat_LPB=lpb_top1_unsel,
+        val_sel_threshold=np.full(
+            len(sel_idx_top1), favorable_thresh_norm, dtype=float
+        ),
+        censor_model=censor_model,
+        covar_cols=tuple(covar_cols),
+        clip_eps=clip_eps,
+    )
+
+    # Mean set sizes (times are already in years here, so use scaling factor = 1.0).
+    mgn_sz_top1, unsel_sz_top1 = mean_set_sizes(
+        m=m,
+        sel_idx=sel_idx_top1,
+        unsel_idx=unsel_idx_top1,
+        horizon_c=favorable_thresh_norm,
+        lpb_unsel=lpb_top1_unsel,
+        study_end_time_year=float(study_end_time_year),
+    )
+
+    top1_row = {
+        "selected_coverage_ipcw": float(sel_cov_ipcw_top1),
+        "mgn_cov_ipcw": float(mgn_cov_ipcw_top1),
+        "mgn_size": float(mgn_sz_top1),
+        "unselected_coverage_ipcw": float(unsel_cov_ipcw_top1),
+        "unselected_set_size": float(unsel_sz_top1),
+        "num_unsel": int(len(unsel_idx_top1)),
+        "num_total": int(m),
+    }
+
+    # Repeat the same Top1 row for each alpha so output shapes align with LNQ output.
+    top1_df = pd.DataFrame([top1_row for _ in range(len(alphas))], index=alphas)[base_cols]
+
+    # 3) LNQ baseline (alpha-dependent)
+    #    - Select if S_hat(c|x) >= 1 - alpha
+    #    - For unselected rows, use LPB = exp(mu + sigma * z_alpha), z_alpha = Phi^{-1}(alpha)
+    lnq_rows: List[Dict[str, Any]] = []
+
+    for a in tqdm.tqdm(alphas, desc=pbar_desc):
+        a = float(a)
+        z_alpha = float(norm.ppf(a))
+
+        # Alpha-dependent selection rule.
+        sel_mask = S_hat_c >= (1.0 - a)
+        sel_idx = np.flatnonzero(sel_mask)
+        unsel_idx = np.flatnonzero(~sel_mask)
+
+        # Selected-side IPCW coverage at horizon c.
+        sel_cov_ipcw = test_fdp_triplet(
+            df_test=df_test,
+            sel_idx=sel_idx,
+            horizon_c=favorable_thresh_norm,
+            cph_censor=censor_model,
+            covar_cols=covar_cols,
+            clip_eps=clip_eps,
+        )
+
+        # LNQ unselected LPB (computed for all rows, then subset to unselected rows).
+        lpb_all = np.exp(mu + sig * z_alpha)
+        lpb_unsel = lpb_all[unsel_idx]  # aligned with unsel_idx
+
+        # Unselected-side IPCW coverage for LNQ LPBs.
+        if len(unsel_idx) > 0:
+            unsel_cov_ipcw = coverage_lpb_tte(
+                df_test=df_test,
+                unsel_idx=unsel_idx,
+                hat_LPB=lpb_unsel,
+                cph_censor=censor_model,
+                covar_cols=covar_cols,
+                clip_eps=clip_eps,
+            )
+        else:
+            unsel_cov_ipcw = float("nan")
+
+        # Marginal coverage across all rows:
+        #   selected -> threshold c
+        #   unselected -> threshold LPB(alpha)
+        mgn_cov_ipcw = marginal_coverage_tte(
+            df_test=df_test,
+            sel_idx=sel_idx,
+            unsel_idx=unsel_idx,
+            hat_LPB=lpb_unsel,
+            val_sel_threshold=np.full(len(sel_idx), favorable_thresh_norm, dtype=float),
+            censor_model=censor_model,
+            covar_cols=tuple(covar_cols),
+            clip_eps=clip_eps,
+        )
+
+        # Mean set sizes (times are already in years here, so use scaling factor = 1.0).
+        mgn_sz, unsel_sz = mean_set_sizes(
+            m=m,
+            sel_idx=sel_idx,
+            unsel_idx=unsel_idx,
+            horizon_c=favorable_thresh_norm,
+            lpb_unsel=lpb_unsel,
+            study_end_time_year=float(study_end_time_year),  # no extra scaling since thresholds are in years
+        )
+
+        lnq_rows.append(
+            {
+                "selected_coverage_ipcw": float(sel_cov_ipcw),
+                "mgn_cov_ipcw": float(mgn_cov_ipcw),
+                "mgn_size": float(mgn_sz),
+                "unselected_coverage_ipcw": float(unsel_cov_ipcw),
+                "unselected_set_size": float(unsel_sz),
+                "num_unsel": int(len(unsel_idx)),
+                "num_total": int(m),
+            }
+        )
+
+    lnq_df = pd.DataFrame(lnq_rows, index=alphas)[base_cols]
+
+    return {"top1": top1_df, "lnq": lnq_df}
+
+
+def _ensure_gender_male(df: pd.DataFrame) -> pd.DataFrame:
+    """Ensure a binary `gender_male` column exists in the DataFrame.
+
+    Args:
+        df: Input DataFrame that must contain either:
+            - a precomputed `gender_male` column, or
+            - a `gender` column from which `gender_male` can be derived.
+
+    Returns:
+        A DataFrame containing `gender_male` (0/1). If `gender_male` already exists,
+        the original DataFrame is returned unchanged. Otherwise, a copy is returned
+        with `gender_male` added.
+
+    Raises:
+        KeyError: If neither `gender_male` nor `gender` exists in `df`.
+    """
+    # If already present, do not overwrite (preserves existing preprocessing).
+    if "gender_male" not in df.columns:
+        if "gender" not in df.columns:
+            raise KeyError("df must contain 'gender' or already have 'gender_male'.")
+
+        # Copy only when we need to add a new column.
+        df = df.copy()
+
+        # Normalize to string/lowercase so values like "Male", "male", etc. map correctly.
+        df["gender_male"] = (df["gender"].astype(str).str.lower() == "male").astype(int)
+
+    return df
+
+
+def _predict_G_hat_at_times(
+    censor_model,
+    X: pd.DataFrame,
+    times: np.ndarray,
+    clip_eps: float,
+) -> np.ndarray:
+    """Predict censoring survival probabilities G_hat(t_i | x_i) for each row-specific time.
+
+    Args:
+        censor_model: Fitted censoring survival model (e.g., lifelines CoxPHFitter trained
+            for censoring), expected to implement `predict_survival_function(X, times=...)`.
+        X: Covariate DataFrame of shape (n, p), one row per individual.
+        times: Array-like of shape (n,) containing the evaluation time for each row.
+            The i-th output is G_hat(times[i] | X.iloc[i]).
+        clip_eps: Lower bound used to clip predicted survival probabilities away from zero
+            for numerical stability.
+
+    Returns:
+        A NumPy array of shape (n,) containing clipped censoring survival probabilities
+        `G_hat(times[i] | x_i)`.
+
+    Raises:
+        ValueError: If `times` is not 1D or if its length does not match `len(X)`.
+    """
+    # Convert to a flat float array for consistent downstream indexing.
+    times = np.asarray(times, dtype=float).reshape(-1)
+
+    if times.ndim != 1:
+        raise ValueError("times must be a 1D array.")
+    if len(times) != len(X):
+        raise ValueError("times length must match number of rows in X.")
+
+    # Evaluate only at unique times for efficiency and stable indexing.
+    uniq_times = np.unique(times)
+
+    # lifelines convention:
+    #   index   -> evaluation times
+    #   columns -> individuals in the same order as rows in X
+    #   shape   -> (n_unique_times, n_individuals)
+    surv_df = censor_model.predict_survival_function(X, times=uniq_times)
+
+    # Build a mapping from time value -> row index in surv_df.
+    # This assumes surv_df.index matches the requested uniq_times (as lifelines typically does).
+    time_to_row = {
+        float(t): i for i, t in enumerate(np.asarray(surv_df.index, dtype=float))
+    }
+
+    # For each original row i, find which row in surv_df corresponds to times[i].
+    row_idx = np.fromiter(
+        (time_to_row[float(t)] for t in times),
+        dtype=int,
+        count=len(times),
+    )
+
+    # Column index is just the sample index (same order as X rows).
+    col_idx = np.arange(len(X), dtype=int)
+
+    # Gather diagonal-like entries: one (time_i, subject_i) value per sample.
+    vals = surv_df.values
+    G_hat = vals[row_idx, col_idx]
+
+    # Clip away from 0 to prevent extreme/unstable IPCW weights.
+    G_hat = np.maximum(G_hat, float(clip_eps))
+    return G_hat
+
+
+def test_fdp_triplet(
+    df_test: pd.DataFrame,
+    sel_idx: np.ndarray,
+    horizon_c: float,
+    cph_censor,  # CoxPHFitter (fit on censoring: event = 1 - Δ)
+    covar_cols: List[str],
+    clip_eps: float = 0.05,
+) -> float:
+    """Compute IPCW-adjusted selected-set coverage at a fixed clinical horizon.
+
+    Args:
+        df_test: Test DataFrame containing at least `survival_time`, `event`, and covariate
+            columns used by the censoring model (plus `gender` or `gender_male` if needed).
+        sel_idx: Integer indices of selected samples within `df_test`.
+        horizon_c: Clinical time horizon `c` used to define the selected-set threshold.
+        cph_censor: Fitted censoring model used to estimate `G_hat(Y | X)`.
+        covar_cols: Covariate column names (must match the censoring model inputs).
+        clip_eps: Minimum value used to clip `G_hat` for IPCW stability.
+
+    Returns:
+        Selected-set IPCW coverage estimate:
+            `1 - mean(Δ * 1{Y <= c} / G_hat(Y|X))`
+        over selected samples, or `np.nan` if `sel_idx` is empty.
+    """
+    sel_idx = np.asarray(sel_idx, dtype=int)
+    if sel_idx.size == 0:
+        return float("nan")
+
+    # Restrict to selected rows.
+    sub = df_test.iloc[sel_idx].copy()
+    sub = _ensure_gender_male(sub)
+
+    # Observed follow-up time Y and event indicator Δ.
+    Y = sub["survival_time"].to_numpy(dtype=float)
+    D = sub["event"].to_numpy(dtype=int)
+
+    # Covariates for censoring survival prediction G_hat(Y | X).
+    X = sub[covar_cols]
+    G_hat = _predict_G_hat_at_times(
+        censor_model=cph_censor,
+        X=X,
+        times=Y,
+        clip_eps=clip_eps,
+    )
+
+    # IPCW error proxy for "event occurred by horizon c" among selected.
+    # Coverage = 1 - error.
+    err_ipcw = (D * (Y <= float(horizon_c))) / G_hat
+    fdp_ipcw = float(np.mean(err_ipcw))
+    return float(1.0 - fdp_ipcw)
+
+
+def coverage_lpb_tte(
+    df_test: pd.DataFrame,
+    unsel_idx: np.ndarray,
+    hat_LPB: np.ndarray,  # aligned with unsel_idx
+    cph_censor,
+    covar_cols: List[str],
+    clip_eps: float = 0.05,
+) -> float:
+    """Compute IPCW-adjusted coverage for unselected samples using per-sample LPB thresholds.
+
+    Args:
+        df_test: Test DataFrame containing at least `survival_time`, `event`, and covariate
+            columns used by the censoring model (plus `gender` or `gender_male` if needed).
+        unsel_idx: Integer indices of unselected (deferred) samples within `df_test`.
+        hat_LPB: Array of lower predictive bounds (or analogous thresholds) aligned with
+            `unsel_idx` (same length and same order).
+        cph_censor: Fitted censoring model used to estimate `G_hat(Y | X)`.
+        covar_cols: Covariate column names (must match the censoring model inputs).
+        clip_eps: Minimum value used to clip `G_hat` for IPCW stability.
+
+    Returns:
+        Unselected-set IPCW coverage estimate:
+            `1 - mean(Δ * 1{Y < L} / G_hat(Y|X))`
+        over unselected samples, or `np.nan` if `unsel_idx` is empty.
+
+    Raises:
+        ValueError: If `hat_LPB` length does not match `unsel_idx`.
+    """
+    unsel_idx = np.asarray(unsel_idx, dtype=int)
+    if unsel_idx.size == 0:
+        return float("nan")
+
+    # Restrict to unselected rows.
+    sub = df_test.iloc[unsel_idx].copy()
+    sub = _ensure_gender_male(sub)
+
+    # Validate and align LPB thresholds to unselected rows.
+    L = np.asarray(hat_LPB, dtype=float).reshape(-1)
+    if L.shape[0] != len(unsel_idx):
+        raise ValueError("hat_LPB must have the same length as unsel_idx.")
+
+    Y = sub["survival_time"].to_numpy(dtype=float)
+    D = sub["event"].to_numpy(dtype=int)
+
+    X = sub[covar_cols]
+    G_hat = _predict_G_hat_at_times(
+        censor_model=cph_censor,
+        X=X,
+        times=Y,
+        clip_eps=clip_eps,
+    )
+
+    # IPCW error proxy for the event "true time T < L".
+    # Coverage = 1 - error.
+    err_ipcw = (D * (Y < L)) / G_hat
+    err_rate = float(np.mean(err_ipcw))
+    return float(1.0 - err_rate)
+
+
+def marginal_coverage_tte(
+    df_test: pd.DataFrame,
+    sel_idx: np.ndarray,
+    unsel_idx: np.ndarray,
+    hat_LPB: np.ndarray,
+    val_sel_threshold: np.ndarray,
+    censor_model,
+    covar_cols: Sequence[str],
+    clip_eps: float = 0.05,
+) -> float:
+    """Compute IPCW-adjusted marginal coverage across all test samples.
+
+    Args:
+        df_test: Test DataFrame containing at least `survival_time`, `event`, and covariate
+            columns used by the censoring model (plus `gender` or `gender_male` if needed).
+        sel_idx: Integer indices of selected samples.
+        unsel_idx: Integer indices of unselected (deferred) samples.
+        hat_LPB: Thresholds for unselected samples (e.g., lower predictive bounds),
+            aligned with `unsel_idx`.
+        val_sel_threshold: Thresholds for selected samples, aligned with `sel_idx`
+            (often a constant horizon `c` repeated).
+        censor_model: Fitted censoring model used to estimate `G_hat(Y | X)`.
+        covar_cols: Covariate column names (must match the censoring model inputs).
+        clip_eps: Minimum value used to clip `G_hat` for IPCW stability.
+
+    Returns:
+        IPCW marginal coverage across all test rows:
+            `1 - mean(Δ * 1{Y <= theta} / G_hat(Y|X))`,
+        where `theta` is per-row threshold assembled from selected/unselected assignments.
+
+    Raises:
+        ValueError: If threshold arrays do not align with their corresponding index arrays,
+            or if `sel_idx` and `unsel_idx` do not jointly cover all test rows.
+    """
+    m = len(df_test)
+    sel_idx = np.asarray(sel_idx, dtype=int)
+    unsel_idx = np.asarray(unsel_idx, dtype=int)
+
+    # Build a per-row threshold vector theta_j:
+    #   - selected rows use val_sel_threshold (typically c)
+    #   - unselected rows use hat_LPB
+    theta = np.full(m, np.nan, dtype=float)
+
+    if sel_idx.size > 0:
+        v = np.asarray(val_sel_threshold, dtype=float).reshape(-1)
+        if v.shape[0] != sel_idx.size:
+            raise ValueError("val_sel_threshold must align with sel_idx.")
+        theta[sel_idx] = v
+
+    if unsel_idx.size > 0:
+        L = np.asarray(hat_LPB, dtype=float).reshape(-1)
+        if L.shape[0] != unsel_idx.size:
+            raise ValueError("hat_LPB must align with unsel_idx.")
+        theta[unsel_idx] = L
+
+    # Ensure every test row has a threshold assignment.
+    if np.any(np.isnan(theta)):
+        raise ValueError(
+            "theta contains NaNs; sel_idx and unsel_idx must cover all test rows."
+        )
+
+    df = df_test.copy()
+    df = _ensure_gender_male(df)
+
+    Y = df["survival_time"].to_numpy(dtype=float)
+    D = df["event"].to_numpy(dtype=int)
+
+    X = df[list(covar_cols)]
+    G_hat = _predict_G_hat_at_times(
+        censor_model=censor_model,
+        X=X,
+        times=Y,
+        clip_eps=clip_eps,
+    )
+
+    # IPCW error proxy for per-row thresholded event; coverage is one minus mean error.
+    err_ipcw = (D * (Y <= theta)) / G_hat
+    mc = float(1.0 - np.mean(err_ipcw))
+    return mc
+
+
+def mean_set_sizes(
+    m: int,
+    sel_idx: np.ndarray,
+    unsel_idx: np.ndarray,
+    horizon_c: float,
+    lpb_unsel: np.ndarray,  # aligned with unsel_idx
+    study_end_time_year: float = 5.0,
+) -> Tuple[float, float]:
+    """Compute marginal and unselected mean set sizes from per-sample lower thresholds.
+
+    Args:
+        m: Total number of test samples.
+        sel_idx: Integer indices of selected samples (used implicitly via default threshold
+            assignment to `horizon_c`).
+        unsel_idx: Integer indices of unselected samples.
+        horizon_c: Threshold assigned to selected samples (e.g., fixed clinical horizon).
+        lpb_unsel: Per-unselected lower predictive bounds (LPBs), aligned with `unsel_idx`.
+        study_end_time_year: Scaling factor applied to set sizes (e.g., convert normalized
+            horizon units to years). Defaults to 5.0.
+
+    Returns:
+        A tuple `(mgn_size, unselected_set_size)` where:
+            - `mgn_size` is the mean set size across all `m` samples.
+            - `unselected_set_size` is the mean set size among unselected samples only,
+              or `np.nan` if there are no unselected samples.
+
+    Raises:
+        ValueError: If `lpb_unsel` length does not match `unsel_idx`.
+    """
+    sel_idx = np.asarray(sel_idx, dtype=int)  # kept for interface consistency / validation context
+    unsel_idx = np.asarray(unsel_idx, dtype=int)
+
+    # Initialize all thresholds as horizon_c (selected default).
+    theta_all = np.full(int(m), float(horizon_c), dtype=float)
+
+    # Replace thresholds for unselected rows with their LPBs.
+    if unsel_idx.size > 0:
+        L = np.asarray(lpb_unsel, dtype=float).reshape(-1)
+        if L.shape[0] != unsel_idx.size:
+            raise ValueError("lpb_unsel must align with unsel_idx.")
+        theta_all[unsel_idx] = L
+
+    # Set size for threshold theta is interval length [theta, study_end_time], truncated at 0.
+    sizes_all = np.maximum(0.0, 1.0 - theta_all)
+    mgn_size = float(np.mean(sizes_all) * float(study_end_time_year))
+
+    if unsel_idx.size > 0:
+        sizes_unsel = np.maximum(
+            0.0,
+            1.0 - np.asarray(lpb_unsel, dtype=float),
+        )
+        unsel_size = float(np.mean(sizes_unsel) * float(study_end_time_year))
+    else:
+        unsel_size = float("nan")
+
+    return mgn_size, unsel_size
+
+
+def run_vanilla_cp_for_split_tte(
+    alphas: np.ndarray,
+    cal_labels: np.ndarray,       
+    cal_mu_pred: np.ndarray,      
+    cal_sigma_hat: np.ndarray,    
+    df_test: pd.DataFrame,
+    test_mu_pred: np.ndarray,     
+    test_sigma_hat: np.ndarray,  
+    favorable_thresh_norm: float,    
+    censor_model: CoxPHFitter,               
+    covar_cols: List[str],
+    clip_eps: float = 0.05,
+    clip_ppf: float = 1e-6,
+    eps_u: float = 1e-12,
+    study_end_time_year: float = 5.0,
+    pbar_desc: str = "Vanilla CP",
+) -> pd.DataFrame:
+    """Run vanilla conformal prediction for TTE and return IPCW-based evaluation metrics across alphas.
+
+    Args:
+        alphas: 1D array of miscoverage levels in (0, 1). One row is produced per alpha.
+        cal_labels: Calibration observed labels (e.g., transformed event/censor times used for
+            conformalization), expected to be strictly positive because `log(cal_labels)` is used.
+        cal_mu_pred: Predicted location parameter (e.g., log-time mean) for calibration samples.
+            Must align with `cal_labels`.
+        cal_sigma_hat: Predicted scale parameter(s) for calibration samples. Can be scalar or
+            an array aligned with `cal_mu_pred`. Must be strictly positive.
+        df_test: Test DataFrame used for evaluation; must contain at least `survival_time`,
+            `event`, and the covariates used by `censor_model` (plus `gender` or `gender_male`
+            if required by helper utilities).
+        test_mu_pred: Predicted location parameter for test samples; must have length `len(df_test)`.
+        test_sigma_hat: Predicted scale parameter(s) for test samples; can be scalar or length
+            `len(df_test)`. Must be strictly positive.
+        favorable_thresh_norm: The favorable threshold in normalized time (e.g., 0.4 for 40% of the study horizon).
+        censor_model: Fitted censoring model used by IPCW helper functions to estimate `G_hat(Y|X)`.
+        covar_cols: Covariate column names required by `censor_model`.
+        clip_eps: Lower clipping value for `G_hat` in IPCW computations for numerical stability.
+        clip_ppf: Clipping level for probabilities passed into `norm.ppf` to avoid infinities.
+        eps_u: Clipping level for calibration PIT-style values `U_cal` to keep them in `(0,1)`.
+        study_end_time_year: Scaling factor used by `mean_set_sizes` to convert set sizes to years
+            (e.g., 5.0 if times are normalized to `[0, 1]` over a 5-year horizon; use 1.0 if
+            times are already in years).
+        pbar_desc: Progress-bar description shown during the alpha loop.
+        censor_model: Fitted censoring model used by IPCW helper functions to estimate `G_hat(Y|X)`.
+        covar_cols: Covariate column names required by `censor_model`.
+        clip_eps: Lower clipping value for `G_hat` in IPCW computations for numerical stability.
+        clip_ppf: Clipping level for probabilities passed into `norm.ppf` to avoid infinities.
+        eps_u: Clipping level for calibration PIT-style values `U_cal` to keep them in `(0,1)`.
+        study_end_time_year: Scaling factor used by `mean_set_sizes` to convert set sizes to years
+            (e.g., 5.0 if times are normalized to `[0, 1]` over a 5-year horizon; use 1.0 if
+            times are already in years).
+        pbar_desc: Progress-bar description shown during the alpha loop.
+
+    Returns:
+        A DataFrame indexed by `alphas` with columns:
+            - `selected_coverage_ipcw`
+            - `mgn_cov_ipcw`
+            - `mgn_size`
+            - `unselected_coverage_ipcw`
+            - `unselected_set_size`
+            - `num_unsel`
+            - `num_total`
+
+    Raises:
+        ValueError: If input shapes/values are invalid (e.g., alpha out of range, length mismatch,
+            non-positive sigma, non-positive labels for log-transform, etc.).
+    """
+    # ------------------------------------------------------------------
+    # 0) Validate and normalize inputs
+    # ------------------------------------------------------------------
+    alphas = np.asarray(alphas, dtype=float).reshape(-1)
+    if alphas.size == 0:
+        raise ValueError("alphas must be non-empty.")
+    if np.any(~np.isfinite(alphas)):
+        raise ValueError("alphas contains non-finite values.")
+    if np.any((alphas <= 0.0) | (alphas >= 1.0)):
+        raise ValueError("alphas must be strictly between 0 and 1 (norm.ppf(alpha) finite).")
+
+    # Calibration arrays (used to compute the vanilla conformal offset per alpha).
+    cal_labels = np.asarray(cal_labels, dtype=float).reshape(-1)
+    cal_mu = np.asarray(cal_mu_pred, dtype=float).reshape(-1)
+    cal_sig = np.asarray(cal_sigma_hat, dtype=float).reshape(-1)
+
+    if cal_labels.shape[0] != cal_mu.shape[0]:
+        raise ValueError("cal_labels and cal_mu_pred must have the same length.")
+
+    # Allow scalar sigma and broadcast across all calibration samples.
+    if cal_sig.size == 1:
+        cal_sig = np.full_like(cal_mu, float(cal_sig.item()), dtype=float)
+    if cal_sig.shape[0] != cal_mu.shape[0]:
+        raise ValueError("cal_sigma_hat must be scalar or the same length as cal_mu_pred.")
+
+    if np.any(~np.isfinite(cal_labels)) or np.any(cal_labels <= 0):
+        raise ValueError("cal_labels must be finite and > 0 (used in log).")
+    if np.any(~np.isfinite(cal_mu)):
+        raise ValueError("cal_mu_pred contains non-finite values.")
+    if np.any(~np.isfinite(cal_sig)) or np.any(cal_sig <= 0):
+        raise ValueError("cal_sigma_hat must be finite and > 0 everywhere.")
+
+    # Test arrays (used to construct LPBs and evaluate metrics on df_test).
+    m = len(df_test)
+    test_mu = np.asarray(test_mu_pred, dtype=float).reshape(-1)
+    test_sig = np.asarray(test_sigma_hat, dtype=float).reshape(-1)
+
+    if test_mu.shape[0] != m:
+        raise ValueError(f"test_mu_pred must have length {m}, got {test_mu.shape[0]}.")
+
+    # Allow scalar sigma and broadcast across all test samples.
+    if test_sig.size == 1:
+        test_sig = np.full(m, float(test_sig.item()), dtype=float)
+    if test_sig.shape[0] != m:
+        raise ValueError(f"test_sigma_hat must be scalar or length {m}, got {test_sig.shape[0]}.")
+
+    if np.any(~np.isfinite(test_mu)):
+        raise ValueError("test_mu_pred contains non-finite values.")
+    if np.any(~np.isfinite(test_sig)) or np.any(test_sig <= 0):
+        raise ValueError("test_sigma_hat must be finite and > 0 everywhere.")
+
+    if not np.isfinite(favorable_thresh_norm) or favorable_thresh_norm <= 0:
+        raise ValueError("favorable_thresh_norm must be finite and > 0.")
+    if not np.isfinite(study_end_time_year) or study_end_time_year <= 0:
+        raise ValueError("study_end_time_year must be finite and > 0.")
+    if not np.isfinite(clip_eps) or clip_eps <= 0:
+        raise ValueError("clip_eps must be finite and > 0.")
+    if not np.isfinite(clip_ppf) or not (0 < clip_ppf < 0.5):
+        raise ValueError("clip_ppf must satisfy 0 < clip_ppf < 0.5.")
+    if not np.isfinite(eps_u) or not (0 < eps_u < 0.5):
+        raise ValueError("eps_u must satisfy 0 < eps_u < 0.5.")
+
+    # Normalize the selection threshold(s) to either:
+    #   - scalar float, or
+    #   - 1D array of length m
+    if np.isscalar(favorable_thresh_norm):
+        vt: float | np.ndarray = float(favorable_thresh_norm)
+        if not np.isfinite(vt):
+            raise ValueError("favorable_thresh_norm (scalar) must be finite.")
+    else:
+        vt = np.asarray(favorable_thresh_norm, dtype=float).reshape(-1)
+        if vt.shape[0] != m:
+            raise ValueError(f"favorable_thresh_norm must be scalar or length {m}, got {vt.shape[0]}.")
+        if np.any(~np.isfinite(vt)):
+            raise ValueError("favorable_thresh_norm contains non-finite values.")
+
+    base_cols = [
+        "selected_coverage_ipcw",
+        "mgn_cov_ipcw",
+        "mgn_size",
+        "unselected_coverage_ipcw",
+        "unselected_set_size",
+        "num_unsel",
+        "num_total",
+    ]
+
+    # ------------------------------------------------------------------
+    # 1) Compute calibration U-values once (alpha-independent)
+    #    U_cal = Phi((log(T_cal) - mu_cal) / sigma_cal)
+    # ------------------------------------------------------------------
+    U_cal = norm.cdf((np.log(cal_labels) - cal_mu) / cal_sig)
+    U_cal = np.clip(U_cal, float(eps_u), 1.0 - float(eps_u))
+
+    rows: List[Dict[str, Any]] = []
+
+    # ------------------------------------------------------------------
+    # 2) Loop over alphas: construct vanilla CP LPB on test and evaluate metrics
+    # ------------------------------------------------------------------
+    for a in tqdm.tqdm(alphas, desc=pbar_desc):
+        a = float(a)
+
+        # Vanilla CP offset construction:
+        #   V_i = alpha - U_i
+        #   eta = quantile_{1-alpha}(V) using the "higher" quantile rule
+        #   p_target = alpha - eta
+        #   LPB(x) = exp(mu(x) + sigma(x) * Phi^{-1}(p_target))
+        V = a - U_cal
+
+        eta = float(np.quantile(V, 1.0 - a, method="higher"))       
+        p_target = float(a - eta)
+
+        # Clip probability before ppf to avoid +/- inf numerical issues.
+        p_target = float(np.clip(p_target, float(clip_ppf), 1.0 - float(clip_ppf)))
+        z_pt = float(norm.ppf(p_target))
+
+        # LPB on all test points (same units as the model output time scale).
+        LPB_test = np.exp(test_mu + test_sig * z_pt)  # shape (m,)
+
+        # Selection rule: selected if LPB_test >= threshold c_j
+        if np.isscalar(vt):
+            sel_mask = LPB_test >= float(vt)
+            # Threshold values for selected rows (needed by marginal coverage helper).
+            val_sel_threshold = np.full(int(np.sum(sel_mask)), float(vt), dtype=float)
+        else:
+            sel_mask = LPB_test >= vt
+            val_sel_threshold = vt[np.flatnonzero(sel_mask)]
+
+        sel_idx = np.flatnonzero(sel_mask)
+        unsel_idx = np.flatnonzero(~sel_mask)
+
+        # Selected-side coverage at the fixed horizon (FDP-style IPCW metric)
+        selected_cov = test_fdp_triplet(
+            df_test=df_test,
+            sel_idx=sel_idx,
+            horizon_c=favorable_thresh_norm,
+            cph_censor=censor_model,
+            covar_cols=covar_cols,
+            clip_eps=clip_eps,
+        )
+
+        # Unselected-side coverage using vanilla CP LPBs
+        hat_LPB_unsel = LPB_test[unsel_idx]  # aligned with unsel_idx
+
+        unselected_cov = coverage_lpb_tte(
+            df_test=df_test,
+            unsel_idx=unsel_idx,
+            hat_LPB=hat_LPB_unsel,
+            cph_censor=censor_model,
+            covar_cols=covar_cols,
+            clip_eps=clip_eps,
+        )
+
+        # Marginal coverage across all test samples
+        #   selected   -> threshold = val_sel_threshold (typically c)
+        #   unselected -> threshold = hat_LPB_unsel
+        mgn_cov = marginal_coverage_tte(
+            df_test=df_test,
+            sel_idx=sel_idx,
+            unsel_idx=unsel_idx,
+            hat_LPB=hat_LPB_unsel,
+            val_sel_threshold=val_sel_threshold,
+            censor_model=censor_model,
+            covar_cols=tuple(covar_cols),
+            clip_eps=clip_eps,
+        )
+
+        # Mean set sizes (all + unselected only)
+        # NOTE:
+        #   - `study_end_time_year` is the scaling factor to convert sizes to years
+        mgn_sz, unsel_sz = mean_set_sizes(
+            m=m,
+            sel_idx=sel_idx,
+            unsel_idx=unsel_idx,
+            horizon_c=favorable_thresh_norm,
+            lpb_unsel=hat_LPB_unsel,
+            study_end_time_year=float(study_end_time_year),
+        )
+
+        rows.append(
+            {
+                "selected_coverage_ipcw": float(selected_cov),
+                "mgn_cov_ipcw": float(mgn_cov),
+                "mgn_size": float(mgn_sz),
+                "unselected_coverage_ipcw": float(unselected_cov),
+                "unselected_set_size": float(unsel_sz),
+                "num_unsel": int(len(unsel_idx)),
+                "num_total": int(m),
+            }
+        )
+
+    vanilla_df = pd.DataFrame(rows, index=alphas)[base_cols]
+    return vanilla_df
+
+
+def compute_stratcp_survival_for_split(
+    alphas: np.ndarray,
+    cal_labels: np.ndarray,
+    cal_mu_pred: np.ndarray,
+    cal_sigma_hat: np.ndarray,
+    df_test: pd.DataFrame,
+    test_mu_pred: np.ndarray,
+    test_sigma_hat: np.ndarray,
+    favorable_thresh_norm: float,
+    censor_model,
+    covar_cols: List[str],
+    w_ipcw: Optional[np.ndarray] = None,
+    clip_eps: float = 0.05,
+    clip_ppf: float = 1e-12,
+    study_end_time_year: float = 5.0,
+    pbar_desc: str = "StratCP (two-stage survival)",
+) -> pd.DataFrame:
+    """Run two-stage StratCP for survival on one split and return IPCW-based metrics across alphas.
+
+    Args:
+        alphas: 1D array of miscoverage levels in (0, 1). One output row is produced per alpha.
+        cal_labels: Calibration labels used by StratCP (must be strictly positive if the
+            underlying survival model assumes log-time transforms).
+        cal_mu_pred: Calibration predicted location parameters (e.g., log-time means), aligned
+            with `cal_labels`.
+        cal_sigma_hat: Calibration predicted scale parameters; may be scalar or length `n_cal`.
+            Must be strictly positive.
+        df_test: Test DataFrame used for IPCW evaluation. Must contain at least:
+            - `survival_time`
+            - `event`
+            - covariates in `covar_cols`
+            - `gender` or `gender_male` (if required by downstream helpers)
+        test_mu_pred: Test predicted location parameters, length `len(df_test)`.
+        test_sigma_hat: Test predicted scale parameters; may be scalar or length `len(df_test)`.
+            Must be strictly positive.
+        favorable_thresh_norm: Real-world favorable threshold (in normalized time) used for StratCP
+            selection/JOMI thresholding. Internally converted to model time domain.
+        censor_model: Fitted censoring model used by IPCW helper functions to estimate
+            `G_hat(Y | X)`.
+        covar_cols: Covariate column names required by `censor_model`.
+        w_ipcw: Optional IPCW weights for StratCP calibration (passed into `StratifiedCP`).
+        clip_eps: Lower clipping value for `G_hat` in IPCW computations.
+        clip_ppf: Probability clipping passed to StratCP prediction to avoid `norm.ppf`
+            numerical issues in the survival path.
+        study_end_time_year: Study endpoint in the real-world time domain (e.g., 5.0 years).
+            Used for set-size calculations and threshold conversion.
+        pbar_desc: Progress-bar description for the alpha loop.
+
+    Returns:
+        A DataFrame indexed by `alphas` with columns:
+            - `selected_coverage_ipcw`
+            - `mgn_cov_ipcw`
+            - `mgn_size`
+            - `unselected_coverage_ipcw`
+            - `unselected_set_size`
+            - `num_unsel`
+            - `num_total`
+
+    Raises:
+        ValueError: If inputs are malformed (e.g., invalid alpha range, non-positive sigma,
+            shape mismatches, invalid time conversion parameters, or misaligned StratCP output).
+    """
+    # 0) Validate scalar inputs and alpha grid
+    alphas = np.asarray(alphas, dtype=float).reshape(-1)
+    if alphas.size == 0:
+        raise ValueError("alphas must be non-empty.")
+    if np.any(~np.isfinite(alphas)):
+        raise ValueError("alphas contains non-finite values.")
+    if np.any((alphas <= 0.0) | (alphas >= 1.0)):
+        raise ValueError("alphas must be strictly between 0 and 1.")
+
+    if not np.isfinite(favorable_thresh_norm) or favorable_thresh_norm <= 0:
+        raise ValueError("favorable_thresh_norm must be a finite positive number (normalized time).")
+    if not np.isfinite(clip_eps) or clip_eps <= 0:
+        raise ValueError("clip_eps must be finite and > 0.")
+    if not np.isfinite(clip_ppf) or not (0 < clip_ppf < 0.5):
+        raise ValueError("clip_ppf must satisfy 0 < clip_ppf < 0.5.")
+    if not np.isfinite(study_end_time_year) or study_end_time_year <= 0:
+        raise ValueError("study_end_time_year must be a finite positive number (years).")
+
+    # 1) Normalize calibration and test arrays
+    cal_labels = np.asarray(cal_labels, dtype=float).reshape(-1)
+    cal_mu_pred = np.asarray(cal_mu_pred, dtype=float).reshape(-1)
+    cal_sigma_hat = np.asarray(cal_sigma_hat, dtype=float).reshape(-1)
+
+    n_cal = cal_labels.shape[0]
+    if cal_mu_pred.shape[0] != n_cal:
+        raise ValueError("cal_labels and cal_mu_pred must have the same length.")
+    if np.any(~np.isfinite(cal_labels)):
+        raise ValueError("cal_labels contains non-finite values.")
+    if np.any(~np.isfinite(cal_mu_pred)):
+        raise ValueError("cal_mu_pred contains non-finite values.")
+
+    # Broadcast calibration sigma if scalar.
+    if cal_sigma_hat.size == 1:
+        cal_sigma_hat = np.full(n_cal, float(cal_sigma_hat.item()), dtype=float)
+    if cal_sigma_hat.shape[0] != n_cal:
+        raise ValueError("cal_sigma_hat must be scalar or the same length as cal_mu_pred.")
+    if np.any(~np.isfinite(cal_sigma_hat)) or np.any(cal_sigma_hat <= 0):
+        raise ValueError("cal_sigma_hat must be finite and > 0 everywhere.")
+
+    # If your survival path is log-normal based, positive labels are required.
+    if np.any(cal_labels <= 0):
+        raise ValueError("cal_labels must be > 0 for the survival conformalization path.")
+
+    m = len(df_test)
+    test_mu_pred = np.asarray(test_mu_pred, dtype=float).reshape(-1)
+    test_sigma_hat = np.asarray(test_sigma_hat, dtype=float).reshape(-1)
+
+    if test_mu_pred.shape[0] != m:
+        raise ValueError(f"test_mu_pred must have length {m}, got {test_mu_pred.shape[0]}.")
+    if np.any(~np.isfinite(test_mu_pred)):
+        raise ValueError("test_mu_pred contains non-finite values.")
+
+    # Broadcast test sigma if scalar.
+    if test_sigma_hat.size == 1:
+        test_sigma_hat = np.full(m, float(test_sigma_hat.item()), dtype=float)
+    if test_sigma_hat.shape[0] != m:
+        raise ValueError("test_sigma_hat must be scalar or the same length as df_test.")
+    if np.any(~np.isfinite(test_sigma_hat)) or np.any(test_sigma_hat <= 0):
+        raise ValueError("test_sigma_hat must be finite and > 0 everywhere.")
+
+    # Optional StratCP calibration weights (if provided) should align to calibration rows.
+    if w_ipcw is not None:
+        w_ipcw = np.asarray(w_ipcw, dtype=float).reshape(-1)
+        if w_ipcw.shape[0] != n_cal:
+            raise ValueError("w_ipcw must have the same length as calibration data.")
+        if np.any(~np.isfinite(w_ipcw)):
+            raise ValueError("w_ipcw contains non-finite values.")
+        if np.any(w_ipcw < 0):
+            raise ValueError("w_ipcw must be non-negative.")
+
+    # Broadcast explicit threshold vectors for calibration and test.
+    cal_threshold_arr = np.full(n_cal, favorable_thresh_norm, dtype=float)
+    test_threshold_arr = np.full(m, favorable_thresh_norm, dtype=float)
+
+    # This is the selected-side threshold used in marginal coverage / set-size helpers.
+    base_cols = [
+        "selected_coverage_ipcw",
+        "mgn_cov_ipcw",
+        "mgn_size",
+        "unselected_coverage_ipcw",
+        "unselected_set_size",
+        "num_unsel",
+        "num_total",
+    ]
+    rows: List[Dict[str, Any]] = []
+
+    # 3) Build and fit StratifiedCP engine once on calibration data
+    # Current StratifiedCP API may still require `cal_probs` / `test_probs` even in survival mode.
+    # We pass dummy placeholders for compatibility; the survival path should ignore them.
+    dummy_cal_probs = np.zeros((n_cal, 1), dtype=float)
+
+    cp = StratifiedCP(
+        task_type="time_to_event_regression",
+        alpha_sel=float(alphas[0]),  # placeholder; overwritten inside loop
+        w_ipcw=w_ipcw,
+    )
+    cp.fit(
+        cal_probs=dummy_cal_probs,
+        cal_labels=cal_labels,
+        cal_loc_hat=cal_mu_pred,
+        cal_scale_hat=cal_sigma_hat,
+        cal_threshold=cal_threshold_arr,
+    )
+
+    dummy_test_probs = np.zeros((m, 1), dtype=float)
+
+    # 4) Loop over alphas: run StratCP (selection + JOMI LPB), then evaluate
+    for a in tqdm.tqdm(alphas, desc=pbar_desc):
+        a = float(a)
+
+        # In this two-stage setup, alpha_sel controls both:
+        #   (i) selection
+        #   (ii) JOMI LPB construction for unselected samples
+        cp.alpha_sel = a
+
+        out = cp.predict(
+            test_probs=dummy_test_probs,   # compatibility placeholder for current API
+            test_loc_hat=test_mu_pred,
+            test_scale_hat=test_sigma_hat,
+            test_threshold=test_threshold_arr,
+            surv_model_family="log_normal",
+            clip_ppf=clip_ppf,
+        )
+        # StratCP should return a partition of test indices.
+        sel_idx = np.asarray(out["selected_idx"], dtype=int)
+        unsel_idx = np.asarray(out["unselected_idx"], dtype=int)
+
+        # Support either old key name ("lcb_unsel") or newer ("lpb_unsel"), but use LPB terminology locally.
+        hat_LPB_unsel = np.asarray(out["lcb_unsel"], dtype=float).reshape(-1)
+
+        # Optional retained threshold output (useful for debugging / parity checks if needed).
+        _tau_hat = out.get("threshold", None)
+
+        # Ensure LPBs align exactly with the unselected partition.
+        if hat_LPB_unsel.shape[0] != unsel_idx.size:
+            raise ValueError("StratifiedCP returned LPBs not aligned with unselected_idx.")
+
+        # Selected-side IPCW coverage at horizon_c
+        # NOTE: `test_fdp_triplet` returns coverage directly (not an FDP triplet tuple).
+        selected_cov = test_fdp_triplet(
+            df_test=df_test,
+            sel_idx=sel_idx,
+            horizon_c=favorable_thresh_norm,
+            cph_censor=censor_model,
+            covar_cols=covar_cols,
+            clip_eps=clip_eps,
+        )
+
+        # Unselected-side IPCW coverage using StratCP LPBs
+        unselected_cov = coverage_lpb_tte(
+            df_test=df_test,
+            unsel_idx=unsel_idx,
+            hat_LPB=hat_LPB_unsel,
+            cph_censor=censor_model,
+            covar_cols=covar_cols,
+            clip_eps=clip_eps,
+        )
+
+        # Marginal IPCW coverage across all test samples
+        #   selected   -> threshold = c_model
+        #   unselected -> threshold = LPB_j
+        val_sel_threshold = np.full(sel_idx.size, favorable_thresh_norm, dtype=float)
+        mgn_cov = marginal_coverage_tte(
+            df_test=df_test,
+            sel_idx=sel_idx,
+            unsel_idx=unsel_idx,
+            hat_LPB=hat_LPB_unsel,
+            val_sel_threshold=val_sel_threshold,
+            censor_model=censor_model,
+            covar_cols=tuple(covar_cols),
+            clip_eps=clip_eps,
+        )
+
+        # Set sizes (model-domain sizes scaled to years by `scaling_factor`)
+        mgn_sz, unsel_sz = mean_set_sizes(
+            m=m,
+            sel_idx=sel_idx,
+            unsel_idx=unsel_idx,
+            horizon_c=favorable_thresh_norm,
+            lpb_unsel=hat_LPB_unsel,
+            study_end_time_year=study_end_time_year,
+        )
+
+        rows.append(
+            {
+                "selected_coverage_ipcw": float(selected_cov),
+                "mgn_cov_ipcw": float(mgn_cov),
+                "mgn_size": float(mgn_sz),
+                "unselected_coverage_ipcw": float(unselected_cov),
+                "unselected_set_size": float(unsel_sz),
+                "num_unsel": int(unsel_idx.size),
+                "num_total": int(m),
+            }
+        )
+
+    stratcp_df = pd.DataFrame(rows, index=alphas)[base_cols]
+    return stratcp_df

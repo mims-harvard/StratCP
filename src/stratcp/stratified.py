@@ -21,6 +21,8 @@ from stratcp.selection import (
     get_reference_sel_single,
     get_sel_multiple,
     get_sel_single,
+    get_jomi_survival_lcb,
+    get_sel_survival,
 )
 
 
@@ -54,6 +56,10 @@ class StratifiedCP:
         Required when score_fn='utility'. Higher values = more similar.
     utility_method : {'weighted', 'greedy'}, default='greedy'
         Method for utility-aware expansion (only used when score_fn='utility')
+    task_type : {'classification', 'time_to_event_regression'}, default='classification'
+        Type of task.
+    w_ipcw : np.ndarray, optional
+        Inverse probability of censoring weights for time-to-event regression.
 
     Attributes
     ----------
@@ -82,6 +88,8 @@ class StratifiedCP:
         lam_reg: float = 0.01,
         similarity_matrix: Optional[np.ndarray] = None,
         utility_method: Literal["weighted", "greedy"] = "greedy",
+        task_type: Literal["classification", "time_to_event_regression"] = "classification",
+        w_ipcw: Optional[np.ndarray] = None,
     ):
         self.score_fn = score_fn
         self.alpha_sel = alpha_sel
@@ -92,10 +100,17 @@ class StratifiedCP:
         self.lam_reg = lam_reg
         self.similarity_matrix = similarity_matrix
         self.utility_method = utility_method
-
+        
+        # Validate task type
+        if task_type not in ["classification", "time_to_event_regression"]:
+            raise ValueError(f"Invalid task_type: {task_type}. Must be 'classification' or 'time_to_event_regression'.")
+        self.task_type = task_type
+        
         # Validate utility-aware requirements
         if score_fn == "utility" and similarity_matrix is None:
             raise ValueError("similarity_matrix must be provided when score_fn='utility'")
+
+        self.w_ipcw = w_ipcw
 
         # Attributes set after fit
         self.cal_probs_ = None
@@ -113,12 +128,23 @@ class StratifiedCP:
         self.coverage_ = None
         self.set_sizes_ = None
 
+        # Time-to-event attributes
+        self.cal_loc_hat_ = None
+        self.cal_scale_hat_ = None
+        self.cal_threshold_ = None
+        self.lcb_unsel_ = None
+
     def fit(
         self,
         cal_probs: np.ndarray,
         cal_labels: np.ndarray,
+        # classification-only
         cal_elig: Optional[np.ndarray] = None,
         cal_confs: Optional[np.ndarray] = None,
+        # time-to-event-only
+        cal_loc_hat: Optional[np.ndarray] = None,
+        cal_scale_hat: Optional[np.ndarray] = None,
+        cal_threshold: Optional[np.ndarray] = None,
     ) -> "StratifiedCP":
         """
         Fit the stratified CP model on calibration data.
@@ -129,43 +155,75 @@ class StratifiedCP:
             Predicted class probabilities for calibration data (n, n_classes)
         cal_labels : np.ndarray
             True labels for calibration data (n,)
+        cal_elig : np.ndarray, optional
+            Eligibility indicators for calibration data (n,) or (n, n_classes) depending on eligibility
+        cal_confs : np.ndarray, optional
+            Confidence labels for calibration data (n,) or (n, n_classes) depending on eligibility
+        cal_loc_hat : np.ndarray, optional
+            Estimated location parameters for calibration data (n,) if task_type='time_to_event_regression'
+        cal_scale_hat : np.ndarray, optional
+            Estimated scale parameters for calibration data (n,) if task_type='time_to_event_regression'
+        cal_threshold : np.ndarray, optional
+            Time-to-event thresholds for calibration data (n,) if task_type='time_to_event_regression'
 
         Returns
         -------
         self : StratifiedCP
             Fitted estimator
         """
-        self.cal_probs_ = cal_probs
-        self.cal_labels_ = cal_labels
-        self.n_classes_ = cal_probs.shape[1]
-
         if cal_elig is not None:
             self.cal_elig = cal_elig
         if cal_confs is not None:
             self.cal_confs = cal_confs
 
         # Compute nonconformity scores
-        if self.score_fn == "raps":
-            self.cal_scores_, _ = compute_score_raps(
-                cal_probs, cal_probs[:1], cal_labels, lam_reg=self.lam_reg, nonempty=self.nonempty
-            )
-        elif self.score_fn == "aps":
-            self.cal_scores_, _ = compute_score_aps(cal_probs, cal_probs[:1], cal_labels, nonempty=self.nonempty)
-        elif self.score_fn == "tps":
-            self.cal_scores_, _ = compute_score_tps(cal_probs, cal_probs[:1], cal_labels, nonempty=self.nonempty)
-        elif self.score_fn == "utility":
-            self.cal_scores_, _ = compute_score_utility(
-                cal_probs,
-                None,
-                cal_labels,
-                self.similarity_matrix,
-                method=self.utility_method,
-                nonempty=self.nonempty,
-            )
-        else:
-            raise ValueError(f"Unknown score function: {self.score_fn}")
+        if self.task_type == 'classification':
+            if cal_probs is None:
+                raise ValueError("cal_probs is required for classification.")
+            self.cal_probs_ = np.asarray(cal_probs, float)
+            self.cal_labels_ = np.asarray(cal_labels, int)
+            self.n_classes_ = self.cal_probs_.shape[1]
 
-        return self
+            if self.score_fn == "raps":
+                self.cal_scores_, _ = compute_score_raps(
+                    cal_probs, cal_probs[:1], cal_labels, lam_reg=self.lam_reg, nonempty=self.nonempty
+                )
+            elif self.score_fn == "aps":
+                self.cal_scores_, _ = compute_score_aps(cal_probs, cal_probs[:1], cal_labels, nonempty=self.nonempty)
+            elif self.score_fn == "tps":
+                self.cal_scores_, _ = compute_score_tps(cal_probs, cal_probs[:1], cal_labels, nonempty=self.nonempty)
+            elif self.score_fn == "utility":
+                self.cal_scores_, _ = compute_score_utility(
+                    cal_probs,
+                    None,
+                    cal_labels,
+                    self.similarity_matrix,
+                    method=self.utility_method,
+                    nonempty=self.nonempty,
+                )
+            else:
+                raise ValueError(f"Unknown score function: {self.score_fn}")
+
+            return self
+        else:
+            if cal_loc_hat is None or cal_scale_hat is None or cal_threshold is None:
+                raise ValueError(
+                    "cal_loc_hat, cal_scale_hat, and cal_threshold must be provided for time-to-event regression."
+                )
+            # Time-to-event regression
+            cal_loc_hat = np.asarray(cal_loc_hat, dtype=float)
+            cal_scale_hat = np.asarray(cal_scale_hat, dtype=float)
+            cal_labels = np.asarray(cal_labels, dtype=float)
+            cal_threshold = np.asarray(cal_threshold, dtype=float)
+
+            self.cal_probs_ = None
+            self.n_classes_ = None
+            self.cal_loc_hat_ = cal_loc_hat
+            self.cal_scale_hat_ = cal_scale_hat
+            self.cal_labels_  = cal_labels
+            self.cal_threshold_ = cal_threshold
+            return self
+
 
     def predict(
         self,
@@ -175,6 +233,12 @@ class StratifiedCP:
         eligibility: Optional[str] = None,
         cal_eligs: Optional[np.ndarray] = None,  # optionally update calibration eligs
         cal_conf_labels: Optional[np.ndarray] = None,  # optionally update calibration confidence labels
+        # time-to-event-only
+        test_loc_hat: Optional[np.ndarray] = None,
+        test_scale_hat: Optional[np.ndarray] = None,
+        test_threshold: Optional[np.ndarray] = None,
+        surv_model_family: str = "log_normal",
+        clip_ppf: float = 1e-12,
     ) -> dict:
         """
         Make stratified conformal predictions on test data.
@@ -193,6 +257,23 @@ class StratifiedCP:
             Eligibility indicators for test data.
             - If eligibility='overall': (m,) array or None (default: all ones)
             - If eligibility='per_class': (m, n_classes) array or None (default: based on argmax)
+        eligibility : {'per_class', 'overall'}, optional
+            Eligibility criterion for selection. If provided, overrides the one set at initialization.
+        cal_eligs : np.ndarray, optional
+            Optionally updated calibration eligibility indicators (same format as test_eligs)
+        cal_conf_labels : np.ndarray, optional
+            Optionally updated calibration confidence labels (same format as test_labels or (n, n_classes
+            depending on eligibility))
+        test_loc_hat : np.ndarray, optional
+            Estimated location parameters for test data (m,) if task_type='time_to_event_regression'
+        test_scale_hat : np.ndarray, optional
+            Estimated scale parameters for test data (m,) if task_type='time_to_event_regression'
+        test_threshold : np.ndarray, optional
+            Time-to-event thresholds for test data (m,) if task_type='time_to_event_regression'
+        surv_model_family : str, default='log_normal'
+            Survival model family for time-to-event regression. Options: 'log_normal', 'weibull', etc.
+        clip_ppf : float, default=1e-12
+            Clip the PPF (percent point function) to avoid numerical issues.
 
         Returns
         -------
@@ -214,16 +295,124 @@ class StratifiedCP:
             - 'set_sizes': Set sizes for unselected samples
  
         """
-        if self.cal_probs_ is None:
-            raise ValueError("Model not fitted. Call fit() before predict().")
+        if self.task_type == "classification":
+            if self.cal_probs_ is None or self.cal_scores_ is None or self.cal_labels_ is None:
+                raise ValueError("Not fitted for classification.")
+        else:
+            if (self.cal_loc_hat_ is None or self.cal_scale_hat_ is None or
+                self.cal_threshold_ is None or self.cal_labels_ is None):
+                raise ValueError("Not fitted for time-to-event regression.")
 
         if eligibility is not None:
             self.eligibility = eligibility
 
-        if self.eligibility == "overall":
-            return self._predict_overall(test_probs, test_labels, test_eligs, cal_eligs, cal_conf_labels)
-        else:  # per_class
-            return self._predict_per_class(test_probs, test_labels, test_eligs, cal_eligs, cal_conf_labels)
+        if self.task_type == 'classification':
+            if self.eligibility == "overall":
+                # Create time-to-event track here
+                return self._predict_overall(test_probs, test_labels, test_eligs, cal_eligs, cal_conf_labels)
+            else:  # per_class
+                return self._predict_per_class(test_probs, test_labels, test_eligs, cal_eligs, cal_conf_labels)
+        else:
+            if test_loc_hat is None or test_scale_hat is None or test_threshold is None:
+                raise ValueError(
+                    "test_loc_hat, test_scale_hat, and test_threshold must be provided for time-to-event regression."
+                )
+
+            if surv_model_family not in ["log_normal"]:
+                raise ValueError(
+                    f"Unsupported surv_model_family: {surv_model_family}. Currently only 'log_normal' is supported."
+                )
+                
+            # time-to-event
+            return self._predict_time_to_event(
+                test_loc_hat=test_loc_hat,
+                test_scale_hat=test_scale_hat,
+                test_threshold=test_threshold,
+                surv_model_family=surv_model_family,
+                clip_ppf=clip_ppf
+            ) 
+
+    def _predict_time_to_event(
+        self,
+        test_loc_hat: Optional[np.ndarray],
+        test_scale_hat: Optional[np.ndarray],
+        test_threshold: Optional[np.ndarray],
+        surv_model_family: str = "log_normal",
+        clip_ppf: float = 1e-12,
+    ) -> dict:
+        """
+        Predict with FDR-controlled selection for time-to-event regression.
+
+        Parameters
+        ----------
+        test_loc_hat : np.ndarray
+            Estimated location parameters for test data (m,)
+        test_scale_hat : np.ndarray
+            Estimated scale parameters for test data (m,) or scalar
+        test_threshold : np.ndarray
+            Time-to-event thresholds for test data (m,)
+        surv_model_family : str, default='log_normal'
+            Survival model family for time-to-event regression. Options: 'log_normal', 'weibull', etc.
+        clip_ppf : float, default=1e-12
+            Clip the PPF (percent point function) to avoid numerical issues.
+
+        Returns
+        ------- 
+        dict
+            Dictionary containing:
+            - 'selected_idx': Selected sample indices
+            - 'unselected_idx': Unselected sample indices
+            - 'threshold': Selection threshold
+            - 'lcb_unsel': Lower confidence bounds for unselected samples
+        """
+        # Validate inputs
+        cal_loc_hat = np.asarray(self.cal_loc_hat_, dtype=float)
+        cal_scale_hat = np.asarray(self.cal_scale_hat_, dtype=float)
+        cal_labels = np.asarray(self.cal_labels_, dtype=float)
+        cal_threshold_arr = np.asarray(self.cal_threshold_, dtype=float)
+
+        # Validate test inputs
+        test_loc_hat = np.asarray(test_loc_hat, dtype=float)
+        test_threshold_arr = np.asarray(test_threshold, dtype=float)
+        test_scale_hat = np.asarray(test_scale_hat, dtype=float)
+
+        # Selection
+        sel_idx, unsel_idx, tau_hat = get_sel_survival(
+            cal_labels, cal_loc_hat, cal_scale_hat, cal_threshold_arr,
+            test_loc_hat, test_scale_hat, test_threshold_arr, self.alpha_sel,
+            w_ipcw=self.w_ipcw,
+            model_family=surv_model_family,
+        )
+        sel_idx = np.asarray(sel_idx, dtype=int)
+        unsel_idx = np.asarray(unsel_idx, dtype=int)
+
+        # LCB for unselected
+        if unsel_idx.size == 0:
+            hat_LCB_unsel = np.zeros((0,), dtype=float)
+        else:
+            hat_LCB_unsel = get_jomi_survival_lcb(
+                unsel_idx,
+                cal_labels, cal_loc_hat, cal_scale_hat, cal_threshold_arr,
+                test_loc_hat, test_scale_hat, test_threshold_arr, self.alpha_sel,
+                w_ipcw=self.w_ipcw,
+                model_family=surv_model_family,
+                clip_ppf=clip_ppf
+            )   
+            hat_LCB_unsel = np.asarray(hat_LCB_unsel, dtype=float)
+
+        # Store attributes (mirrors classification where sensible)
+        self.selected_indices_ = sel_idx
+        self.unselected_indices_ = unsel_idx
+        self.selection_threshold_ = float(tau_hat)
+        self.lcb_unsel_ = hat_LCB_unsel
+
+        return {
+            "selected_idx": sel_idx,
+            "unselected_idx": unsel_idx,
+            "threshold": float(tau_hat),
+            "lcb_unsel": hat_LCB_unsel,
+        }
+
 
     def _predict_overall(
         self,
@@ -502,7 +691,13 @@ class StratifiedCP:
         results : dict
             Prediction results (same as predict method)
         """
-        return self.fit(cal_probs, cal_labels).predict(test_probs, test_labels, test_eligs, cal_eligs, cal_conf_labels)
+        return self.fit(cal_probs=cal_probs, cal_labels=cal_labels).predict(
+            test_probs=test_probs,
+            test_labels=test_labels,
+            test_eligs=test_eligs,
+            cal_eligs=cal_eligs,
+            cal_conf_labels=cal_conf_labels,
+        )
 
     def summary(self) -> str:
         """

@@ -290,3 +290,5 @@ data/uni_pathology_tasks/idh_mutation_status_pred/*.pkl
 data/uni_pathology_tasks/cns_tumor_subtype/stratcp_eval_results_grade_consist_True/**
 data/uni_pathology_tasks/cns_tumor_subtype/stratcp_eval_results_grade_consist_False/**
 data/uni_pathology_tasks/cns_tumor_subtype/*.pkl
+data/uni_pathology_tasks/he_time_to_mortality_pred/stratcp_eval_results/**
+data/uni_pathology_tasks/he_time_to_mortality_pred/*.pkl
