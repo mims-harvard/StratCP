@@ -401,6 +401,7 @@ For TCGA LGG & GBM H\&E slides, no additional special approval is required beyon
 ## Citation
 
 If you use StratCP in your research, please cite:
+- [**Act or Defer: Error-Controlled Decision Policies for Medical Foundation Models** (medRxiv, 2026)](https://www.medrxiv.org/content/10.64898/2026.02.23.26346927)
 
 ```bibtex
 @article{jin26error,
