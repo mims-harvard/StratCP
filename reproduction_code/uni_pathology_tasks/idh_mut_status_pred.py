@@ -270,7 +270,8 @@ def main() -> None:
     methods = [m.strip().lower() for m in args.cp_methods]
 
     # Ensure the root results directory exists
-    ensure_directory(args.results_dir)
+    eval_results_dir = os.path.join(args.results_dir, "stratcp_eval_results")
+    ensure_directory(eval_results_dir)
 
     # Step 1: Load per-slide predictions and dataset metadata
     model_preds_path = os.path.join(args.results_dir, "uni_eval_results", "uni_results_dict.pkl")

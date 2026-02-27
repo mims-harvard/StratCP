@@ -247,14 +247,12 @@ def main() -> None:
     """Run StratCP evaluation for multiclass WSI classification."""
     args = parse_args()
 
-    # Selected CP methods (normalized to lowercase)
-    methods = [m.strip().lower() for m in args.cp_methods]
-
     # α grid used for all components (baselines, vanilla CP, StratCP)
     alpha_grid = np.linspace(args.alpha_min, args.alpha_max, args.alpha_points)
 
     # Set up directories
-    ensure_directory(args.results_dir)
+    eval_results_dir = os.path.join(args.results_dir, "stratcp_eval_results")
+    ensure_directory(eval_results_dir)
     eval_dir = os.path.join(
         args.results_dir,
         f"stratcp_eval_results",

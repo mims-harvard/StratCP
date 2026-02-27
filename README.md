@@ -334,6 +334,16 @@ Scripts for reproducing the results in the paper are in `reproduction_code/` wit
 
 We store these files in the `data/` folder. The summarized results will be saved in the same folder by default.
 
+**Important (running scripts after `make install`).** If you installed the package with:
+```bash
+cd stratcp
+make install
+```
+then run reproduction scripts with `uv`, i.e. use `uv run` before `python`:
+```bash
+uv run python reproduction_code/<path_to_script>.py ...
+```
+
 ### Retinal disease diagnosis tasks
 
 Across all ophthalmology tasks, we follow the RetFound foundation model [[Zhou et al., 2023](https://www.nature.com/articles/s41586-023-06555-x)] using the provided model checkpoints and data splits available [here](https://github.com/rmaphoh/RETFound/blob/main/BENCHMARK.md). Given model predictions (per-class probabilities for classification tasks), we apply **StratCP** to the task-specific scores:
@@ -358,8 +368,8 @@ Given model predictions (per-class probabilities for classification tasks and th
 
 The main entry points for reproducing neuro-oncology experiments are:
 
-- `idh_mut_status_pred.py` – IDH mutation status prediction.
-- `cns_tumor_subtype.py` – central nervous system (CNS) tumor subtype classification.
+- `idh_mut_status_pred.py` – IDH mutation status prediction. Add `--return_per_class_metrics` to use per-class eligibility and report per-class results.
+- `cns_tumor_subtype.py` – central nervous system (CNS) tumor subtype classification. Add `--grade_consist_set` to ensure grade coherence within prediction sets using the utility graph of WHO-based CNS subtype grades.
 - `he_time_to_mortaility_pred.py` – H\&E time-to-mortality prediction.
 - `he_diagnosis_in_atdg.py` – H\&E-only diagnosis in adult-type diffuse glioma (ATDG).
 
@@ -393,10 +403,11 @@ For TCGA LGG & GBM H\&E slides, no additional special approval is required beyon
 If you use StratCP in your research, please cite:
 
 ```bibtex
-@article{stratcp2026,
-  title={TBA},
-  author={TBA},
-  journal={Journal TBA},
+@article{jin26error,
+  title={Act or Defer: Error-Controlled Decision Policies for Medical Foundation Models},
+  author={Jin, Ying and Moon, Intae and Zitnik, Marinka},
+  journal={In Review},
+  url={https://www.medrxiv.org/content/10.64898/2026.02.23.26346927},
   year={2026}
 }
 ```

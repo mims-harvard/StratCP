@@ -337,7 +337,8 @@ def main() -> None:
     alpha_grid = np.linspace(args.alpha_min, args.alpha_max, args.alpha_points)
 
     # Set up directories
-    ensure_directory(args.results_dir)
+    eval_results_dir = os.path.join(args.results_dir, "stratcp_eval_results")
+    ensure_directory(eval_results_dir)
     eval_dir = os.path.join(
         args.results_dir,
         f"stratcp_eval_results_grade_consist_{args.grade_consist_set}",
