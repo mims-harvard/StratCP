@@ -1,13 +1,19 @@
 #!/usr/bin/env bash
 # Run the diabetic retinopathy reproduction pipeline.
-# Update RESULTS_DIR to point at your RETFound predictions directory
+# By default this uses data under the current StratCP repo.
+# Override RESULTS_DIR to run on a custom dataset directory
 # containing predicted_probabilities.npy and true_labels.npy.
 
 set -euo pipefail
 
-RESULTS_DIR="/Users/yjinstat/Desktop/Research/collaborations/cp-diagnosis/StratCP/data/retfound_tasks/diabetic_retinopathy"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
-python3 "$(dirname "$0")/diabetic_retinopacy.py" \
+RESULTS_DIR="${RESULTS_DIR:-${REPO_ROOT}/data/retfound_tasks/diabetic_retinopathy}"
+PYTHON_BIN="${PYTHON_BIN:-python3}"
+export PYTHONPATH="${REPO_ROOT}/src${PYTHONPATH:+:${PYTHONPATH}}"
+
+"${PYTHON_BIN}" "${SCRIPT_DIR}/diabetic_retinopathy.py" \
   --results_dir "$RESULTS_DIR" \
   --cp_methods aps \
   --alphas 0.025 0.05 0.1 0.2 \

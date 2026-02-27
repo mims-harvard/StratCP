@@ -172,11 +172,11 @@ def eval_dec_cond_glaucoma(cp_set: np.ndarray, test_labels: np.ndarray) -> Dict[
         cov_mild=_safe_mean(if_only_mild, 0),
         cov_early=_safe_mean(if_only_early, 1),
         cov_advanced=_safe_mean(if_only_advanced, 2),
-        cov_other=_safe_mean(if_other, None),
+        cov_unselected=_safe_mean(if_other, None),
         num_mild=int(if_only_mild.sum()),
         num_early=int(if_only_early.sum()),
         num_advanced=int(if_only_advanced.sum()),
-        num_other=int(if_other.sum()),
+        num_unselected=int(if_other.sum()),
     )
 
 
@@ -348,7 +348,7 @@ def main() -> None:
         for a in alphas:
             naive_set = _make_naive_set(test_probs, a)
             naive_cond = eval_dec_cond_glaucoma(naive_set, test_labels)
-            naive_cond.update({"method": "raw_cut", "source": "baseline", "alpha": float(a), "run": run_idx})
+            naive_cond.update({"method": "thresh", "source": "baseline", "alpha": float(a), "run": run_idx})
             cond_rows.append(naive_cond)
 
         # Vanilla CP

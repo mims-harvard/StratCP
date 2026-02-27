@@ -1,7 +1,7 @@
 """
 JSIEC reproduction with action-based similarity (utility-aware) and overall eligibility.
 
-- Methods: TPS, APS, RAPS, expand_greedy (utility greedy), expand_weighted (utility weighted)
+- Methods: APS and expand_greedy (utility greedy)
 - Vanilla CP and Stratified CP (overall selection on max prob)
 - Similarity metrics on prediction sets using a provided similarity matrix
 
@@ -87,13 +87,6 @@ def parse_args() -> argparse.Namespace:
         default=0.05,
         help="Alpha at which to print the comparison table.",
     )
-    parser.add_argument(
-        "--utility_methods",
-        nargs="+",
-        default=["expand_greedy", "expand_weighted"],
-        help="Utility-aware methods to include (subset of expand_greedy, expand_weighted).",
-    )
-
     return parser.parse_args()
 
 
@@ -195,20 +188,14 @@ def main() -> None:
         for y in range(n_classes):
             test_imputed_labels_for_ref[:, y] = (test_argmax == y).astype(int)
 
-        # Score builders (APS + optional utility methods)
+        # Score builders (APS + utility greedy)
         scores_std: Dict[str, tuple[np.ndarray, np.ndarray]] = {
             "aps": compute_score_aps(calib_probs, test_probs, calib_labels),
         }
-    if "expand_greedy" in args.utility_methods:
         cal_scores_greedy, test_scores_greedy = compute_score_utility(
             calib_probs, test_probs, calib_labels, sim_mat, method="greedy", nonempty=True, null_lab=0
         )
         scores_std["expand_greedy"] = (cal_scores_greedy, test_scores_greedy)
-        if "expand_weighted" in args.utility_methods:
-            cal_scores_weighted, test_scores_weighted = compute_score_utility(
-                calib_probs, test_probs, calib_labels, sim_mat, method="weighted", nonempty=True, null_lab=0
-            )
-            scores_std["expand_weighted"] = (cal_scores_weighted, test_scores_weighted)
 
         # Top-1 baseline (alpha=1 marker)
         top1_set = np.zeros_like(test_probs, dtype=bool)
@@ -258,7 +245,7 @@ def main() -> None:
                     n_sel=int(np.sum(np.sum(naive_set, axis=1) == 1)),
                     size=float(np.mean(np.sum(naive_set, axis=1))),
                     sim_avg=float(naive_sim),
-                    method="raw_cut",
+                    method="thresh",
                     conformal="baseline",
                     alpha=float(alpha),
                     run=run_idx,
@@ -268,7 +255,7 @@ def main() -> None:
                 pd.DataFrame({
                     "size": np.sum(naive_set, axis=1),
                     "sim": eval_similarity(naive_set, sim_mat, null_lab=None)[0],
-                    "method": "raw_cut",
+                    "method": "thresh",
                 })
                 .groupby(["size", "method"], as_index=False)
                 .agg(average_sim=("sim", "mean"), count=("sim", "size"))
@@ -368,7 +355,7 @@ def main() -> None:
                     )
                     cov_unsel = pred_unsel[np.arange(len(unsel_idx)), test_labels[unsel_idx]]
                     size_unsel = np.sum(pred_unsel, axis=1)
-                    scov_unsel, nscov_unsel = eval_singleton_cover(pred_unsel, test_labels[unsel_idx])
+                    scov_unsel, _ = eval_singleton_cover(pred_unsel, test_labels[unsel_idx])
                     avg_sim_unsel_all, avg_sim_unsel = eval_similarity(pred_unsel, sim_mat, null_lab=None)
 
                     m_sel = m - len(unsel_idx)

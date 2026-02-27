@@ -341,7 +341,7 @@ Across all ophthalmology tasks, we follow the RetFound foundation model [[Zhou e
 2. **Deferral arm.** For the remaining (deferred) cases, construct conformal prediction sets with finite-sample coverage guarantees, adjusting for the distribution shift due to the selection in the action arm. 
 
 The experiments in the paper can be reproduced with the following scripts:
-- `reproduction_code/retfound_tasks/diabetic_retinpacy.py` for the DR diagnosis task.
+- `reproduction_code/retfound_tasks/diabetic_retinopathy.py` for the DR diagnosis task.
 - `reproduction_code/retfound_tasks/glaucoma.py` for the Glaucoma diagnosis task.
 - `reproduction_code/retfound_tasks/jsiec_action.py` for the eye condition detection task, with utility enhancement. 
 

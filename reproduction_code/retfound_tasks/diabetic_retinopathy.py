@@ -240,13 +240,13 @@ def eval_dec_cond_diabetic(cp_set: np.ndarray, test_labels: np.ndarray) -> Dict[
         cov_modr=_safe_mean(if_only_modr, 2),
         cov_sever=_safe_mean(if_only_sever, 3),
         cov_prol=_safe_mean(if_only_prol, 4),
-        cov_other=_safe_mean(if_other, None),
+        cov_unselected=_safe_mean(if_other, None),
         num_normal=int(if_only_normal.sum()),
         num_mild=int(if_only_mild.sum()),
         num_modr=int(if_only_modr.sum()),
         num_sever=int(if_only_sever.sum()),
         num_prol=int(if_only_prol.sum()),
-        num_other=int(if_other.sum()),
+        num_unselected=int(if_other.sum()),
     )
 
 
@@ -430,7 +430,7 @@ def main() -> None:
         for a in alphas:
             naive_set = _make_naive_set(test_probs, a)
             naive_cond = eval_dec_cond_diabetic(naive_set, test_labels)
-            naive_cond.update({"method": "raw_cut", "source": "baseline", "alpha": float(a), "run": run_idx})
+            naive_cond.update({"method": "thresh", "source": "baseline", "alpha": float(a), "run": run_idx})
             cond_rows.append(naive_cond)
 
         # Vanilla CP per method/alpha
