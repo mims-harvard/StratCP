@@ -371,7 +371,7 @@ The main entry points for reproducing neuro-oncology experiments are:
 - `idh_mut_status_pred.py` – IDH mutation status prediction. Add `--return_per_class_metrics` to use per-class eligibility and report per-class results.
 - `cns_tumor_subtype.py` – central nervous system (CNS) tumor subtype classification. Add `--grade_consist_set` to ensure grade coherence within prediction sets using the utility graph of WHO-based CNS subtype grades.
 - `he_time_to_mortaility_pred.py` – H\&E time-to-mortality prediction.
-- `he_diagnosis_in_atdg.py` – StratCP evaluation for **H&E-only ATDG intraoperative triage** under a pre-specified error budget (see **Fig. 6** in the manuscript: https://www.medrxiv.org/content/10.64898/2026.02.23.26346927v1).
+- `he_diagnosis_in_atdg.py` – StratCP evaluation for **H&E-only ATDG intraoperative triage** under a pre-specified error budget (see **Fig. 6** in the [manuscript on medRxiv](https://www.medrxiv.org/content/10.64898/2026.02.23.26346927v1)).
 
   Task modes follow the Fig. 6 morphology branches:
   - `mvp_3_subtypes` (MVP/necrosis): *Anaplastic oligodendroglioma, IDH-mutant and 1p/19q codeletion* vs *Glioblastoma, IDH-mutant* vs *Glioblastoma, IDH-wildtype*
