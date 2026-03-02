@@ -1,6 +1,6 @@
 [project]
 name = "stratcp"
-version = "0.1.0"
+version = "0.1.1"
 description = "Stratified Conformal Prediction: A Python package for safe decisions with FDR-control in the action arm and coverage in the deferral arm"
 authors = [{ name = "Ying Jin", email = "yjinstat@wharton.upenn.edu" }, { name = "Intae Moon", email = "intae_moon@hms.harvard.edu"}]
 readme = "README.md"

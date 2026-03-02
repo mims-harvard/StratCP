@@ -45,7 +45,7 @@ utils
 """
 
 # Version info
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __author__ = "Zitnik Lab"
 __email__ = "marinka@hms.harvard.edu"
 
